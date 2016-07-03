@@ -2,11 +2,31 @@
 
 ### If you don't understand the basics of HTTPong, please read the first lines of [the spec][spec].
 
+### Although this is a draft, everything is tested and it should work in most modern browsers.
+
+## Getting started
+
+```javascript
+HTTPong.setHttpFunction($http); // or $.ajax, or something like that
+HTTPong.initialize();
+
+var scheme = HTTPong.addScheme(object); // This is the animal-farm scheme, check the spec!
+scheme.setApiUrl('/api');
+var pigs = scheme.select('pigs'); // select the pigs collection
+
+var promise = pigs.actions.doGetAll(); // sends a GET to /api/pigs
+promise.then(function(response) {
+  for (pig in pigs.getArray()) {
+    alert('Received pig ' + pig.getField('name')); // or pig.fields.name
+  }
+})
+```
+
 ## Schemes
 
 You can create a scheme in two ways:
 
-`new HTTPong.Scheme(scheme_object)`
+`new HTTPong.addScheme(scheme_object)`
 
 or by creating a meta tag with `name=httpong-scheme` and `content=scheme_object`.
 
@@ -27,12 +47,12 @@ To load data into the collection, you can use `collection.actions.doGetAll()`,
 or `collection.actions.doGetOne(id)`
 
 To preload data, which is recommended, create a meta tag with
-`name=httpong-collection`, `scheme=scheme_name` and `content=array`
+`name=httpong-collection`, `scheme=scheme_name` and `content=array`.<br/>
 Array is the same data the API would return.
 
-To make a new element, use `collection.makeNewElement({name: 'Bob'})`.
+To make a new element, use `collection.makeNewElement({name: 'Bob'})`.<br/>
 This element will be stored in the `new_elements` array, and when it is
-POSTed, and thus gets a selector value (id gets a value), it will end
+`POST`ed, and thus gets a selector value (`id` gets a value), it will end
 up in the `elements` object.
 
 You shouldn't access the `new_elements` and `elements` attributes directly,
@@ -40,8 +60,8 @@ just use `getArray()` or `getArray({without_new: true})` for that.
 
 #### Collection actions
 
-You can do collection actions with the `actions` key. The built in ones are
-`doGetOne` and `doGetAll`.
+You can do collection actions with the `actions` key.<br/>
+The built in ones are `doGetOne` and `doGetAll`.
 
 ## Elements
 
@@ -49,11 +69,11 @@ You can do collection actions with the `actions` key. The built in ones are
 
 Fields can be accessed through the `fields` key, or with `getField` and `setField`
 
-e.g.
+Example:
 ```javascript
-element.fields.name;
-element.getField('name');
-element.setField('name', 'Bob');
+pig.fields.name;
+pig.getField('name');
+pig.setField('name', 'Snowball');
 ```
 
 #### Actions
@@ -73,13 +93,15 @@ or otherwise small updates.
 but does not delete the element from the collection on the client side.
 Use `remove` to do that.
 
-e.g.
+Example:
 ```javascript
-element = collection.makeNewElement()
-element.actions.doPost() // saves the element
-element.actions.doGet()
-element.actions.doPut()
-element.actions.doDelete()
+var pig = pigs.makeNewElement();
+pig.actions.doPost(); // saves the pig, pig gets an id
+pig.actions.doGet();
+pig.actions.doPut();
+pig.actions.doDelete();
+
+pig.actions.doOink(); // sends a PUT to /api/pigs/8/oink
 ```
 
 #### Relations
@@ -87,10 +109,10 @@ element.actions.doDelete()
 You can find other elements on the `relations` key. These functions always start
 with `get`.
 
-e.g.
+Example:
 ```javascript
-human.relations.getPigs()
-pig.relations.getBoss()
+human.relations.getPigs();
+pig.relations.getBoss();
 ```
 
 #### Other functions
@@ -122,10 +144,21 @@ are made after those actions, like `before_get` and `after_put`.
 - When passed in a time, it will revert itself to a snapshot of that time.
 - When passed in a number, it will revert itself n steps.
 
+You can loop through snapshots with the `snapshots` key.
+
 #### Merging
 
 If data is received in another way, like with WebSockets, it can be merged with
-the other data using `mergeWith`
+the other data using `mergeWith`.
+
+### Examples
+
+###### Animal Farm
+[Scheme](../blob/master/test/fixtures/animal-farm/scheme.json)
+[Usage](../blob/master/test/animal_farm_spec.coffee)
+
+###### Pulser
+[Scheme](../blob/master/test/fixtures/pulser/scheme.json)
 
 [spec]: https://github.com/hansottowirtz/httpong/blob/master/SPEC.md
 [js-localization]: https://github.com/hansottowirtz/httpong-js-localization
