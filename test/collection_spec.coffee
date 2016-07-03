@@ -19,9 +19,9 @@ describe 'Collection', ->
     afterAll ->
       HTTPong.private.schemes = {}
 
-  describe 'animals', ->
+  describe 'stupid farm', ->
     beforeAll ->
-      pre_scheme = window.__json__["test/fixtures/animals/scheme"]
+      pre_scheme = window.__json__["test/fixtures/stupid-farm/scheme"]
       @scheme = window.HTTPong.addScheme(pre_scheme)
       @geese = @scheme.getCollection('geese')
 
@@ -32,7 +32,7 @@ describe 'Collection', ->
       expect(@geese.getSingularName()).toBe('goose')
 
     it 'should have the right default element', ->
-      expect(@geese.default_pre_element).toEqual({name: 'Bob'})      
+      expect(@geese.default_pre_element).toEqual({name: 'Bob'})
 
     afterAll ->
       HTTPong.private.schemes = {}

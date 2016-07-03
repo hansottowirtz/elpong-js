@@ -1,5 +1,5 @@
 {
-  "name": "animals",
+  "name": "stupid-farm",
   "collections": {
     "geese": {
       "singular": "goose",
@@ -81,9 +81,11 @@
           "type": "String"
         }
       },
-      "has_one": {
-        "apple": {
-          "field": "stem_id"
+      "relations": {
+        "has_one": {
+          "apple": {
+            "field": "stem_id"
+          }
         }
       }
     }

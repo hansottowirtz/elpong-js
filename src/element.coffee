@@ -30,19 +30,15 @@ class HP.Element
 
     @actions = {
       doGet: (user_options) ->
-        throw new Error('Element is new') if hpe.isNew()
         HP.Helpers.Element.doAction(hpe, 'GET', user_options)
 
       doPost: (user_options) ->
-        throw new Error('Element is not new') if !hpe.isNew()
         HP.Helpers.Element.doAction(hpe, 'POST', user_options)
 
       doPut: (user_options) ->
-        throw new Error('Element is new') if hpe.isNew()
         HP.Helpers.Element.doAction(hpe, 'PUT', user_options)
 
       doDelete: (user_options) ->
-        throw new Error('Element is new') if hpe.isNew()
         HP.Helpers.Element.doAction(hpe, 'DELETE', user_options)
     }
 

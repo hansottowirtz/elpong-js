@@ -17,7 +17,7 @@ gulp.task('build', ['lint'], function(done) {
     .pipe(gulp.dest('./dist/'))
     .pipe(coffee({bare: true}))
     .pipe(gulp.dest('./dist/'))
-    .pipe(uglify())
+    .pipe(uglify({unsafe: true}))
     .pipe(rename('httpong.min.js'))
     .pipe(gulp.dest('./dist/'))
     .pipe(size({showFiles: true}));

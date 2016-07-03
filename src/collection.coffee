@@ -65,7 +65,6 @@ class HP.Collection
   makeNewElement: (pre_element = @default_pre_element) ->
     el = new HP.Element(@, pre_element)
     @addElement(el)
-    console.log(@)
     return el
 
   addElement: (el) ->

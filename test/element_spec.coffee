@@ -1,5 +1,5 @@
 describe 'Element', ->
-  describe 'animals', ->
+  describe 'stupid farm', ->
     $httpBackend = null
 
     beforeEach inject(($injector) ->
@@ -8,7 +8,7 @@ describe 'Element', ->
       # backend definition common for all tests
       geeseHandler = $httpBackend.when('GET', '/api/v1/geese').respond([{id: 1, name: 'Bob'}])
 
-      @pre_scheme = window.__json__["test/fixtures/animals/scheme"]
+      @pre_scheme = window.__json__["test/fixtures/stupid-farm/scheme"]
       @scheme = window.HTTPong.addScheme(@pre_scheme)
     )
 

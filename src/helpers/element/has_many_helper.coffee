@@ -12,24 +12,26 @@ HP.Helpers.Element.setupHasManyRelation = (hpe, relation_collection_name, relati
       HP.Helpers.Element.getHasManyRelationArrayThroughReferencesField(hpe, relation_collection, field_name)
 
   else # normal has_many relationship
-    collection_singular_name = collection.getSingularName()
-    relation_collection_settings = HP.Helpers.Collection.getSettings(relation_collection)
+    hpe.relations["get#{HP.Util.upperCamelize(relation_collection_name)}"] = HP.Helpers.Element.getHasManyRelationFunction(hpe, collection, relation_settings, relation_collection)
 
-    if relation_settings.polymorphic
-      has_many_field_name = "#{relation_settings.as}_#{collection.selector_name}"
-      has_many_collection_field_name = "#{relation_settings.as}_collection"
-      hpe.relations["get#{HP.Util.upperCamelize(relation_collection_name)}"] = ->
-        HP.Helpers.Element.getPolymorphicHasManyRelationArray(hpe, relation_collection, has_many_field_name, has_many_collection_field_name)
+HP.Helpers.Element.getHasManyRelationFunction = (hpe, collection, relation_settings, relation_collection) ->
+  collection_singular_name = collection.getSingularName()
+  relation_collection_settings = HP.Helpers.Collection.getSettings(relation_collection)
+
+  if relation_settings.polymorphic
+    has_many_field_name = "#{relation_settings.as}_#{collection.selector_name}"
+    has_many_collection_field_name = "#{relation_settings.as}_collection"
+
+    return -> HP.Helpers.Element.getPolymorphicHasManyRelationArray(hpe, relation_collection, has_many_field_name, has_many_collection_field_name)
+  else
+    has_many_field_name = if relation_settings.field
+      relation_settings.field
+    else if relation_settings.as
+      "#{relation_settings.as}_#{collection.selector_name}"
     else
-      has_many_field_name = if relation_settings.field
-        relation_settings.field
-      else if relation_settings.as
-        "#{relation_settings.as}_#{collection.selector_name}"
-      else
-        "#{collection_singular_name}_#{collection.selector_name}"
-      hpe.relations["get#{HP.Util.upperCamelize(relation_collection_name)}"] = ->
-        HP.Helpers.Element.getHasManyRelationArray(hpe, relation_collection, has_many_field_name)
+      "#{collection_singular_name}_#{collection.selector_name}"
 
+    return -> HP.Helpers.Element.getHasManyRelationArray(hpe, relation_collection, has_many_field_name)
 
 HP.Helpers.Element.getHasManyRelationArray = (hpe, relation_collection, has_many_field_name) ->
   hpe2_arr = []

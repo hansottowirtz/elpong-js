@@ -1,4 +1,4 @@
-name: 'animals'
+name: 'stupid-farm'
 collections:
   # Geese are not owned
   geese:
@@ -59,7 +59,8 @@ collections:
         type: 'Integer'
       color:
         type: 'String'
-
-    has_one:
-      apple:
-        field: 'stem_id'
+        
+    relations:
+      has_one:
+        apple:
+          field: 'stem_id'

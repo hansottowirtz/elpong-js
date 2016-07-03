@@ -154,19 +154,15 @@ class HP.Element
 
     @actions = {
       doGet: (user_options) ->
-        throw new Error('Element is new') if hpe.isNew()
         HP.Helpers.Element.doAction(hpe, 'GET', user_options)
 
       doPost: (user_options) ->
-        throw new Error('Element is not new') if !hpe.isNew()
         HP.Helpers.Element.doAction(hpe, 'POST', user_options)
 
       doPut: (user_options) ->
-        throw new Error('Element is new') if hpe.isNew()
         HP.Helpers.Element.doAction(hpe, 'PUT', user_options)
 
       doDelete: (user_options) ->
-        throw new Error('Element is new') if hpe.isNew()
         HP.Helpers.Element.doAction(hpe, 'DELETE', user_options)
     }
 
@@ -345,7 +341,6 @@ class HP.Collection
   makeNewElement: (pre_element = @default_pre_element) ->
     el = new HP.Element(@, pre_element)
     @addElement(el)
-    console.log(@)
     return el
 
   addElement: (el) ->
@@ -676,24 +671,26 @@ HP.Helpers.Element.setupHasManyRelation = (hpe, relation_collection_name, relati
       HP.Helpers.Element.getHasManyRelationArrayThroughReferencesField(hpe, relation_collection, field_name)
 
   else # normal has_many relationship
-    collection_singular_name = collection.getSingularName()
-    relation_collection_settings = HP.Helpers.Collection.getSettings(relation_collection)
+    hpe.relations["get#{HP.Util.upperCamelize(relation_collection_name)}"] = HP.Helpers.Element.getHasManyRelationFunction(hpe, collection, relation_settings, relation_collection)
 
-    if relation_settings.polymorphic
-      has_many_field_name = "#{relation_settings.as}_#{collection.selector_name}"
-      has_many_collection_field_name = "#{relation_settings.as}_collection"
-      hpe.relations["get#{HP.Util.upperCamelize(relation_collection_name)}"] = ->
-        HP.Helpers.Element.getPolymorphicHasManyRelationArray(hpe, relation_collection, has_many_field_name, has_many_collection_field_name)
+HP.Helpers.Element.getHasManyRelationFunction = (hpe, collection, relation_settings, relation_collection) ->
+  collection_singular_name = collection.getSingularName()
+  relation_collection_settings = HP.Helpers.Collection.getSettings(relation_collection)
+
+  if relation_settings.polymorphic
+    has_many_field_name = "#{relation_settings.as}_#{collection.selector_name}"
+    has_many_collection_field_name = "#{relation_settings.as}_collection"
+
+    return -> HP.Helpers.Element.getPolymorphicHasManyRelationArray(hpe, relation_collection, has_many_field_name, has_many_collection_field_name)
+  else
+    has_many_field_name = if relation_settings.field
+      relation_settings.field
+    else if relation_settings.as
+      "#{relation_settings.as}_#{collection.selector_name}"
     else
-      has_many_field_name = if relation_settings.field
-        relation_settings.field
-      else if relation_settings.as
-        "#{relation_settings.as}_#{collection.selector_name}"
-      else
-        "#{collection_singular_name}_#{collection.selector_name}"
-      hpe.relations["get#{HP.Util.upperCamelize(relation_collection_name)}"] = ->
-        HP.Helpers.Element.getHasManyRelationArray(hpe, relation_collection, has_many_field_name)
+      "#{collection_singular_name}_#{collection.selector_name}"
 
+    return -> HP.Helpers.Element.getHasManyRelationArray(hpe, relation_collection, has_many_field_name)
 
 HP.Helpers.Element.getHasManyRelationArray = (hpe, relation_collection, has_many_field_name) ->
   hpe2_arr = []
@@ -718,22 +715,18 @@ HP.Helpers.Element.getHasManyRelationArrayThroughReferencesField = (hpe, relatio
     hpe2_arr.push(hpe2) if selector_value_arr.includes hpe.getSelectorValue()
   return hpe2_arr
 
-HP.Helpers.Element.setupHasOneRelation = (hpe, relation_collection_name, relation_settings) ->
-  console.warn 'Not yet implemented'
-  # collection = hpe.getCollection()
-  # collection_settings = HP.Helpers.Collection.getSettings(hpe.getCollection())
-  #
-  # relation_collection = collection.getScheme().getCollection(relation_settings.collection || relation_collection_name)
-  #
-  # reference_field_name = relation_settings.field || || "#{relation_collection_name}_#{relation_collection.selector_name}"
-  #
-  # hpe.relations["get#{HP.Util.upperCamelize(relation_collection_singular_name)}"] = ->
-  #   HP.Helpers.Element.getHasOneElement(hpe, relation_collection, reference_field_name)
+HP.Helpers.Element.setupHasOneRelation = (hpe, relation_collection_singular_name, relation_settings) ->
+  collection = hpe.getCollection()
+  collection_settings = HP.Helpers.Collection.getSettings(hpe.getCollection())
 
-HP.Helpers.Element.getHasOneElement = (hpe, relation_collection, reference_field_name) ->
-  # selector_value = hpe.getField(field_name, true, 'belongs_to')
-  # for relation_element in relation_collection.getArray()
-  #   return relation_element if relation_element.getField(reference_field_name, 'has_one')
+  scheme = collection.getScheme()
+
+  if relation_settings.collection
+    relation_collection = scheme.getCollection(relation_settings.collection)
+  else
+    relation_collection = scheme.getCollectionBySingularName(relation_collection_singular_name)
+
+  hpe.relations["get#{HP.Util.upperCamelize(relation_collection_singular_name)}"] = -> HP.Helpers.Element.getHasManyRelationFunction(hpe, collection, relation_settings, relation_collection)()[0]
 
 getOptions = (method, url, data, headers) ->
   {
@@ -749,8 +742,13 @@ HP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
   hpe.makeSnapshot("before_#{method.toLowerCase()}")
   if user_options.data
     data = user_options.data
-  else if method != 'GET'
+  else if method isnt 'GET'
     data = HP.Helpers.Element.toData(hpe)
+
+  if method is 'POST'
+    throw new Error('Element is not new') if !hpe.isNew()
+  else
+    throw new Error('Element is new') if hpe.isNew()
 
   options = getOptions(
     method,
@@ -804,8 +802,7 @@ HP.Helpers.Field.handleEmbeddedElement = (hpe, pre_element, field_name, field_se
   else
     embedded_element_collection = scheme.getCollectionBySingularName(field_name)
 
-  embedded_element = new HP.Element(embedded_element_collection, pre_element[field_name])
-  embedded_element_collection.addElement(embedded_element)
+  embedded_element = embedded_element_collection.makeOrMerge(pre_element[field_name])
 
   associated_field_name = field_settings.associated_field || "#{field_name}_#{embedded_element_collection.selector_name}"
   hpe.setField(associated_field_name, embedded_element.getSelectorValue())

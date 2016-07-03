@@ -12,8 +12,13 @@ HP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
   hpe.makeSnapshot("before_#{method.toLowerCase()}")
   if user_options.data
     data = user_options.data
-  else if method != 'GET'
+  else if method isnt 'GET'
     data = HP.Helpers.Element.toData(hpe)
+
+  if method is 'POST'
+    throw new Error('Element is not new') if !hpe.isNew()
+  else
+    throw new Error('Element is new') if hpe.isNew()
 
   options = getOptions(
     method,
