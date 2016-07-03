@@ -1,0 +1,91 @@
+name: 'pulser'
+collections:
+  users:
+    fields:
+      id:
+        selector: true
+        type: 'Integer'
+      email:
+        type: 'String'
+      password:
+        type: 'String'
+
+    actions:
+      login:
+        method: 'POST'
+      register:
+        method: 'POST'
+      logout:
+        method: 'DELETE'
+        without_selector: true
+
+    collection_actions:
+      get_me:
+        method: 'GET'
+        url: 'me'
+
+  controls:
+    fields:
+      id:
+        selector: true
+        type: 'Integer'
+      name:
+        type: 'String'
+      plugs:
+        embedded_collection: true
+
+    relations:
+      has_many:
+        plugs:
+          polymorphic: true
+          as: 'block'
+
+  devices:
+    fields:
+      id:
+        selector: true
+        type: 'Integer'
+      name:
+        type: 'String'
+      plugs:
+        embedded_collection: true
+
+    relations:
+      has_many:
+        plugs:
+          polymorphic: true
+          as: 'block'
+          # collection_field: 'block_collection'
+          # field: 'block_id'
+
+  plugs:
+    fields:
+      id:
+        selector: true
+        type: 'Integer'
+      block_id:
+        reference: true
+        type: 'Integer'
+      block_collection:
+        type: 'String'
+      endplug_id:
+        reference: true
+        type: 'Integer'
+
+    relations:
+      belongs_to:
+        block:
+          polymorphic: true
+          collection_selector_field: 'id'
+          # collection_field: 'block_collection'
+          # field: 'block_id'
+        endplug:
+          collection: 'plugs'
+
+    actions:
+      wire:
+        method: 'PUT'
+      unwire:
+        method: 'PUT'
+      pulse:
+        method: 'PUT'

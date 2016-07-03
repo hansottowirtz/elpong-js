@@ -1,0 +1,23 @@
+{
+  "name": "httpong-js",
+  "homepage": "https://github.com/hansottowirtz/httpong-js",
+  "authors": [
+    "Hans Otto Wirtz <hansottowirtz@gmail.com>"
+  ],
+  "description": "HTTPong for Javascript",
+  "main": "dist/httpong.coffee",
+  "keywords": [
+    "restful",
+    "json",
+    "api"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {}
+}
