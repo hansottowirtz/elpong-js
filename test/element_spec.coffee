@@ -21,7 +21,6 @@ describe 'Element', ->
       collection = @scheme.select('geese')
       bob = collection.makeNewElement()
       jef = collection.makeNewElement(name: 'Jef')
-      console.log bob, jef
       expect(bob.fields.name).toBe('Bob')
       expect(jef.fields.name).toBe('Jef')
 
@@ -32,8 +31,6 @@ describe 'Element', ->
       boss = bosses.makeNewElement({id: 1})
       dog = dogs.makeNewElement({id: 1, boss_id: 1})
 
-      console.log bosses, dogs
-
       expect(dog.relations.getBoss()).toBe(boss)
       bosses_dogs = boss.relations.getDogs()
       first_dog = bosses_dogs[0]
@@ -42,7 +39,6 @@ describe 'Element', ->
     it 'should have working embedded elements', ->
       apples = @scheme.select('apples')
       apple = new HTTPong.Element apples, {id: 5, kind: 'Granny Smith', stem: {id: 3, color: 'brown'}}
-      console.log 'APPEL', apple
       window.apple = apple
       expect(apple.relations.getStem().getField('id')).toBe(3)
 

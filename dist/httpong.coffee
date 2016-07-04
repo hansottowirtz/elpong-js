@@ -168,7 +168,7 @@ class HP.Element
 
     HP.Util.forEach collection_settings.actions, (action_settings, action_name) ->
       hpe.actions["do#{HP.Util.upperCamelize(action_name)}"] = (user_options) ->
-        throw new Error('Element is new') if hpe.isNew()
+        throw new Error('Element is new') if hpe.isNew() and !action_settings.without_selector
         HP.Helpers.Element.doCustomAction(hpe, action_name, action_settings, user_options)
 
     @makeSnapshot('creation')
@@ -304,11 +304,14 @@ class HP.Collection
         HP.Helpers.Collection.doGetOneAction(hpc, selector_value, user_options)
     }
 
-    # ((hpc) ->
-    #   doGetAll =
-    #
-    #   hpc.actions.doGetAll = (user_options) -> doGetAll(hpc, user_options)
-    # )(@)
+    HP.Util.forEach settings.collection_actions, (action_settings, action_name) ->
+      hpc.actions["do#{HP.Util.upperCamelize(action_name)}"] = (user_options) ->
+        HP.Helpers.Collection.doCustomAction(hpc, action_name, action_settings, user_options)
+
+    collection_tags = document.querySelectorAll("meta[name=httpong-collection][collection=\"#{@name}\"][scheme=\"#{@scheme.getName()}\"]")
+    for collection_tag in collection_tags
+      for pre_element in JSON.parse(collection_tag.content)
+        @makeOrMerge pre_element
 
   getName: ->
     @name
@@ -489,7 +492,7 @@ HP.Helpers = {
         url = "#{url}/#{element.getSelectorValue()}" unless action_settings.without_selector or action_name is 'POST'
 
       if action_settings.method # is custom action
-        url = "#{url}/#{action_name}"
+        url = "#{url}/#{action_settings.path || action_name}"
 
       url = "#{url}/#{user_options.suffix}" if user_options.suffix
       url
@@ -508,9 +511,11 @@ HP.Helpers = {
       collection = element.getCollection()
       o = HP.Helpers.Element.getFields(element)
 
-      data = {}
-      data[HP.Helpers.Collection.getSingularName(collection)] = o
-      data
+      # data = {}
+      # data[HP.Helpers.Collection.getSingularName(collection)] = o
+      # data
+
+      data = o
 
     getFields: (element) ->
       collection = element.getCollection()
@@ -573,16 +578,13 @@ HP.Helpers.Snapshot = {
 HP.Helpers.Collection.doGetAllAction = (hpc, user_options = {}) ->
   data = user_options.data
 
-  url = HP.Helpers.Url.createForCollection('GET', hpc, user_options)
+  options = getOptions(
+    'GET',
+    HP.Helpers.Url.createForCollection('GET', hpc, user_options),
+    data,
+    user_options.headers
+  )
 
-  options = {
-    method: 'GET'
-    url: url
-    data: data
-    headers: user_options.headers
-    dataType: 'json'
-    responseType: 'json'
-  }
   promise = HPP.http_function(options)
   promise.then (response) ->
     for pre_element in response.data
@@ -592,43 +594,30 @@ HP.Helpers.Collection.doGetAllAction = (hpc, user_options = {}) ->
 HP.Helpers.Collection.doGetOneAction = (hpc, selector_value, user_options = {}) ->
   data = user_options.data
 
-  url = HP.Helpers.Url.createForCollection('GET', hpc, {suffix: selector_value})
-
-  options = {
-    method: 'GET'
-    url: url
-    data: data
-    headers: user_options.headers
-    dataType: 'json'
-    responseType: 'json'
-  }
+  options = getOptions(
+    'GET',
+    HP.Helpers.Url.createForCollection('GET', hpc, {suffix: selector_value}),
+    data,
+    user_options.headers
+  )
   promise = HPP.http_function(options)
   promise.then (response) ->
     hpc.makeOrMerge(response.data)
   return promise
-#
-# HP.Helpers.Element.doCustomAction = (hpe, method, action_settings, user_options = {}) ->
-#   if user_options.data
-#     data = user_options.data
-#   # else if iets
-#   else
-#     if user_options.exclude_data? or user_options.include_data?
-#       console
-#     if method == 'GET'
-#       data = user_options.data
-#     else
-#       data = user_options.data || HP.Helpers.Element.toData(@)
-#
-#   options = {
-#     method: method
-#     url: HP.Helpers.Url.create(method, hpe, user_options) # (action_name, element, user_options = {}, suffix)
-#     data: data
-#     headers: user_options.headers
-#   }
-#   promise = HPP.http_function(options)
-#   promise.then (response) ->
-#     hpe.mergeWith response.data
-#   return promise
+
+HP.Helpers.Collection.doCustomAction = (hpc, action_name, action_settings, user_options = {}) ->
+  method = action_settings.method.toUpperCase()
+
+  data = user_options.data
+
+  options = getOptions(
+    method,
+    HP.Helpers.Url.createForCollection('GET', hpc, {suffix: action_settings.path || action_name})
+    data,
+    user_options.headers
+  )
+
+  HPP.http_function(options)
 
 HP.Helpers.Element.setupBelongsToRelation = (hpe, relation_collection_singular_name, relation_settings) ->
   collection = hpe.getCollection()
@@ -732,7 +721,7 @@ getOptions = (method, url, data, headers) ->
   {
     method: method
     url: url
-    data: data
+    data: data || null
     headers: headers
     dataType: 'json'
     responseType: 'json'
@@ -769,7 +758,7 @@ HP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_opt
 
   if user_options.data
     data = user_options.data
-  else if not (user_options.exclude_data or action_settings.exclude_data)
+  else if not action_settings.without_data
     data = HP.Helpers.Element.toData(hpe)
 
   options = getOptions(
@@ -781,7 +770,7 @@ HP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_opt
 
   promise = HPP.http_function(options)
   promise.then (response) ->
-    hpe.mergeWith response.data if response.data
+    hpe.mergeWith response.data if response.data and !action_settings.returns_other
     hpe.makeSnapshot("after_#{method.toLowerCase()}")
   return promise
 

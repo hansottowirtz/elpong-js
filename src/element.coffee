@@ -44,7 +44,7 @@ class HP.Element
 
     HP.Util.forEach collection_settings.actions, (action_settings, action_name) ->
       hpe.actions["do#{HP.Util.upperCamelize(action_name)}"] = (user_options) ->
-        throw new Error('Element is new') if hpe.isNew()
+        throw new Error('Element is new') if hpe.isNew() and !action_settings.without_selector
         HP.Helpers.Element.doCustomAction(hpe, action_name, action_settings, user_options)
 
     @makeSnapshot('creation')

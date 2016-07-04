@@ -28,11 +28,14 @@ class HP.Collection
         HP.Helpers.Collection.doGetOneAction(hpc, selector_value, user_options)
     }
 
-    # ((hpc) ->
-    #   doGetAll =
-    #
-    #   hpc.actions.doGetAll = (user_options) -> doGetAll(hpc, user_options)
-    # )(@)
+    HP.Util.forEach settings.collection_actions, (action_settings, action_name) ->
+      hpc.actions["do#{HP.Util.upperCamelize(action_name)}"] = (user_options) ->
+        HP.Helpers.Collection.doCustomAction(hpc, action_name, action_settings, user_options)
+
+    collection_tags = document.querySelectorAll("meta[name=httpong-collection][collection=\"#{@name}\"][scheme=\"#{@scheme.getName()}\"]")
+    for collection_tag in collection_tags
+      for pre_element in JSON.parse(collection_tag.content)
+        @makeOrMerge pre_element
 
   getName: ->
     @name

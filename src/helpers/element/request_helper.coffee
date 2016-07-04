@@ -2,7 +2,7 @@ getOptions = (method, url, data, headers) ->
   {
     method: method
     url: url
-    data: data
+    data: data || null
     headers: headers
     dataType: 'json'
     responseType: 'json'
@@ -39,7 +39,7 @@ HP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_opt
 
   if user_options.data
     data = user_options.data
-  else if not (user_options.exclude_data or action_settings.exclude_data)
+  else if not action_settings.without_data
     data = HP.Helpers.Element.toData(hpe)
 
   options = getOptions(
@@ -51,6 +51,6 @@ HP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_opt
 
   promise = HPP.http_function(options)
   promise.then (response) ->
-    hpe.mergeWith response.data if response.data
+    hpe.mergeWith response.data if response.data and !action_settings.returns_other
     hpe.makeSnapshot("after_#{method.toLowerCase()}")
   return promise

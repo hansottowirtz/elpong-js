@@ -1,16 +1,13 @@
 HP.Helpers.Collection.doGetAllAction = (hpc, user_options = {}) ->
   data = user_options.data
 
-  url = HP.Helpers.Url.createForCollection('GET', hpc, user_options)
+  options = getOptions(
+    'GET',
+    HP.Helpers.Url.createForCollection('GET', hpc, user_options),
+    data,
+    user_options.headers
+  )
 
-  options = {
-    method: 'GET'
-    url: url
-    data: data
-    headers: user_options.headers
-    dataType: 'json'
-    responseType: 'json'
-  }
   promise = HPP.http_function(options)
   promise.then (response) ->
     for pre_element in response.data
@@ -20,40 +17,27 @@ HP.Helpers.Collection.doGetAllAction = (hpc, user_options = {}) ->
 HP.Helpers.Collection.doGetOneAction = (hpc, selector_value, user_options = {}) ->
   data = user_options.data
 
-  url = HP.Helpers.Url.createForCollection('GET', hpc, {suffix: selector_value})
-
-  options = {
-    method: 'GET'
-    url: url
-    data: data
-    headers: user_options.headers
-    dataType: 'json'
-    responseType: 'json'
-  }
+  options = getOptions(
+    'GET',
+    HP.Helpers.Url.createForCollection('GET', hpc, {suffix: selector_value}),
+    data,
+    user_options.headers
+  )
   promise = HPP.http_function(options)
   promise.then (response) ->
     hpc.makeOrMerge(response.data)
   return promise
-#
-# HP.Helpers.Element.doCustomAction = (hpe, method, action_settings, user_options = {}) ->
-#   if user_options.data
-#     data = user_options.data
-#   # else if iets
-#   else
-#     if user_options.exclude_data? or user_options.include_data?
-#       console
-#     if method == 'GET'
-#       data = user_options.data
-#     else
-#       data = user_options.data || HP.Helpers.Element.toData(@)
-#
-#   options = {
-#     method: method
-#     url: HP.Helpers.Url.create(method, hpe, user_options) # (action_name, element, user_options = {}, suffix)
-#     data: data
-#     headers: user_options.headers
-#   }
-#   promise = HPP.http_function(options)
-#   promise.then (response) ->
-#     hpe.mergeWith response.data
-#   return promise
+
+HP.Helpers.Collection.doCustomAction = (hpc, action_name, action_settings, user_options = {}) ->
+  method = action_settings.method.toUpperCase()
+
+  data = user_options.data
+
+  options = getOptions(
+    method,
+    HP.Helpers.Url.createForCollection('GET', hpc, {suffix: action_settings.path || action_name})
+    data,
+    user_options.headers
+  )
+
+  HPP.http_function(options)

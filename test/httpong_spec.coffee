@@ -5,7 +5,6 @@ describe 'HTTPong', ->
     @users = @scheme.select('users')
 
   it 'should test right', ->
-    console.log @users
     expect(HTTPong.private.isHpe(@users.makeNewElement())).toBe(true)
     expect(HTTPong.private.isHpc(@users)).toBe(true)
 

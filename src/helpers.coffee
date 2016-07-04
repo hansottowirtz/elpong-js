@@ -21,7 +21,7 @@ HP.Helpers = {
         url = "#{url}/#{element.getSelectorValue()}" unless action_settings.without_selector or action_name is 'POST'
 
       if action_settings.method # is custom action
-        url = "#{url}/#{action_name}"
+        url = "#{url}/#{action_settings.path || action_name}"
 
       url = "#{url}/#{user_options.suffix}" if user_options.suffix
       url
@@ -40,9 +40,11 @@ HP.Helpers = {
       collection = element.getCollection()
       o = HP.Helpers.Element.getFields(element)
 
-      data = {}
-      data[HP.Helpers.Collection.getSingularName(collection)] = o
-      data
+      # data = {}
+      # data[HP.Helpers.Collection.getSingularName(collection)] = o
+      # data
+
+      data = o
 
     getFields: (element) ->
       collection = element.getCollection()
