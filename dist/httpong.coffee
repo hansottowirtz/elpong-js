@@ -40,7 +40,7 @@ HP.getScheme = (name) ->
 HP.initialize = (options = {no_search: false})->
   unless options.no_search
     scheme_tags = document.querySelectorAll('meta[name=httpong-scheme]')
-    if !scheme_tags.length and !Object.keys(HP.schemes).length
+    if !scheme_tags.length and !Object.keys(HP.private.schemes).length
       throw new Error('No scheme added or found')
 
     for scheme_tag in scheme_tags
@@ -717,11 +717,12 @@ HP.Helpers.Element.setupHasOneRelation = (hpe, relation_collection_singular_name
 
   hpe.relations["get#{HP.Util.upperCamelize(relation_collection_singular_name)}"] = -> HP.Helpers.Element.getHasManyRelationFunction(hpe, collection, relation_settings, relation_collection)()[0]
 
-getOptions = (method, url, data, headers) ->
+getOptions = (method, url, data, headers = {}) ->
+  headers.Accept = headers['Content-Type'] = 'application/json'
   {
     method: method
     url: url
-    data: data || null
+    data: JSON.stringify(data || null)
     headers: headers
     dataType: 'json'
     responseType: 'json'

@@ -1,5 +1,5 @@
 {
-  "name": "httpong-js",
+  "name": "httpong",
   "homepage": "https://github.com/hansottowirtz/httpong-js",
   "authors": [
     "Hans Otto Wirtz <hansottowirtz@gmail.com>"
@@ -19,5 +19,5 @@
     "!src/*"
   ],
   "dependencies": {},
-  "version": "1.0.0-rc1"
+  "version": "1.0.0-rc.1"
 }

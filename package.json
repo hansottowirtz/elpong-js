@@ -1,7 +1,7 @@
 {
-  "name": "httpong-js",
-  "version": "0.3.0",
-  "description": "A Javascript implementation of HTTPong",
+  "name": "httpong",
+  "version": "1.0.0-rc.1",
+  "description": "HTTPong for Javascript",
   "main": "dist/httpong.js",
   "dependencies": {},
   "devDependencies": {
@@ -37,5 +37,5 @@
   "bugs": {
     "url": "https://github.com/hansottowirtz/httpong-js/issues"
   },
-  "homepage": "https://github.com/hansottowirtz/httpong-js#readme"
+  "homepage": "https://github.com/hansottowirtz/httpong-js"
 }

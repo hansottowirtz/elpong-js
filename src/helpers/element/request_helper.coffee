@@ -1,8 +1,9 @@
-getOptions = (method, url, data, headers) ->
+getOptions = (method, url, data, headers = {}) ->
+  headers.Accept = headers['Content-Type'] = 'application/json'
   {
     method: method
     url: url
-    data: data || null
+    data: JSON.stringify(data || null)
     headers: headers
     dataType: 'json'
     responseType: 'json'

@@ -13,9 +13,9 @@ bower install httpong-js --save
 ```
 or download it [here](https://github.com/hansottowirtz/httpong-js/archive/master.zip)
 ```html
-<script src="/assets/httpong-js/dist/httpong.js"></script>
+<script src="/scripts/httpong-js/dist/httpong.js"></script>
 <!-- or -->
-<script src="/assets/httpong-js/dist/httpong.min.js"></script>
+<script src="/scripts/httpong-js/dist/httpong.min.js"></script>
 ```
 
 ```javascript
@@ -59,8 +59,10 @@ To load data into the collection, you can use `collection.actions.doGetAll()`,
 or `collection.actions.doGetOne(id)`
 
 To preload data, which is recommended, create a meta tag with
-`name=httpong-collection`, `scheme=scheme_name` and `content=array`.<br/>
+`name=httpong-collection`, `scheme=scheme_name`, `content=array` and `collection=name`.<br/>
 Array is the same data the API would return.
+
+If you are using Rails, check out [this library][rails].
 
 To make a new element, use `collection.makeNewElement({name: 'Bob'})`.<br/>
 This element will be stored in the `new_elements` array, and when it is
@@ -181,6 +183,24 @@ The library includes some polyfills for:<br/>
 `Array.prototype.includes`,
 `String.prototype.includes`
 
+### Setting a HTTP function
+
+The http function expects one argument object with `url`, `method`, `data` and
+`headers` keys.<br/>
+It should return a Promise-like object that catches when the response status is
+not between 200 and 299, and on other network errors.<br/>
+The `then` and `catch` functions should return a response object with a
+`data` key, that holds the parsed JSON object.<br/>
+`$http` and `jQuery.ajax` support this out of the box.<br/>
+If you don't work with Angular or jQuery, you can use [window.fetch](fetch).
+
+### Frameworks
+
+To use HTTPong with frameworks, see:
+
+[AngularJS][angularjs]<br/>
+[jQuery][jquery]
+
 ### Contributing
 
 Yes please!
@@ -197,3 +217,7 @@ Make pull requests when your feature should be merged.
 
 [spec]: https://github.com/hansottowirtz/httpong/blob/master/SPEC.md
 [js-localization]: https://github.com/hansottowirtz/httpong-js-localization
+[fetch]: https://github.com/hansottowirtz/httpong-fetch
+[angularjs]: https://github.com/hansottowirtz/httpong-angularjs
+[jquery]: https://github.com/hansottowirtz/httpong-jquery
+[rails]: https://github.com/hansottowirtz/httpong-rails

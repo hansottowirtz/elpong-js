@@ -39,7 +39,7 @@ HP.initialize = function(options) {
   }
   if (!options.no_search) {
     scheme_tags = document.querySelectorAll('meta[name=httpong-scheme]');
-    if (!scheme_tags.length && !Object.keys(HP.schemes).length) {
+    if (!scheme_tags.length && !Object.keys(HP["private"].schemes).length) {
       throw new Error('No scheme added or found');
     }
     for (j = 0, len = scheme_tags.length; j < len; j++) {
@@ -947,10 +947,14 @@ HP.Helpers.Element.setupHasOneRelation = function(hpe, relation_collection_singu
 };
 
 getOptions = function(method, url, data, headers) {
+  if (headers == null) {
+    headers = {};
+  }
+  headers.Accept = headers['Content-Type'] = 'application/json';
   return {
     method: method,
     url: url,
-    data: data || null,
+    data: JSON.stringify(data || null),
     headers: headers,
     dataType: 'json',
     responseType: 'json'
