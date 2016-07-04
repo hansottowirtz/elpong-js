@@ -5,19 +5,14 @@
     "Hans Otto Wirtz <hansottowirtz@gmail.com>"
   ],
   "description": "HTTPong for Javascript",
-  "main": "dist/httpong.coffee",
+  "main": "dist/httpong.js",
   "keywords": [
     "restful",
     "json",
-    "api"
+    "api",
+    "httpong"
   ],
   "license": "MIT",
-  "ignore": [
-    "**/.*",
-    "node_modules",
-    "bower_components",
-    "test",
-    "tests"
-  ],
+  "ignore": ["*", "!dist/*", "!src/*"],
   "dependencies": {}
 }
