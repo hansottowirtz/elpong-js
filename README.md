@@ -156,11 +156,34 @@ the other data using `mergeWith`.
 ### Examples
 
 ###### Animal Farm
-[Scheme](../blob/master/test/fixtures/animal-farm/scheme.json)
-[Usage](../blob/master/test/animal_farm_spec.coffee)
+[Scheme](../master/test/fixtures/animal-farm/scheme.json)
+[Usage](../master/test/animal_farm_spec.coffee)
 
 ###### Pulser
-[Scheme](../blob/master/test/fixtures/pulser/scheme.json)
+[Scheme](../master/test/fixtures/pulser/scheme.json)
+[Usage](../master/test/pulser_spec.coffee)
+
+### Polyfills
+
+The library includes some polyfills for:<br/>
+`Object.values`,
+`String.prototype.endsWith`,
+`Array.prototype.includes`,
+`String.prototype.includes`
+
+### Contributing
+
+Yes please!
+
+Fork it, then do something like this:
+```bash
+git clone https://github.com/<you>/httpong-js
+cd httpong-js
+npm install
+gulp test
+```
+Check the `gulpfile.js` for other tasks.
+Make pull requests when your feature should be merged.
 
 [spec]: https://github.com/hansottowirtz/httpong/blob/master/SPEC.md
 [js-localization]: https://github.com/hansottowirtz/httpong-js-localization
