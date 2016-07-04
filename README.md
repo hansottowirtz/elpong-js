@@ -8,6 +8,16 @@
 
 ## Getting started
 
+```bash
+bower install httpong-js --save
+```
+or download it [here](https://github.com/hansottowirtz/httpong-js/archive/master.zip)
+```html
+<script src="/assets/httpong-js/dist/httpong.js"></script>
+<!-- or -->
+<script src="/assets/httpong-js/dist/httpong.min.js"></script>
+```
+
 ```javascript
 HTTPong.setHttpFunction($http); // or $.ajax, or something like that
 HTTPong.initialize();
