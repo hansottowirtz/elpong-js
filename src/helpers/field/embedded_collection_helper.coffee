@@ -1,4 +1,4 @@
-HP.Helpers.Field.handleEmbeddedCollection = (hpe, pre_element, field_name, field_settings) ->
+HPP.Helpers.Field.handleEmbeddedCollection = (hpe, pre_element, field_name, field_settings) ->
   collection = hpe.getCollection()
   scheme = collection.getScheme()
   embedded_element_collection = scheme.getCollection(field_name || field_settings.collection)

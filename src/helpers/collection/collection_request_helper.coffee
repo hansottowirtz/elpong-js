@@ -1,9 +1,9 @@
-HP.Helpers.Collection.doGetAllAction = (hpc, user_options = {}) ->
+HPP.Helpers.Collection.doGetAllAction = (hpc, user_options = {}) ->
   data = user_options.data
 
   options = getOptions(
     'GET',
-    HP.Helpers.Url.createForCollection('GET', hpc, user_options),
+    HPP.Helpers.Url.createForCollection('GET', hpc, user_options),
     data,
     user_options.headers
   )
@@ -14,12 +14,12 @@ HP.Helpers.Collection.doGetAllAction = (hpc, user_options = {}) ->
       hpc.makeOrMerge(pre_element)
   return promise
 
-HP.Helpers.Collection.doGetOneAction = (hpc, selector_value, user_options = {}) ->
+HPP.Helpers.Collection.doGetOneAction = (hpc, selector_value, user_options = {}) ->
   data = user_options.data
 
   options = getOptions(
     'GET',
-    HP.Helpers.Url.createForCollection('GET', hpc, {suffix: selector_value}),
+    HPP.Helpers.Url.createForCollection('GET', hpc, {suffix: selector_value}),
     data,
     user_options.headers
   )
@@ -28,14 +28,14 @@ HP.Helpers.Collection.doGetOneAction = (hpc, selector_value, user_options = {}) 
     hpc.makeOrMerge(response.data)
   return promise
 
-HP.Helpers.Collection.doCustomAction = (hpc, action_name, action_settings, user_options = {}) ->
+HPP.Helpers.Collection.doCustomAction = (hpc, action_name, action_settings, user_options = {}) ->
   method = action_settings.method.toUpperCase()
 
   data = user_options.data
 
   options = getOptions(
     method,
-    HP.Helpers.Url.createForCollection('GET', hpc, {suffix: action_settings.path || action_name})
+    HPP.Helpers.Url.createForCollection('GET', hpc, {suffix: action_settings.path || action_name})
     data,
     user_options.headers
   )

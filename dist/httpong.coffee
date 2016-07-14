@@ -5,7 +5,7 @@
 
 HTTPong = window.HTTPong = HP = {}
 HP.private = HPP = {
-  log: -> console.log.apply(console, ['%c HP ', 'background: #80CBC4; color: #fff'].concat(Array.from(arguments)))
+  log: -> console.log.apply(console, ['%c HTTPong ', 'background: #80CBC4; color: #fff'].concat(Array.from(arguments)))
   schemes: {}
   http_function: null
   type_tests: []
@@ -34,17 +34,20 @@ HP.addScheme = (pre_scheme) ->
 HP.getScheme = (name) ->
   HPP.schemes[name]
 
-# Bootstrap HP
+# Bootstrap HTTPong
 #
-# @return {Object} HP
-HP.initialize = (options = {no_search: false})->
-  unless options.no_search
-    scheme_tags = document.querySelectorAll('meta[name=httpong-scheme]')
-    if !scheme_tags.length and !Object.keys(HP.private.schemes).length
-      throw new Error('No scheme added or found')
+# @return {Object} HTTPong
+HP.initialize = ->
+  scheme_tags = document.querySelectorAll('meta[name=httpong-scheme]')
+  if !scheme_tags.length and !Object.keys(HPP.schemes).length
+    throw new Error('No scheme added or found')
 
-    for scheme_tag in scheme_tags
-      HP.addScheme(JSON.parse(scheme_tag.content))
+  for scheme_tag in scheme_tags
+    HP.addScheme(JSON.parse(scheme_tag.content))
+
+  for scheme_name, scheme of HPP.schemes
+    for collection_name, collection of scheme.collections
+      collection.handlePreloadedElements()
 
   return HP
 
@@ -113,7 +116,7 @@ class HP.Scheme
       is_other_domain: parser.host isnt window.location.host
       protocol: parser.protocol
       host: parser.host
-      path: HP.Helpers.Url.trimSlashes(parser.pathname)
+      path: HPP.Helpers.Url.trimSlashes(parser.pathname)
     }
 
   getApiUrl: ->
@@ -130,46 +133,46 @@ class HP.Element
     @snapshots = {}
     @last_snapshot_time = null
 
-    collection_settings = HP.Helpers.Collection.getSettings(@collection)
+    collection_settings = HPP.Helpers.Collection.getSettings(@collection)
 
     HP.Util.forEach collection_settings.fields, (field_settings, field_name) ->
       if field_settings.embedded_element
-        HP.Helpers.Field.handleEmbeddedElement(hpe, pre_element, field_name, field_settings)
+        HPP.Helpers.Field.handleEmbeddedElement(hpe, pre_element, field_name, field_settings)
       else if field_settings.embedded_collection
-        HP.Helpers.Field.handleEmbeddedCollection(hpe, pre_element, field_name, field_settings)
+        HPP.Helpers.Field.handleEmbeddedCollection(hpe, pre_element, field_name, field_settings)
       else
         return if field_settings.only_send
         field_value = pre_element[field_name]
-        HP.Helpers.Field.validateType(field_name, field_value, field_settings)
+        HPP.Helpers.Field.validateType(field_name, field_value, field_settings)
         hpe.setField(field_name, field_value, true)
 
     HP.Util.forEach collection_settings.relations.has_many, (relation_settings, relation_collection_name) ->
-      HP.Helpers.Element.setupHasManyRelation(hpe, relation_collection_name, relation_settings)
+      HPP.Helpers.Element.setupHasManyRelation(hpe, relation_collection_name, relation_settings)
 
     HP.Util.forEach collection_settings.relations.has_one, (relation_settings, relation_collection_singular_name) ->
-      HP.Helpers.Element.setupHasOneRelation(hpe, relation_collection_singular_name, relation_settings)
+      HPP.Helpers.Element.setupHasOneRelation(hpe, relation_collection_singular_name, relation_settings)
 
     HP.Util.forEach collection_settings.relations.belongs_to, (relation_settings, relation_collection_singular_name) ->
-      HP.Helpers.Element.setupBelongsToRelation(hpe, relation_collection_singular_name, relation_settings)
+      HPP.Helpers.Element.setupBelongsToRelation(hpe, relation_collection_singular_name, relation_settings)
 
     @actions = {
       doGet: (user_options) ->
-        HP.Helpers.Element.doAction(hpe, 'GET', user_options)
+        HPP.Helpers.Element.doAction(hpe, 'GET', user_options)
 
       doPost: (user_options) ->
-        HP.Helpers.Element.doAction(hpe, 'POST', user_options)
+        HPP.Helpers.Element.doAction(hpe, 'POST', user_options)
 
       doPut: (user_options) ->
-        HP.Helpers.Element.doAction(hpe, 'PUT', user_options)
+        HPP.Helpers.Element.doAction(hpe, 'PUT', user_options)
 
       doDelete: (user_options) ->
-        HP.Helpers.Element.doAction(hpe, 'DELETE', user_options)
+        HPP.Helpers.Element.doAction(hpe, 'DELETE', user_options)
     }
 
     HP.Util.forEach collection_settings.actions, (action_settings, action_name) ->
       hpe.actions["do#{HP.Util.upperCamelize(action_name)}"] = (user_options) ->
         throw new Error('Element is new') if hpe.isNew() and !action_settings.without_selector
-        HP.Helpers.Element.doCustomAction(hpe, action_name, action_settings, user_options)
+        HPP.Helpers.Element.doCustomAction(hpe, action_name, action_settings, user_options)
 
     @makeSnapshot('creation')
 
@@ -185,13 +188,13 @@ class HP.Element
   makeSnapshot: (tag) ->
     date = Date.now()
     hpe = @
-    @snapshots = HP.Helpers.Snapshot.removeAfter(@last_snapshot_time, @snapshots)
+    @snapshots = HPP.Helpers.Snapshot.removeAfter(@last_snapshot_time, @snapshots)
     if @snapshots[date]
       return @makeSnapshot(tag) # loop until 1ms has passed
     s = @snapshots[date] = {
       tag: tag
       time: date
-      data: HP.Helpers.Element.getFields(@)
+      data: HPP.Helpers.Element.getFields(@)
       revert: ->
         hpe.undo(date)
     }
@@ -214,6 +217,12 @@ class HP.Element
       return @actions.doDelete().then ->
         elements = hpe.getCollection().elements
         delete elements[hpe.getSelectorValue()]
+
+  save: ->
+    if @isNew()
+      @actions.doPost()
+    else
+      @actions.doPut()
 
   isNew: ->
     if @getCollection().new_elements.includes(@)
@@ -238,7 +247,7 @@ class HP.Element
       else if n < 0
         throw new Error("#{n} is smaller than 0")
       else
-        ds = HP.Helpers.Snapshot.getSortedArray(@snapshots)
+        ds = HPP.Helpers.Snapshot.getSortedArray(@snapshots)
         length = ds.length
         index = ds.indexOf(@snapshots[@last_snapshot_time])
         # index = 0 if index < 0
@@ -260,18 +269,18 @@ class HP.Element
 
   mergeWith: (pre_element) ->
     hpe = @
-    collection_settings = HP.Helpers.Collection.getSettings(@collection)
+    collection_settings = HPP.Helpers.Collection.getSettings(@collection)
     HP.Util.forEach collection_settings.fields, (field_settings, field_name) ->
       if field_value = pre_element[field_name]
         if field_settings.embedded_element
-          # HP.Helpers.Field.handleEmbeddedElement(hpe, pre_element, field_name, field_settings)
+          # HPP.Helpers.Field.handleEmbeddedElement(hpe, pre_element, field_name, field_settings)
         else if field_settings.embedded_collection
-          # HP.Helpers.Field.handleEmbeddedCollection(hpe, pre_element, field_name, field_settings)
+          # HPP.Helpers.Field.handleEmbeddedCollection(hpe, pre_element, field_name, field_settings)
         else
           sv_1 = hpe.fields[field_name]
           if field_settings.selector and sv_1 isnt field_value and sv_1 and field_value
             throw new Error("Selector has changed from #{sv_1} to #{field_value}")
-          HP.Helpers.Field.validateType(field_name, field_value, field_settings)
+          HPP.Helpers.Field.validateType(field_name, field_value, field_settings)
           hpe.setField(field_name, field_value, true)
 
 class HP.Collection
@@ -282,7 +291,7 @@ class HP.Collection
     @default_pre_element = {}
     @selector_name = null
 
-    settings = HP.Helpers.Collection.getSettings(@)
+    settings = HPP.Helpers.Collection.getSettings(@)
 
     for field_name, field_settings of settings.fields
       if field_settings.selector
@@ -299,19 +308,23 @@ class HP.Collection
 
     @actions = {
       doGetAll: (user_options) ->
-        HP.Helpers.Collection.doGetAllAction(hpc, user_options)
+        HPP.Helpers.Collection.doGetAllAction(hpc, user_options)
       doGetOne: (selector_value, user_options) ->
-        HP.Helpers.Collection.doGetOneAction(hpc, selector_value, user_options)
+        HPP.Helpers.Collection.doGetOneAction(hpc, selector_value, user_options)
     }
 
     HP.Util.forEach settings.collection_actions, (action_settings, action_name) ->
       hpc.actions["do#{HP.Util.upperCamelize(action_name)}"] = (user_options) ->
-        HP.Helpers.Collection.doCustomAction(hpc, action_name, action_settings, user_options)
+        HPP.Helpers.Collection.doCustomAction(hpc, action_name, action_settings, user_options)
 
+  handlePreloadedElements: ->
     collection_tags = document.querySelectorAll("meta[name=httpong-collection][collection=\"#{@name}\"][scheme=\"#{@scheme.getName()}\"]")
+    element_tags = document.querySelectorAll("meta[name=httpong-element][collection=\"#{@name}\"][scheme=\"#{@scheme.getName()}\"]")
     for collection_tag in collection_tags
       for pre_element in JSON.parse(collection_tag.content)
         @makeOrMerge pre_element
+    for element_tag in element_tags
+      @makeOrMerge JSON.parse(element_tag.content)
 
   getName: ->
     @name
@@ -319,7 +332,7 @@ class HP.Collection
   getPluralName: @::getName
 
   getSingularName: ->
-    HP.Helpers.Collection.getSingularName(@)
+    HPP.Helpers.Collection.getSingularName(@)
 
   getScheme: ->
     @scheme
@@ -355,7 +368,7 @@ class HP.Collection
   makeOrMerge: (pre_element) ->
     if sv = pre_element[@selector_name]
       if el = @find(sv)
-        el.ergeWith pre_element
+        el.mergeWith pre_element
       else
         @makeNewElement pre_element
     else
@@ -469,7 +482,7 @@ HP.Util = {
     return
 }
 
-HP.Helpers = {
+HPP.Helpers = {
   Url: {
     # Creates the api url for an element
     #
@@ -485,7 +498,7 @@ HP.Helpers = {
       throw new Error('Api url has not yet been set') if !api_url
 
       if user_options.path
-        path = HP.Helpers.Url.trimSlashes(user_options.path)
+        path = HPP.Helpers.Url.trimSlashes(user_options.path)
         url = "#{api_url}/#{path}"
       else
         url = "#{api_url}/#{collection.getName()}"
@@ -498,7 +511,7 @@ HP.Helpers = {
       url
 
     createForCollection: (action_name, collection, user_options) ->
-      url = "#{collection.getScheme().getApiUrl()}/#{collection.getName()}" #HP.Helpers.Url.createForCollection(, hpe, user_options) # (action_name, element, user_options = {}, suffix)
+      url = "#{collection.getScheme().getApiUrl()}/#{collection.getName()}" #HPP.Helpers.Url.createForCollection(, hpe, user_options) # (action_name, element, user_options = {}, suffix)
       url = "#{url}/#{user_options.suffix}" if user_options.suffix
       url
 
@@ -509,10 +522,10 @@ HP.Helpers = {
   Element: {
     toData: (element) ->
       collection = element.getCollection()
-      o = HP.Helpers.Element.getFields(element)
+      o = HPP.Helpers.Element.getFields(element)
 
       # data = {}
-      # data[HP.Helpers.Collection.getSingularName(collection)] = o
+      # data[HPP.Helpers.Collection.getSingularName(collection)] = o
       # data
 
       data = o
@@ -524,7 +537,7 @@ HP.Helpers = {
       for field_name, field_settings of scheme.data.collections[collection.getName()].fields
         continue if field_settings.only_receive or field_settings.embedded_collection or field_settings.embedded_element
         field_value = element.getField(field_name)
-        HP.Helpers.Field.validateType(field_name, field_value, field_settings)
+        HPP.Helpers.Field.validateType(field_name, field_value, field_settings)
         o[field_name] = field_value
       o
   }
@@ -533,7 +546,7 @@ HP.Helpers = {
       c.getScheme().data.collections[c.getName()]
 
     getSingularName: (c) ->
-      HP.Helpers.Collection.getSettings(c).singular
+      HPP.Helpers.Collection.getSettings(c).singular
   }
   Field: {
     validateType: (field_name, field_value, field_settings) ->
@@ -553,7 +566,7 @@ HP.Helpers = {
         else if field_settings.types
           is_any = false
           for type in field_settings.types
-            if HP.Helpers.Field.isOfType(type, field_value)
+            if HPP.Helpers.Field.isOfType(type, field_value)
               is_any = true
               break
           HPP.log 'Error value: ', field_value
@@ -561,26 +574,26 @@ HP.Helpers = {
   }
 }
 
-HP.Helpers.Snapshot = {
+HPP.Helpers.Snapshot = {
   getSortedArray: (snapshots) ->
     arr = Object.values(snapshots)
     arr.sort (a, b) -> a.time - b.time
     arr
 
   removeAfter: (time, snapshots) ->
-    arr = HP.Helpers.Snapshot.getSortedArray(snapshots)
+    arr = HPP.Helpers.Snapshot.getSortedArray(snapshots)
     snapshots_2 = {}
     for v in arr
       snapshots_2[v.time] = v if v.time <= time
     snapshots_2
 }
 
-HP.Helpers.Collection.doGetAllAction = (hpc, user_options = {}) ->
+HPP.Helpers.Collection.doGetAllAction = (hpc, user_options = {}) ->
   data = user_options.data
 
   options = getOptions(
     'GET',
-    HP.Helpers.Url.createForCollection('GET', hpc, user_options),
+    HPP.Helpers.Url.createForCollection('GET', hpc, user_options),
     data,
     user_options.headers
   )
@@ -591,12 +604,12 @@ HP.Helpers.Collection.doGetAllAction = (hpc, user_options = {}) ->
       hpc.makeOrMerge(pre_element)
   return promise
 
-HP.Helpers.Collection.doGetOneAction = (hpc, selector_value, user_options = {}) ->
+HPP.Helpers.Collection.doGetOneAction = (hpc, selector_value, user_options = {}) ->
   data = user_options.data
 
   options = getOptions(
     'GET',
-    HP.Helpers.Url.createForCollection('GET', hpc, {suffix: selector_value}),
+    HPP.Helpers.Url.createForCollection('GET', hpc, {suffix: selector_value}),
     data,
     user_options.headers
   )
@@ -605,21 +618,21 @@ HP.Helpers.Collection.doGetOneAction = (hpc, selector_value, user_options = {}) 
     hpc.makeOrMerge(response.data)
   return promise
 
-HP.Helpers.Collection.doCustomAction = (hpc, action_name, action_settings, user_options = {}) ->
+HPP.Helpers.Collection.doCustomAction = (hpc, action_name, action_settings, user_options = {}) ->
   method = action_settings.method.toUpperCase()
 
   data = user_options.data
 
   options = getOptions(
     method,
-    HP.Helpers.Url.createForCollection('GET', hpc, {suffix: action_settings.path || action_name})
+    HPP.Helpers.Url.createForCollection('GET', hpc, {suffix: action_settings.path || action_name})
     data,
     user_options.headers
   )
 
   HPP.http_function(options)
 
-HP.Helpers.Element.setupBelongsToRelation = (hpe, relation_collection_singular_name, relation_settings) ->
+HPP.Helpers.Element.setupBelongsToRelation = (hpe, relation_collection_singular_name, relation_settings) ->
   collection = hpe.getCollection()
   if !relation_settings.polymorphic
     if relation_settings.collection
@@ -632,23 +645,23 @@ HP.Helpers.Element.setupBelongsToRelation = (hpe, relation_collection_singular_n
   if relation_settings.polymorphic
     collection_field_name = relation_settings.collection_field ||  "#{relation_collection_singular_name}_collection"
     hpe.relations["get#{HP.Util.upperCamelize(relation_collection_singular_name)}"] = ->
-      HP.Helpers.Element.getPolymorphicBelongsToElement(hpe, field_name, collection_field_name)
+      HPP.Helpers.Element.getPolymorphicBelongsToElement(hpe, field_name, collection_field_name)
   else # normal
     hpe.relations["get#{HP.Util.upperCamelize(relation_collection_singular_name)}"] = ->
-      HP.Helpers.Element.getBelongsToElement(hpe, relation_collection, field_name)
+      HPP.Helpers.Element.getBelongsToElement(hpe, relation_collection, field_name)
 
-HP.Helpers.Element.getBelongsToElement = (hpe, relation_collection, field_name) ->
+HPP.Helpers.Element.getBelongsToElement = (hpe, relation_collection, field_name) ->
   selector_value = hpe.getField(field_name, true, 'belongs_to')
   relation_collection.find(selector_value) || null
 
-HP.Helpers.Element.getPolymorphicBelongsToElement = (hpe, field_name, collection_field_name) ->
+HPP.Helpers.Element.getPolymorphicBelongsToElement = (hpe, field_name, collection_field_name) ->
   relation_collection_name = hpe.getField(collection_field_name, true, 'belongs_to_collection')
   selector_value = hpe.getField(field_name, true, 'belongs_to')
   hpe.getCollection().getScheme().getCollection(relation_collection_name).find(selector_value) || null
 
-HP.Helpers.Element.setupHasManyRelation = (hpe, relation_collection_name, relation_settings) ->
+HPP.Helpers.Element.setupHasManyRelation = (hpe, relation_collection_name, relation_settings) ->
   collection = hpe.getCollection()
-  collection_settings = HP.Helpers.Collection.getSettings(hpe.getCollection())
+  collection_settings = HPP.Helpers.Collection.getSettings(hpe.getCollection())
 
   relation_collection = collection.getScheme().getCollection(relation_settings.collection || relation_collection_name)
 
@@ -657,20 +670,20 @@ HP.Helpers.Element.setupHasManyRelation = (hpe, relation_collection_name, relati
   if relation_field_settings = collection_settings.fields[references_field_name]
     # throw new Error("Field #{field_name} of collection #{collection.getName()} are not references") if !relation_field_settings.references
     hpe.relations["get#{HP.Util.upperCamelize(relation_collection_name)}"] = ->
-      HP.Helpers.Element.getHasManyRelationArrayThroughReferencesField(hpe, relation_collection, field_name)
+      HPP.Helpers.Element.getHasManyRelationArrayThroughReferencesField(hpe, relation_collection, field_name)
 
   else # normal has_many relationship
-    hpe.relations["get#{HP.Util.upperCamelize(relation_collection_name)}"] = HP.Helpers.Element.getHasManyRelationFunction(hpe, collection, relation_settings, relation_collection)
+    hpe.relations["get#{HP.Util.upperCamelize(relation_collection_name)}"] = HPP.Helpers.Element.getHasManyRelationFunction(hpe, collection, relation_settings, relation_collection)
 
-HP.Helpers.Element.getHasManyRelationFunction = (hpe, collection, relation_settings, relation_collection) ->
+HPP.Helpers.Element.getHasManyRelationFunction = (hpe, collection, relation_settings, relation_collection) ->
   collection_singular_name = collection.getSingularName()
-  relation_collection_settings = HP.Helpers.Collection.getSettings(relation_collection)
+  relation_collection_settings = HPP.Helpers.Collection.getSettings(relation_collection)
 
   if relation_settings.polymorphic
     has_many_field_name = "#{relation_settings.as}_#{collection.selector_name}"
     has_many_collection_field_name = "#{relation_settings.as}_collection"
 
-    return -> HP.Helpers.Element.getPolymorphicHasManyRelationArray(hpe, relation_collection, has_many_field_name, has_many_collection_field_name)
+    return -> HPP.Helpers.Element.getPolymorphicHasManyRelationArray(hpe, relation_collection, has_many_field_name, has_many_collection_field_name)
   else
     has_many_field_name = if relation_settings.field
       relation_settings.field
@@ -679,16 +692,16 @@ HP.Helpers.Element.getHasManyRelationFunction = (hpe, collection, relation_setti
     else
       "#{collection_singular_name}_#{collection.selector_name}"
 
-    return -> HP.Helpers.Element.getHasManyRelationArray(hpe, relation_collection, has_many_field_name)
+    return -> HPP.Helpers.Element.getHasManyRelationArray(hpe, relation_collection, has_many_field_name)
 
-HP.Helpers.Element.getHasManyRelationArray = (hpe, relation_collection, has_many_field_name) ->
+HPP.Helpers.Element.getHasManyRelationArray = (hpe, relation_collection, has_many_field_name) ->
   hpe2_arr = []
   selector_value = hpe.getSelectorValue()
   for hpe2 in relation_collection.getArray()
     hpe2_arr.push(hpe2) if selector_value is hpe2.getField(has_many_field_name, true, 'has_many')
   return hpe2_arr
 
-HP.Helpers.Element.getPolymorphicHasManyRelationArray = (hpe, relation_collection, has_many_field_name, has_many_collection_field_name) ->
+HPP.Helpers.Element.getPolymorphicHasManyRelationArray = (hpe, relation_collection, has_many_field_name, has_many_collection_field_name) ->
   hpe2_arr = []
   selector_value = hpe.getSelectorValue()
   collection_name = hpe.getCollection().getName()
@@ -696,7 +709,7 @@ HP.Helpers.Element.getPolymorphicHasManyRelationArray = (hpe, relation_collectio
     hpe2_arr.push(hpe2) if selector_value is hpe2.getField(has_many_field_name, true, 'has_many') and collection_name is hpe2.getField(has_many_collection_field_name, true, 'has_many_collection_name')
   return hpe2_arr
 
-HP.Helpers.Element.getHasManyRelationArrayThroughReferencesField = (hpe, relation_collection, field_name) ->
+HPP.Helpers.Element.getHasManyRelationArrayThroughReferencesField = (hpe, relation_collection, field_name) ->
   selector_value_arr = hpe.getField(field_name, true, 'has_many_array')
   throw new Error("Field #{field_name} is not an array, but it should be an array of references to #{relation_collection.getName()}") if !Array.isArray(selector_value_arr)
   hpe2_arr = []
@@ -704,9 +717,9 @@ HP.Helpers.Element.getHasManyRelationArrayThroughReferencesField = (hpe, relatio
     hpe2_arr.push(hpe2) if selector_value_arr.includes hpe.getSelectorValue()
   return hpe2_arr
 
-HP.Helpers.Element.setupHasOneRelation = (hpe, relation_collection_singular_name, relation_settings) ->
+HPP.Helpers.Element.setupHasOneRelation = (hpe, relation_collection_singular_name, relation_settings) ->
   collection = hpe.getCollection()
-  collection_settings = HP.Helpers.Collection.getSettings(hpe.getCollection())
+  collection_settings = HPP.Helpers.Collection.getSettings(hpe.getCollection())
 
   scheme = collection.getScheme()
 
@@ -715,25 +728,25 @@ HP.Helpers.Element.setupHasOneRelation = (hpe, relation_collection_singular_name
   else
     relation_collection = scheme.getCollectionBySingularName(relation_collection_singular_name)
 
-  hpe.relations["get#{HP.Util.upperCamelize(relation_collection_singular_name)}"] = -> HP.Helpers.Element.getHasManyRelationFunction(hpe, collection, relation_settings, relation_collection)()[0]
+  hpe.relations["get#{HP.Util.upperCamelize(relation_collection_singular_name)}"] = -> HPP.Helpers.Element.getHasManyRelationFunction(hpe, collection, relation_settings, relation_collection)()[0]
 
 getOptions = (method, url, data, headers = {}) ->
   headers.Accept = headers['Content-Type'] = 'application/json'
   {
     method: method
     url: url
-    data: JSON.stringify(data || null)
+    data: JSON.stringify(data || {})
     headers: headers
     dataType: 'json'
     responseType: 'json'
   }
 
-HP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
+HPP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
   hpe.makeSnapshot("before_#{method.toLowerCase()}")
   if user_options.data
     data = user_options.data
   else if method isnt 'GET'
-    data = HP.Helpers.Element.toData(hpe)
+    data = HPP.Helpers.Element.toData(hpe)
 
   if method is 'POST'
     throw new Error('Element is not new') if !hpe.isNew()
@@ -742,7 +755,7 @@ HP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
 
   options = getOptions(
     method,
-    HP.Helpers.Url.createForElement(method, {}, hpe, user_options),
+    HPP.Helpers.Url.createForElement(method, {}, hpe, user_options),
     data,
     user_options.headers
   )
@@ -753,18 +766,18 @@ HP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
     hpe.makeSnapshot("after_#{method.toLowerCase()}")
   return promise
 
-HP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_options = {}) ->
+HPP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_options = {}) ->
   method = action_settings.method.toUpperCase()
   hpe.makeSnapshot("before_#{method.toLowerCase()}")
 
   if user_options.data
     data = user_options.data
   else if not action_settings.without_data
-    data = HP.Helpers.Element.toData(hpe)
+    data = HPP.Helpers.Element.toData(hpe)
 
   options = getOptions(
     method,
-    HP.Helpers.Url.createForElement(action_name, action_settings, hpe, user_options)
+    HPP.Helpers.Url.createForElement(action_name, action_settings, hpe, user_options)
     data,
     user_options.headers
   )
@@ -775,7 +788,7 @@ HP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_opt
     hpe.makeSnapshot("after_#{method.toLowerCase()}")
   return promise
 
-HP.Helpers.Field.handleEmbeddedCollection = (hpe, pre_element, field_name, field_settings) ->
+HPP.Helpers.Field.handleEmbeddedCollection = (hpe, pre_element, field_name, field_settings) ->
   collection = hpe.getCollection()
   scheme = collection.getScheme()
   embedded_element_collection = scheme.getCollection(field_name || field_settings.collection)
@@ -784,7 +797,7 @@ HP.Helpers.Field.handleEmbeddedCollection = (hpe, pre_element, field_name, field
     embedded_element = new HP.Element(embedded_element_collection, embedded_pre_element)
     embedded_element_collection.addElement(embedded_element)
 
-HP.Helpers.Field.handleEmbeddedElement = (hpe, pre_element, field_name, field_settings) ->
+HPP.Helpers.Field.handleEmbeddedElement = (hpe, pre_element, field_name, field_settings) ->
   collection = hpe.getCollection()
   scheme = collection.getScheme()
   if field_settings.collection

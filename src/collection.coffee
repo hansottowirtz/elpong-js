@@ -6,7 +6,7 @@ class HP.Collection
     @default_pre_element = {}
     @selector_name = null
 
-    settings = HP.Helpers.Collection.getSettings(@)
+    settings = HPP.Helpers.Collection.getSettings(@)
 
     for field_name, field_settings of settings.fields
       if field_settings.selector
@@ -23,19 +23,23 @@ class HP.Collection
 
     @actions = {
       doGetAll: (user_options) ->
-        HP.Helpers.Collection.doGetAllAction(hpc, user_options)
+        HPP.Helpers.Collection.doGetAllAction(hpc, user_options)
       doGetOne: (selector_value, user_options) ->
-        HP.Helpers.Collection.doGetOneAction(hpc, selector_value, user_options)
+        HPP.Helpers.Collection.doGetOneAction(hpc, selector_value, user_options)
     }
 
     HP.Util.forEach settings.collection_actions, (action_settings, action_name) ->
       hpc.actions["do#{HP.Util.upperCamelize(action_name)}"] = (user_options) ->
-        HP.Helpers.Collection.doCustomAction(hpc, action_name, action_settings, user_options)
+        HPP.Helpers.Collection.doCustomAction(hpc, action_name, action_settings, user_options)
 
+  handlePreloadedElements: ->
     collection_tags = document.querySelectorAll("meta[name=httpong-collection][collection=\"#{@name}\"][scheme=\"#{@scheme.getName()}\"]")
+    element_tags = document.querySelectorAll("meta[name=httpong-element][collection=\"#{@name}\"][scheme=\"#{@scheme.getName()}\"]")
     for collection_tag in collection_tags
       for pre_element in JSON.parse(collection_tag.content)
         @makeOrMerge pre_element
+    for element_tag in element_tags
+      @makeOrMerge JSON.parse(element_tag.content)
 
   getName: ->
     @name
@@ -43,7 +47,7 @@ class HP.Collection
   getPluralName: @::getName
 
   getSingularName: ->
-    HP.Helpers.Collection.getSingularName(@)
+    HPP.Helpers.Collection.getSingularName(@)
 
   getScheme: ->
     @scheme

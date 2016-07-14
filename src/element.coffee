@@ -6,46 +6,46 @@ class HP.Element
     @snapshots = {}
     @last_snapshot_time = null
 
-    collection_settings = HP.Helpers.Collection.getSettings(@collection)
+    collection_settings = HPP.Helpers.Collection.getSettings(@collection)
 
     HP.Util.forEach collection_settings.fields, (field_settings, field_name) ->
       if field_settings.embedded_element
-        HP.Helpers.Field.handleEmbeddedElement(hpe, pre_element, field_name, field_settings)
+        HPP.Helpers.Field.handleEmbeddedElement(hpe, pre_element, field_name, field_settings)
       else if field_settings.embedded_collection
-        HP.Helpers.Field.handleEmbeddedCollection(hpe, pre_element, field_name, field_settings)
+        HPP.Helpers.Field.handleEmbeddedCollection(hpe, pre_element, field_name, field_settings)
       else
         return if field_settings.only_send
         field_value = pre_element[field_name]
-        HP.Helpers.Field.validateType(field_name, field_value, field_settings)
+        HPP.Helpers.Field.validateType(field_name, field_value, field_settings)
         hpe.setField(field_name, field_value, true)
 
     HP.Util.forEach collection_settings.relations.has_many, (relation_settings, relation_collection_name) ->
-      HP.Helpers.Element.setupHasManyRelation(hpe, relation_collection_name, relation_settings)
+      HPP.Helpers.Element.setupHasManyRelation(hpe, relation_collection_name, relation_settings)
 
     HP.Util.forEach collection_settings.relations.has_one, (relation_settings, relation_collection_singular_name) ->
-      HP.Helpers.Element.setupHasOneRelation(hpe, relation_collection_singular_name, relation_settings)
+      HPP.Helpers.Element.setupHasOneRelation(hpe, relation_collection_singular_name, relation_settings)
 
     HP.Util.forEach collection_settings.relations.belongs_to, (relation_settings, relation_collection_singular_name) ->
-      HP.Helpers.Element.setupBelongsToRelation(hpe, relation_collection_singular_name, relation_settings)
+      HPP.Helpers.Element.setupBelongsToRelation(hpe, relation_collection_singular_name, relation_settings)
 
     @actions = {
       doGet: (user_options) ->
-        HP.Helpers.Element.doAction(hpe, 'GET', user_options)
+        HPP.Helpers.Element.doAction(hpe, 'GET', user_options)
 
       doPost: (user_options) ->
-        HP.Helpers.Element.doAction(hpe, 'POST', user_options)
+        HPP.Helpers.Element.doAction(hpe, 'POST', user_options)
 
       doPut: (user_options) ->
-        HP.Helpers.Element.doAction(hpe, 'PUT', user_options)
+        HPP.Helpers.Element.doAction(hpe, 'PUT', user_options)
 
       doDelete: (user_options) ->
-        HP.Helpers.Element.doAction(hpe, 'DELETE', user_options)
+        HPP.Helpers.Element.doAction(hpe, 'DELETE', user_options)
     }
 
     HP.Util.forEach collection_settings.actions, (action_settings, action_name) ->
       hpe.actions["do#{HP.Util.upperCamelize(action_name)}"] = (user_options) ->
         throw new Error('Element is new') if hpe.isNew() and !action_settings.without_selector
-        HP.Helpers.Element.doCustomAction(hpe, action_name, action_settings, user_options)
+        HPP.Helpers.Element.doCustomAction(hpe, action_name, action_settings, user_options)
 
     @makeSnapshot('creation')
 
@@ -61,13 +61,13 @@ class HP.Element
   makeSnapshot: (tag) ->
     date = Date.now()
     hpe = @
-    @snapshots = HP.Helpers.Snapshot.removeAfter(@last_snapshot_time, @snapshots)
+    @snapshots = HPP.Helpers.Snapshot.removeAfter(@last_snapshot_time, @snapshots)
     if @snapshots[date]
       return @makeSnapshot(tag) # loop until 1ms has passed
     s = @snapshots[date] = {
       tag: tag
       time: date
-      data: HP.Helpers.Element.getFields(@)
+      data: HPP.Helpers.Element.getFields(@)
       revert: ->
         hpe.undo(date)
     }
@@ -90,6 +90,12 @@ class HP.Element
       return @actions.doDelete().then ->
         elements = hpe.getCollection().elements
         delete elements[hpe.getSelectorValue()]
+
+  save: ->
+    if @isNew()
+      @actions.doPost()
+    else
+      @actions.doPut()
 
   isNew: ->
     if @getCollection().new_elements.includes(@)
@@ -114,7 +120,7 @@ class HP.Element
       else if n < 0
         throw new Error("#{n} is smaller than 0")
       else
-        ds = HP.Helpers.Snapshot.getSortedArray(@snapshots)
+        ds = HPP.Helpers.Snapshot.getSortedArray(@snapshots)
         length = ds.length
         index = ds.indexOf(@snapshots[@last_snapshot_time])
         # index = 0 if index < 0
@@ -136,16 +142,16 @@ class HP.Element
 
   mergeWith: (pre_element) ->
     hpe = @
-    collection_settings = HP.Helpers.Collection.getSettings(@collection)
+    collection_settings = HPP.Helpers.Collection.getSettings(@collection)
     HP.Util.forEach collection_settings.fields, (field_settings, field_name) ->
       if field_value = pre_element[field_name]
         if field_settings.embedded_element
-          # HP.Helpers.Field.handleEmbeddedElement(hpe, pre_element, field_name, field_settings)
+          # HPP.Helpers.Field.handleEmbeddedElement(hpe, pre_element, field_name, field_settings)
         else if field_settings.embedded_collection
-          # HP.Helpers.Field.handleEmbeddedCollection(hpe, pre_element, field_name, field_settings)
+          # HPP.Helpers.Field.handleEmbeddedCollection(hpe, pre_element, field_name, field_settings)
         else
           sv_1 = hpe.fields[field_name]
           if field_settings.selector and sv_1 isnt field_value and sv_1 and field_value
             throw new Error("Selector has changed from #{sv_1} to #{field_value}")
-          HP.Helpers.Field.validateType(field_name, field_value, field_settings)
+          HPP.Helpers.Field.validateType(field_name, field_value, field_settings)
           hpe.setField(field_name, field_value, true)

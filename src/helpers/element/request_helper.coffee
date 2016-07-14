@@ -3,18 +3,18 @@ getOptions = (method, url, data, headers = {}) ->
   {
     method: method
     url: url
-    data: JSON.stringify(data || null)
+    data: JSON.stringify(data || {})
     headers: headers
     dataType: 'json'
     responseType: 'json'
   }
 
-HP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
+HPP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
   hpe.makeSnapshot("before_#{method.toLowerCase()}")
   if user_options.data
     data = user_options.data
   else if method isnt 'GET'
-    data = HP.Helpers.Element.toData(hpe)
+    data = HPP.Helpers.Element.toData(hpe)
 
   if method is 'POST'
     throw new Error('Element is not new') if !hpe.isNew()
@@ -23,7 +23,7 @@ HP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
 
   options = getOptions(
     method,
-    HP.Helpers.Url.createForElement(method, {}, hpe, user_options),
+    HPP.Helpers.Url.createForElement(method, {}, hpe, user_options),
     data,
     user_options.headers
   )
@@ -34,18 +34,18 @@ HP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
     hpe.makeSnapshot("after_#{method.toLowerCase()}")
   return promise
 
-HP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_options = {}) ->
+HPP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_options = {}) ->
   method = action_settings.method.toUpperCase()
   hpe.makeSnapshot("before_#{method.toLowerCase()}")
 
   if user_options.data
     data = user_options.data
   else if not action_settings.without_data
-    data = HP.Helpers.Element.toData(hpe)
+    data = HPP.Helpers.Element.toData(hpe)
 
   options = getOptions(
     method,
-    HP.Helpers.Url.createForElement(action_name, action_settings, hpe, user_options)
+    HPP.Helpers.Url.createForElement(action_name, action_settings, hpe, user_options)
     data,
     user_options.headers
   )

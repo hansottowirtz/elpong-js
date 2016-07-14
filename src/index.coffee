@@ -5,7 +5,7 @@
 
 HTTPong = window.HTTPong = HP = {}
 HP.private = HPP = {
-  log: -> console.log.apply(console, ['%c HP ', 'background: #80CBC4; color: #fff'].concat(Array.from(arguments)))
+  log: -> console.log.apply(console, ['%c HTTPong ', 'background: #80CBC4; color: #fff'].concat(Array.from(arguments)))
   schemes: {}
   http_function: null
   type_tests: []
@@ -34,17 +34,20 @@ HP.addScheme = (pre_scheme) ->
 HP.getScheme = (name) ->
   HPP.schemes[name]
 
-# Bootstrap HP
+# Bootstrap HTTPong
 #
-# @return {Object} HP
-HP.initialize = (options = {no_search: false})->
-  unless options.no_search
-    scheme_tags = document.querySelectorAll('meta[name=httpong-scheme]')
-    if !scheme_tags.length and !Object.keys(HP.private.schemes).length
-      throw new Error('No scheme added or found')
+# @return {Object} HTTPong
+HP.initialize = ->
+  scheme_tags = document.querySelectorAll('meta[name=httpong-scheme]')
+  if !scheme_tags.length and !Object.keys(HPP.schemes).length
+    throw new Error('No scheme added or found')
 
-    for scheme_tag in scheme_tags
-      HP.addScheme(JSON.parse(scheme_tag.content))
+  for scheme_tag in scheme_tags
+    HP.addScheme(JSON.parse(scheme_tag.content))
+
+  for scheme_name, scheme of HPP.schemes
+    for collection_name, collection of scheme.collections
+      collection.handlePreloadedElements()
 
   return HP
 

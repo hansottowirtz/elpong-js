@@ -1,4 +1,4 @@
-HP.Helpers.Field.handleEmbeddedElement = (hpe, pre_element, field_name, field_settings) ->
+HPP.Helpers.Field.handleEmbeddedElement = (hpe, pre_element, field_name, field_settings) ->
   collection = hpe.getCollection()
   scheme = collection.getScheme()
   if field_settings.collection

@@ -48,7 +48,7 @@ class HP.Scheme
       is_other_domain: parser.host isnt window.location.host
       protocol: parser.protocol
       host: parser.host
-      path: HP.Helpers.Url.trimSlashes(parser.pathname)
+      path: HPP.Helpers.Url.trimSlashes(parser.pathname)
     }
 
   getApiUrl: ->

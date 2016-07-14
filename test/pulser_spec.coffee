@@ -36,7 +36,7 @@ describe 'Pulser', ->
         reply 'POST', '/api/users/register', {id: 1, email: 'hansottowirtz@gmail.com'}, 200, (data) ->
           expect(JSON.parse(data)).toEqual({email: 'hansottowirtz@gmail.com', password: 'abcdefgh'})
         reply 'GET', '/api/users/me', {id: 1, email: 'wirtzhansotto@gmail.com'}, 200, (data) ->
-          expect(JSON.parse(data)).toBe(null)
+          expect(JSON.parse(data)).toEqual({})
 
         @otto.setField('password', 'abcdefgh')
         @otto.actions.doRegister().then =>

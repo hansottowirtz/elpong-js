@@ -4,7 +4,7 @@ HTTPong = window.HTTPong = HP = {};
 
 HP["private"] = HPP = {
   log: function() {
-    return console.log.apply(console, ['%c HP ', 'background: #80CBC4; color: #fff'].concat(Array.from(arguments)));
+    return console.log.apply(console, ['%c HTTPong ', 'background: #80CBC4; color: #fff'].concat(Array.from(arguments)));
   },
   schemes: {},
   http_function: null,
@@ -30,21 +30,23 @@ HP.getScheme = function(name) {
   return HPP.schemes[name];
 };
 
-HP.initialize = function(options) {
-  var j, len, scheme_tag, scheme_tags;
-  if (options == null) {
-    options = {
-      no_search: false
-    };
+HP.initialize = function() {
+  var collection, collection_name, j, len, ref, ref1, scheme, scheme_name, scheme_tag, scheme_tags;
+  scheme_tags = document.querySelectorAll('meta[name=httpong-scheme]');
+  if (!scheme_tags.length && !Object.keys(HPP.schemes).length) {
+    throw new Error('No scheme added or found');
   }
-  if (!options.no_search) {
-    scheme_tags = document.querySelectorAll('meta[name=httpong-scheme]');
-    if (!scheme_tags.length && !Object.keys(HP["private"].schemes).length) {
-      throw new Error('No scheme added or found');
-    }
-    for (j = 0, len = scheme_tags.length; j < len; j++) {
-      scheme_tag = scheme_tags[j];
-      HP.addScheme(JSON.parse(scheme_tag.content));
+  for (j = 0, len = scheme_tags.length; j < len; j++) {
+    scheme_tag = scheme_tags[j];
+    HP.addScheme(JSON.parse(scheme_tag.content));
+  }
+  ref = HPP.schemes;
+  for (scheme_name in ref) {
+    scheme = ref[scheme_name];
+    ref1 = scheme.collections;
+    for (collection_name in ref1) {
+      collection = ref1[collection_name];
+      collection.handlePreloadedElements();
     }
   }
   return HP;
@@ -145,7 +147,7 @@ HP.Scheme = (function() {
       is_other_domain: parser.host !== window.location.host,
       protocol: parser.protocol,
       host: parser.host,
-      path: HP.Helpers.Url.trimSlashes(parser.pathname)
+      path: HPP.Helpers.Url.trimSlashes(parser.pathname)
     };
   };
 
@@ -170,43 +172,43 @@ HP.Element = (function() {
     this.relations = {};
     this.snapshots = {};
     this.last_snapshot_time = null;
-    collection_settings = HP.Helpers.Collection.getSettings(this.collection);
+    collection_settings = HPP.Helpers.Collection.getSettings(this.collection);
     HP.Util.forEach(collection_settings.fields, function(field_settings, field_name) {
       var field_value;
       if (field_settings.embedded_element) {
-        return HP.Helpers.Field.handleEmbeddedElement(hpe, pre_element, field_name, field_settings);
+        return HPP.Helpers.Field.handleEmbeddedElement(hpe, pre_element, field_name, field_settings);
       } else if (field_settings.embedded_collection) {
-        return HP.Helpers.Field.handleEmbeddedCollection(hpe, pre_element, field_name, field_settings);
+        return HPP.Helpers.Field.handleEmbeddedCollection(hpe, pre_element, field_name, field_settings);
       } else {
         if (field_settings.only_send) {
           return;
         }
         field_value = pre_element[field_name];
-        HP.Helpers.Field.validateType(field_name, field_value, field_settings);
+        HPP.Helpers.Field.validateType(field_name, field_value, field_settings);
         return hpe.setField(field_name, field_value, true);
       }
     });
     HP.Util.forEach(collection_settings.relations.has_many, function(relation_settings, relation_collection_name) {
-      return HP.Helpers.Element.setupHasManyRelation(hpe, relation_collection_name, relation_settings);
+      return HPP.Helpers.Element.setupHasManyRelation(hpe, relation_collection_name, relation_settings);
     });
     HP.Util.forEach(collection_settings.relations.has_one, function(relation_settings, relation_collection_singular_name) {
-      return HP.Helpers.Element.setupHasOneRelation(hpe, relation_collection_singular_name, relation_settings);
+      return HPP.Helpers.Element.setupHasOneRelation(hpe, relation_collection_singular_name, relation_settings);
     });
     HP.Util.forEach(collection_settings.relations.belongs_to, function(relation_settings, relation_collection_singular_name) {
-      return HP.Helpers.Element.setupBelongsToRelation(hpe, relation_collection_singular_name, relation_settings);
+      return HPP.Helpers.Element.setupBelongsToRelation(hpe, relation_collection_singular_name, relation_settings);
     });
     this.actions = {
       doGet: function(user_options) {
-        return HP.Helpers.Element.doAction(hpe, 'GET', user_options);
+        return HPP.Helpers.Element.doAction(hpe, 'GET', user_options);
       },
       doPost: function(user_options) {
-        return HP.Helpers.Element.doAction(hpe, 'POST', user_options);
+        return HPP.Helpers.Element.doAction(hpe, 'POST', user_options);
       },
       doPut: function(user_options) {
-        return HP.Helpers.Element.doAction(hpe, 'PUT', user_options);
+        return HPP.Helpers.Element.doAction(hpe, 'PUT', user_options);
       },
       doDelete: function(user_options) {
-        return HP.Helpers.Element.doAction(hpe, 'DELETE', user_options);
+        return HPP.Helpers.Element.doAction(hpe, 'DELETE', user_options);
       }
     };
     HP.Util.forEach(collection_settings.actions, function(action_settings, action_name) {
@@ -214,7 +216,7 @@ HP.Element = (function() {
         if (hpe.isNew() && !action_settings.without_selector) {
           throw new Error('Element is new');
         }
-        return HP.Helpers.Element.doCustomAction(hpe, action_name, action_settings, user_options);
+        return HPP.Helpers.Element.doCustomAction(hpe, action_name, action_settings, user_options);
       };
     });
     this.makeSnapshot('creation');
@@ -236,14 +238,14 @@ HP.Element = (function() {
     var date, hpe, s;
     date = Date.now();
     hpe = this;
-    this.snapshots = HP.Helpers.Snapshot.removeAfter(this.last_snapshot_time, this.snapshots);
+    this.snapshots = HPP.Helpers.Snapshot.removeAfter(this.last_snapshot_time, this.snapshots);
     if (this.snapshots[date]) {
       return this.makeSnapshot(tag);
     }
     s = this.snapshots[date] = {
       tag: tag,
       time: date,
-      data: HP.Helpers.Element.getFields(this),
+      data: HPP.Helpers.Element.getFields(this),
       revert: function() {
         return hpe.undo(date);
       }
@@ -281,6 +283,14 @@ HP.Element = (function() {
     }
   };
 
+  Element.prototype.save = function() {
+    if (this.isNew()) {
+      return this.actions.doPost();
+    } else {
+      return this.actions.doPut();
+    }
+  };
+
   Element.prototype.isNew = function() {
     if (this.getCollection().new_elements.includes(this)) {
       if (this.getSelectorValue()) {
@@ -313,7 +323,7 @@ HP.Element = (function() {
       } else if (n < 0) {
         throw new Error(n + " is smaller than 0");
       } else {
-        ds = HP.Helpers.Snapshot.getSortedArray(this.snapshots);
+        ds = HPP.Helpers.Snapshot.getSortedArray(this.snapshots);
         length = ds.length;
         index = ds.indexOf(this.snapshots[this.last_snapshot_time]);
         d = ds[index - n];
@@ -343,7 +353,7 @@ HP.Element = (function() {
   Element.prototype.mergeWith = function(pre_element) {
     var collection_settings, hpe;
     hpe = this;
-    collection_settings = HP.Helpers.Collection.getSettings(this.collection);
+    collection_settings = HPP.Helpers.Collection.getSettings(this.collection);
     return HP.Util.forEach(collection_settings.fields, function(field_settings, field_name) {
       var field_value, sv_1;
       if (field_value = pre_element[field_name]) {
@@ -356,7 +366,7 @@ HP.Element = (function() {
           if (field_settings.selector && sv_1 !== field_value && sv_1 && field_value) {
             throw new Error("Selector has changed from " + sv_1 + " to " + field_value);
           }
-          HP.Helpers.Field.validateType(field_name, field_value, field_settings);
+          HPP.Helpers.Field.validateType(field_name, field_value, field_settings);
           return hpe.setField(field_name, field_value, true);
         }
       }
@@ -369,7 +379,7 @@ HP.Element = (function() {
 
 HP.Collection = (function() {
   function Collection(scheme1, name1) {
-    var collection_tag, collection_tags, field_name, field_settings, hpc, j, l, len, len1, pre_element, ref, ref1, settings;
+    var field_name, field_settings, hpc, ref, settings;
     this.scheme = scheme1;
     this.name = name1;
     hpc = this;
@@ -377,7 +387,7 @@ HP.Collection = (function() {
     this.new_elements = [];
     this.default_pre_element = {};
     this.selector_name = null;
-    settings = HP.Helpers.Collection.getSettings(this);
+    settings = HPP.Helpers.Collection.getSettings(this);
     ref = settings.fields;
     for (field_name in ref) {
       field_settings = ref[field_name];
@@ -390,27 +400,38 @@ HP.Collection = (function() {
     }
     this.actions = {
       doGetAll: function(user_options) {
-        return HP.Helpers.Collection.doGetAllAction(hpc, user_options);
+        return HPP.Helpers.Collection.doGetAllAction(hpc, user_options);
       },
       doGetOne: function(selector_value, user_options) {
-        return HP.Helpers.Collection.doGetOneAction(hpc, selector_value, user_options);
+        return HPP.Helpers.Collection.doGetOneAction(hpc, selector_value, user_options);
       }
     };
     HP.Util.forEach(settings.collection_actions, function(action_settings, action_name) {
       return hpc.actions["do" + (HP.Util.upperCamelize(action_name))] = function(user_options) {
-        return HP.Helpers.Collection.doCustomAction(hpc, action_name, action_settings, user_options);
+        return HPP.Helpers.Collection.doCustomAction(hpc, action_name, action_settings, user_options);
       };
     });
+  }
+
+  Collection.prototype.handlePreloadedElements = function() {
+    var collection_tag, collection_tags, element_tag, element_tags, j, l, len, len1, len2, m, pre_element, ref, results;
     collection_tags = document.querySelectorAll("meta[name=httpong-collection][collection=\"" + this.name + "\"][scheme=\"" + (this.scheme.getName()) + "\"]");
+    element_tags = document.querySelectorAll("meta[name=httpong-element][collection=\"" + this.name + "\"][scheme=\"" + (this.scheme.getName()) + "\"]");
     for (j = 0, len = collection_tags.length; j < len; j++) {
       collection_tag = collection_tags[j];
-      ref1 = JSON.parse(collection_tag.content);
-      for (l = 0, len1 = ref1.length; l < len1; l++) {
-        pre_element = ref1[l];
+      ref = JSON.parse(collection_tag.content);
+      for (l = 0, len1 = ref.length; l < len1; l++) {
+        pre_element = ref[l];
         this.makeOrMerge(pre_element);
       }
     }
-  }
+    results = [];
+    for (m = 0, len2 = element_tags.length; m < len2; m++) {
+      element_tag = element_tags[m];
+      results.push(this.makeOrMerge(JSON.parse(element_tag.content)));
+    }
+    return results;
+  };
 
   Collection.prototype.getName = function() {
     return this.name;
@@ -419,7 +440,7 @@ HP.Collection = (function() {
   Collection.prototype.getPluralName = Collection.prototype.getName;
 
   Collection.prototype.getSingularName = function() {
-    return HP.Helpers.Collection.getSingularName(this);
+    return HPP.Helpers.Collection.getSingularName(this);
   };
 
   Collection.prototype.getScheme = function() {
@@ -635,7 +656,7 @@ HP.Util = {
   }
 };
 
-HP.Helpers = {
+HPP.Helpers = {
   Url: {
     createForElement: function(action_name, action_settings, element, user_options) {
       var api_url, collection, path, scheme, url;
@@ -646,7 +667,7 @@ HP.Helpers = {
         throw new Error('Api url has not yet been set');
       }
       if (user_options.path) {
-        path = HP.Helpers.Url.trimSlashes(user_options.path);
+        path = HPP.Helpers.Url.trimSlashes(user_options.path);
         url = api_url + "/" + path;
       } else {
         url = api_url + "/" + (collection.getName());
@@ -678,7 +699,7 @@ HP.Helpers = {
     toData: function(element) {
       var collection, data, o;
       collection = element.getCollection();
-      o = HP.Helpers.Element.getFields(element);
+      o = HPP.Helpers.Element.getFields(element);
       return data = o;
     },
     getFields: function(element) {
@@ -693,7 +714,7 @@ HP.Helpers = {
           continue;
         }
         field_value = element.getField(field_name);
-        HP.Helpers.Field.validateType(field_name, field_value, field_settings);
+        HPP.Helpers.Field.validateType(field_name, field_value, field_settings);
         o[field_name] = field_value;
       }
       return o;
@@ -704,7 +725,7 @@ HP.Helpers = {
       return c.getScheme().data.collections[c.getName()];
     },
     getSingularName: function(c) {
-      return HP.Helpers.Collection.getSettings(c).singular;
+      return HPP.Helpers.Collection.getSettings(c).singular;
     }
   },
   Field: {
@@ -728,7 +749,7 @@ HP.Helpers = {
           ref = field_settings.types;
           for (j = 0, len = ref.length; j < len; j++) {
             type = ref[j];
-            if (HP.Helpers.Field.isOfType(type, field_value)) {
+            if (HPP.Helpers.Field.isOfType(type, field_value)) {
               is_any = true;
               break;
             }
@@ -743,7 +764,7 @@ HP.Helpers = {
   }
 };
 
-HP.Helpers.Snapshot = {
+HPP.Helpers.Snapshot = {
   getSortedArray: function(snapshots) {
     var arr;
     arr = Object.values(snapshots);
@@ -754,7 +775,7 @@ HP.Helpers.Snapshot = {
   },
   removeAfter: function(time, snapshots) {
     var arr, j, len, snapshots_2, v;
-    arr = HP.Helpers.Snapshot.getSortedArray(snapshots);
+    arr = HPP.Helpers.Snapshot.getSortedArray(snapshots);
     snapshots_2 = {};
     for (j = 0, len = arr.length; j < len; j++) {
       v = arr[j];
@@ -766,13 +787,13 @@ HP.Helpers.Snapshot = {
   }
 };
 
-HP.Helpers.Collection.doGetAllAction = function(hpc, user_options) {
+HPP.Helpers.Collection.doGetAllAction = function(hpc, user_options) {
   var data, options, promise;
   if (user_options == null) {
     user_options = {};
   }
   data = user_options.data;
-  options = getOptions('GET', HP.Helpers.Url.createForCollection('GET', hpc, user_options), data, user_options.headers);
+  options = getOptions('GET', HPP.Helpers.Url.createForCollection('GET', hpc, user_options), data, user_options.headers);
   promise = HPP.http_function(options);
   promise.then(function(response) {
     var j, len, pre_element, ref, results;
@@ -787,13 +808,13 @@ HP.Helpers.Collection.doGetAllAction = function(hpc, user_options) {
   return promise;
 };
 
-HP.Helpers.Collection.doGetOneAction = function(hpc, selector_value, user_options) {
+HPP.Helpers.Collection.doGetOneAction = function(hpc, selector_value, user_options) {
   var data, options, promise;
   if (user_options == null) {
     user_options = {};
   }
   data = user_options.data;
-  options = getOptions('GET', HP.Helpers.Url.createForCollection('GET', hpc, {
+  options = getOptions('GET', HPP.Helpers.Url.createForCollection('GET', hpc, {
     suffix: selector_value
   }), data, user_options.headers);
   promise = HPP.http_function(options);
@@ -803,20 +824,20 @@ HP.Helpers.Collection.doGetOneAction = function(hpc, selector_value, user_option
   return promise;
 };
 
-HP.Helpers.Collection.doCustomAction = function(hpc, action_name, action_settings, user_options) {
+HPP.Helpers.Collection.doCustomAction = function(hpc, action_name, action_settings, user_options) {
   var data, method, options;
   if (user_options == null) {
     user_options = {};
   }
   method = action_settings.method.toUpperCase();
   data = user_options.data;
-  options = getOptions(method, HP.Helpers.Url.createForCollection('GET', hpc, {
+  options = getOptions(method, HPP.Helpers.Url.createForCollection('GET', hpc, {
     suffix: action_settings.path || action_name
   }), data, user_options.headers);
   return HPP.http_function(options);
 };
 
-HP.Helpers.Element.setupBelongsToRelation = function(hpe, relation_collection_singular_name, relation_settings) {
+HPP.Helpers.Element.setupBelongsToRelation = function(hpe, relation_collection_singular_name, relation_settings) {
   var collection, collection_field_name, field_name, relation_collection;
   collection = hpe.getCollection();
   if (!relation_settings.polymorphic) {
@@ -830,62 +851,62 @@ HP.Helpers.Element.setupBelongsToRelation = function(hpe, relation_collection_si
   if (relation_settings.polymorphic) {
     collection_field_name = relation_settings.collection_field || (relation_collection_singular_name + "_collection");
     return hpe.relations["get" + (HP.Util.upperCamelize(relation_collection_singular_name))] = function() {
-      return HP.Helpers.Element.getPolymorphicBelongsToElement(hpe, field_name, collection_field_name);
+      return HPP.Helpers.Element.getPolymorphicBelongsToElement(hpe, field_name, collection_field_name);
     };
   } else {
     return hpe.relations["get" + (HP.Util.upperCamelize(relation_collection_singular_name))] = function() {
-      return HP.Helpers.Element.getBelongsToElement(hpe, relation_collection, field_name);
+      return HPP.Helpers.Element.getBelongsToElement(hpe, relation_collection, field_name);
     };
   }
 };
 
-HP.Helpers.Element.getBelongsToElement = function(hpe, relation_collection, field_name) {
+HPP.Helpers.Element.getBelongsToElement = function(hpe, relation_collection, field_name) {
   var selector_value;
   selector_value = hpe.getField(field_name, true, 'belongs_to');
   return relation_collection.find(selector_value) || null;
 };
 
-HP.Helpers.Element.getPolymorphicBelongsToElement = function(hpe, field_name, collection_field_name) {
+HPP.Helpers.Element.getPolymorphicBelongsToElement = function(hpe, field_name, collection_field_name) {
   var relation_collection_name, selector_value;
   relation_collection_name = hpe.getField(collection_field_name, true, 'belongs_to_collection');
   selector_value = hpe.getField(field_name, true, 'belongs_to');
   return hpe.getCollection().getScheme().getCollection(relation_collection_name).find(selector_value) || null;
 };
 
-HP.Helpers.Element.setupHasManyRelation = function(hpe, relation_collection_name, relation_settings) {
+HPP.Helpers.Element.setupHasManyRelation = function(hpe, relation_collection_name, relation_settings) {
   var collection, collection_settings, references_field_name, relation_collection, relation_field_settings;
   collection = hpe.getCollection();
-  collection_settings = HP.Helpers.Collection.getSettings(hpe.getCollection());
+  collection_settings = HPP.Helpers.Collection.getSettings(hpe.getCollection());
   relation_collection = collection.getScheme().getCollection(relation_settings.collection || relation_collection_name);
   references_field_name = relation_settings.references_field || (relation_collection_name + "_" + relation_collection.selector_name + "s");
   if (relation_field_settings = collection_settings.fields[references_field_name]) {
     return hpe.relations["get" + (HP.Util.upperCamelize(relation_collection_name))] = function() {
-      return HP.Helpers.Element.getHasManyRelationArrayThroughReferencesField(hpe, relation_collection, field_name);
+      return HPP.Helpers.Element.getHasManyRelationArrayThroughReferencesField(hpe, relation_collection, field_name);
     };
   } else {
-    return hpe.relations["get" + (HP.Util.upperCamelize(relation_collection_name))] = HP.Helpers.Element.getHasManyRelationFunction(hpe, collection, relation_settings, relation_collection);
+    return hpe.relations["get" + (HP.Util.upperCamelize(relation_collection_name))] = HPP.Helpers.Element.getHasManyRelationFunction(hpe, collection, relation_settings, relation_collection);
   }
 };
 
-HP.Helpers.Element.getHasManyRelationFunction = function(hpe, collection, relation_settings, relation_collection) {
+HPP.Helpers.Element.getHasManyRelationFunction = function(hpe, collection, relation_settings, relation_collection) {
   var collection_singular_name, has_many_collection_field_name, has_many_field_name, relation_collection_settings;
   collection_singular_name = collection.getSingularName();
-  relation_collection_settings = HP.Helpers.Collection.getSettings(relation_collection);
+  relation_collection_settings = HPP.Helpers.Collection.getSettings(relation_collection);
   if (relation_settings.polymorphic) {
     has_many_field_name = relation_settings.as + "_" + collection.selector_name;
     has_many_collection_field_name = relation_settings.as + "_collection";
     return function() {
-      return HP.Helpers.Element.getPolymorphicHasManyRelationArray(hpe, relation_collection, has_many_field_name, has_many_collection_field_name);
+      return HPP.Helpers.Element.getPolymorphicHasManyRelationArray(hpe, relation_collection, has_many_field_name, has_many_collection_field_name);
     };
   } else {
     has_many_field_name = relation_settings.field ? relation_settings.field : relation_settings.as ? relation_settings.as + "_" + collection.selector_name : collection_singular_name + "_" + collection.selector_name;
     return function() {
-      return HP.Helpers.Element.getHasManyRelationArray(hpe, relation_collection, has_many_field_name);
+      return HPP.Helpers.Element.getHasManyRelationArray(hpe, relation_collection, has_many_field_name);
     };
   }
 };
 
-HP.Helpers.Element.getHasManyRelationArray = function(hpe, relation_collection, has_many_field_name) {
+HPP.Helpers.Element.getHasManyRelationArray = function(hpe, relation_collection, has_many_field_name) {
   var hpe2, hpe2_arr, j, len, ref, selector_value;
   hpe2_arr = [];
   selector_value = hpe.getSelectorValue();
@@ -899,7 +920,7 @@ HP.Helpers.Element.getHasManyRelationArray = function(hpe, relation_collection, 
   return hpe2_arr;
 };
 
-HP.Helpers.Element.getPolymorphicHasManyRelationArray = function(hpe, relation_collection, has_many_field_name, has_many_collection_field_name) {
+HPP.Helpers.Element.getPolymorphicHasManyRelationArray = function(hpe, relation_collection, has_many_field_name, has_many_collection_field_name) {
   var collection_name, hpe2, hpe2_arr, j, len, ref, selector_value;
   hpe2_arr = [];
   selector_value = hpe.getSelectorValue();
@@ -914,7 +935,7 @@ HP.Helpers.Element.getPolymorphicHasManyRelationArray = function(hpe, relation_c
   return hpe2_arr;
 };
 
-HP.Helpers.Element.getHasManyRelationArrayThroughReferencesField = function(hpe, relation_collection, field_name) {
+HPP.Helpers.Element.getHasManyRelationArrayThroughReferencesField = function(hpe, relation_collection, field_name) {
   var hpe2, hpe2_arr, j, len, ref, selector_value_arr;
   selector_value_arr = hpe.getField(field_name, true, 'has_many_array');
   if (!Array.isArray(selector_value_arr)) {
@@ -931,10 +952,10 @@ HP.Helpers.Element.getHasManyRelationArrayThroughReferencesField = function(hpe,
   return hpe2_arr;
 };
 
-HP.Helpers.Element.setupHasOneRelation = function(hpe, relation_collection_singular_name, relation_settings) {
+HPP.Helpers.Element.setupHasOneRelation = function(hpe, relation_collection_singular_name, relation_settings) {
   var collection, collection_settings, relation_collection, scheme;
   collection = hpe.getCollection();
-  collection_settings = HP.Helpers.Collection.getSettings(hpe.getCollection());
+  collection_settings = HPP.Helpers.Collection.getSettings(hpe.getCollection());
   scheme = collection.getScheme();
   if (relation_settings.collection) {
     relation_collection = scheme.getCollection(relation_settings.collection);
@@ -942,7 +963,7 @@ HP.Helpers.Element.setupHasOneRelation = function(hpe, relation_collection_singu
     relation_collection = scheme.getCollectionBySingularName(relation_collection_singular_name);
   }
   return hpe.relations["get" + (HP.Util.upperCamelize(relation_collection_singular_name))] = function() {
-    return HP.Helpers.Element.getHasManyRelationFunction(hpe, collection, relation_settings, relation_collection)()[0];
+    return HPP.Helpers.Element.getHasManyRelationFunction(hpe, collection, relation_settings, relation_collection)()[0];
   };
 };
 
@@ -954,14 +975,14 @@ getOptions = function(method, url, data, headers) {
   return {
     method: method,
     url: url,
-    data: JSON.stringify(data || null),
+    data: JSON.stringify(data || {}),
     headers: headers,
     dataType: 'json',
     responseType: 'json'
   };
 };
 
-HP.Helpers.Element.doAction = function(hpe, method, user_options) {
+HPP.Helpers.Element.doAction = function(hpe, method, user_options) {
   var data, options, promise;
   if (user_options == null) {
     user_options = {};
@@ -970,7 +991,7 @@ HP.Helpers.Element.doAction = function(hpe, method, user_options) {
   if (user_options.data) {
     data = user_options.data;
   } else if (method !== 'GET') {
-    data = HP.Helpers.Element.toData(hpe);
+    data = HPP.Helpers.Element.toData(hpe);
   }
   if (method === 'POST') {
     if (!hpe.isNew()) {
@@ -981,7 +1002,7 @@ HP.Helpers.Element.doAction = function(hpe, method, user_options) {
       throw new Error('Element is new');
     }
   }
-  options = getOptions(method, HP.Helpers.Url.createForElement(method, {}, hpe, user_options), data, user_options.headers);
+  options = getOptions(method, HPP.Helpers.Url.createForElement(method, {}, hpe, user_options), data, user_options.headers);
   promise = HPP.http_function(options);
   promise.then(function(response) {
     if (response.data) {
@@ -992,7 +1013,7 @@ HP.Helpers.Element.doAction = function(hpe, method, user_options) {
   return promise;
 };
 
-HP.Helpers.Element.doCustomAction = function(hpe, action_name, action_settings, user_options) {
+HPP.Helpers.Element.doCustomAction = function(hpe, action_name, action_settings, user_options) {
   var data, method, options, promise;
   if (user_options == null) {
     user_options = {};
@@ -1002,9 +1023,9 @@ HP.Helpers.Element.doCustomAction = function(hpe, action_name, action_settings, 
   if (user_options.data) {
     data = user_options.data;
   } else if (!action_settings.without_data) {
-    data = HP.Helpers.Element.toData(hpe);
+    data = HPP.Helpers.Element.toData(hpe);
   }
-  options = getOptions(method, HP.Helpers.Url.createForElement(action_name, action_settings, hpe, user_options), data, user_options.headers);
+  options = getOptions(method, HPP.Helpers.Url.createForElement(action_name, action_settings, hpe, user_options), data, user_options.headers);
   promise = HPP.http_function(options);
   promise.then(function(response) {
     if (response.data && !action_settings.returns_other) {
@@ -1015,7 +1036,7 @@ HP.Helpers.Element.doCustomAction = function(hpe, action_name, action_settings, 
   return promise;
 };
 
-HP.Helpers.Field.handleEmbeddedCollection = function(hpe, pre_element, field_name, field_settings) {
+HPP.Helpers.Field.handleEmbeddedCollection = function(hpe, pre_element, field_name, field_settings) {
   var collection, embedded_element_collection, scheme;
   collection = hpe.getCollection();
   scheme = collection.getScheme();
@@ -1027,7 +1048,7 @@ HP.Helpers.Field.handleEmbeddedCollection = function(hpe, pre_element, field_nam
   });
 };
 
-HP.Helpers.Field.handleEmbeddedElement = function(hpe, pre_element, field_name, field_settings) {
+HPP.Helpers.Field.handleEmbeddedElement = function(hpe, pre_element, field_name, field_settings) {
   var associated_field_name, collection, embedded_element, embedded_element_collection, scheme;
   collection = hpe.getCollection();
   scheme = collection.getScheme();

@@ -1,4 +1,4 @@
-HP.Helpers = {
+HPP.Helpers = {
   Url: {
     # Creates the api url for an element
     #
@@ -14,7 +14,7 @@ HP.Helpers = {
       throw new Error('Api url has not yet been set') if !api_url
 
       if user_options.path
-        path = HP.Helpers.Url.trimSlashes(user_options.path)
+        path = HPP.Helpers.Url.trimSlashes(user_options.path)
         url = "#{api_url}/#{path}"
       else
         url = "#{api_url}/#{collection.getName()}"
@@ -27,7 +27,7 @@ HP.Helpers = {
       url
 
     createForCollection: (action_name, collection, user_options) ->
-      url = "#{collection.getScheme().getApiUrl()}/#{collection.getName()}" #HP.Helpers.Url.createForCollection(, hpe, user_options) # (action_name, element, user_options = {}, suffix)
+      url = "#{collection.getScheme().getApiUrl()}/#{collection.getName()}" #HPP.Helpers.Url.createForCollection(, hpe, user_options) # (action_name, element, user_options = {}, suffix)
       url = "#{url}/#{user_options.suffix}" if user_options.suffix
       url
 
@@ -38,10 +38,10 @@ HP.Helpers = {
   Element: {
     toData: (element) ->
       collection = element.getCollection()
-      o = HP.Helpers.Element.getFields(element)
+      o = HPP.Helpers.Element.getFields(element)
 
       # data = {}
-      # data[HP.Helpers.Collection.getSingularName(collection)] = o
+      # data[HPP.Helpers.Collection.getSingularName(collection)] = o
       # data
 
       data = o
@@ -53,7 +53,7 @@ HP.Helpers = {
       for field_name, field_settings of scheme.data.collections[collection.getName()].fields
         continue if field_settings.only_receive or field_settings.embedded_collection or field_settings.embedded_element
         field_value = element.getField(field_name)
-        HP.Helpers.Field.validateType(field_name, field_value, field_settings)
+        HPP.Helpers.Field.validateType(field_name, field_value, field_settings)
         o[field_name] = field_value
       o
   }
@@ -62,7 +62,7 @@ HP.Helpers = {
       c.getScheme().data.collections[c.getName()]
 
     getSingularName: (c) ->
-      HP.Helpers.Collection.getSettings(c).singular
+      HPP.Helpers.Collection.getSettings(c).singular
   }
   Field: {
     validateType: (field_name, field_value, field_settings) ->
@@ -82,7 +82,7 @@ HP.Helpers = {
         else if field_settings.types
           is_any = false
           for type in field_settings.types
-            if HP.Helpers.Field.isOfType(type, field_value)
+            if HPP.Helpers.Field.isOfType(type, field_value)
               is_any = true
               break
           HPP.log 'Error value: ', field_value
