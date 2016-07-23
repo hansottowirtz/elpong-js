@@ -500,7 +500,7 @@ HP.Collection = (function() {
     var el, sv;
     if (sv = pre_element[this.selector_name]) {
       if (el = this.find(sv)) {
-        return el.ergeWith(pre_element);
+        return el.mergeWith(pre_element);
       } else {
         return this.makeNewElement(pre_element);
       }
@@ -838,7 +838,7 @@ HPP.Helpers.Collection.doCustomAction = function(hpc, action_name, action_settin
 };
 
 HPP.Helpers.Element.setupBelongsToRelation = function(hpe, relation_collection_singular_name, relation_settings) {
-  var collection, collection_field_name, field_name, relation_collection;
+  var collection, collection_field_name, collection_selector_field, field_name, relation_collection;
   collection = hpe.getCollection();
   if (!relation_settings.polymorphic) {
     if (relation_settings.collection) {
@@ -847,13 +847,15 @@ HPP.Helpers.Element.setupBelongsToRelation = function(hpe, relation_collection_s
       relation_collection = collection.getScheme().getCollectionBySingularName(relation_collection_singular_name);
     }
   }
-  field_name = relation_settings.field || (relation_collection_singular_name + "_" + (relation_settings.polymorphic ? relation_settings.collection_selector_field : relation_collection.selector_name));
   if (relation_settings.polymorphic) {
     collection_field_name = relation_settings.collection_field || (relation_collection_singular_name + "_collection");
+    collection_selector_field = relation_settings.collection_selector_field;
+    field_name = relation_settings.field;
     return hpe.relations["get" + (HP.Util.upperCamelize(relation_collection_singular_name))] = function() {
-      return HPP.Helpers.Element.getPolymorphicBelongsToElement(hpe, field_name, collection_field_name);
+      return HPP.Helpers.Element.getPolymorphicBelongsToElement(hpe, field_name, collection_field_name, collection_selector_field, relation_collection_singular_name);
     };
   } else {
+    field_name = relation_settings.field || (relation_collection_singular_name + "_" + relation_collection.selector_name);
     return hpe.relations["get" + (HP.Util.upperCamelize(relation_collection_singular_name))] = function() {
       return HPP.Helpers.Element.getBelongsToElement(hpe, relation_collection, field_name);
     };
@@ -866,11 +868,16 @@ HPP.Helpers.Element.getBelongsToElement = function(hpe, relation_collection, fie
   return relation_collection.find(selector_value) || null;
 };
 
-HPP.Helpers.Element.getPolymorphicBelongsToElement = function(hpe, field_name, collection_field_name) {
-  var relation_collection_name, selector_value;
+HPP.Helpers.Element.getPolymorphicBelongsToElement = function(hpe, field_name, collection_field_name, collection_selector_field, collection_singular_name) {
+  var relation_collection, relation_collection_name, selector_value;
   relation_collection_name = hpe.getField(collection_field_name, true, 'belongs_to_collection');
+  relation_collection = hpe.getCollection().getScheme().getCollection(relation_collection_name);
+  if (!field_name) {
+    collection_selector_field || (collection_selector_field = relation_collection.selector_name);
+    field_name = collection_singular_name + "_" + collection_selector_field;
+  }
   selector_value = hpe.getField(field_name, true, 'belongs_to');
-  return hpe.getCollection().getScheme().getCollection(relation_collection_name).find(selector_value) || null;
+  return relation_collection.find(selector_value) || null;
 };
 
 HPP.Helpers.Element.setupHasManyRelation = function(hpe, relation_collection_name, relation_settings) {

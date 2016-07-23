@@ -83,7 +83,7 @@ class HP.Collection
   makeOrMerge: (pre_element) ->
     if sv = pre_element[@selector_name]
       if el = @find(sv)
-        el.ergeWith pre_element
+        el.mergeWith pre_element
       else
         @makeNewElement pre_element
     else
