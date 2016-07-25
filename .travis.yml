@@ -2,7 +2,8 @@ language: node_js
 node_js:
   - 0.12.7
 before_script:
-  - npm install
+  - npm install -g gulp-cli bower coffee-script
   - export PATH="$PWD/node_modules/.bin:$PATH"
+  - npm install
   - bower install
 script: gulp test
