@@ -1,14 +1,13 @@
 # A Javascript implementation of HTTPong
 #
 # @author Hans Otto Wirtz
-# @version 0.3.2
+# @version 0.3.3
 
 HTTPong = window.HTTPong = HP = {}
 HP.private = HPP = {
   log: -> console.log.apply(console, ['%c HTTPong ', 'background: #80CBC4; color: #fff'].concat(Array.from(arguments)))
   schemes: {}
   http_function: null
-  type_tests: []
   isHpe: (e) ->
     e.constructor is HP.Element
   isHpc: (e) ->
@@ -62,9 +61,6 @@ HP.initialize = ->
 # @return {Object} HP
 HP.setHttpFunction = (http_function) ->
   HPP.http_function = http_function
-
-HP.addTypeTest = (name, fn) ->
-  HPP.type_tests[name] = fn
 
 class HP.Scheme
   constructor: (pre_scheme, options = {no_normalize: false, no_create_collections: false}) ->
@@ -143,7 +139,6 @@ class HP.Element
       else
         return if field_settings.only_send
         field_value = pre_element[field_name]
-        HPP.Helpers.Field.validateType(field_name, field_value, field_settings)
         hpe.setField(field_name, field_value, true)
 
     HP.Util.forEach collection_settings.relations.has_many, (relation_settings, relation_collection_name) ->
@@ -256,8 +251,7 @@ class HP.Element
         @last_snapshot_time = d.time
     else if HP.Util.isString(n)
       a = null
-      HP.Util.reverseForIn @snapshots, (k, v) ->
-        return if k == 'last'
+      for v in HPP.Helpers.Snapshot.getSortedArray(@snapshots)
         if v.tag is n
           a ||= v
       if a
@@ -273,15 +267,24 @@ class HP.Element
     HP.Util.forEach collection_settings.fields, (field_settings, field_name) ->
       if field_value = pre_element[field_name]
         if field_settings.embedded_element
-          # HPP.Helpers.Field.handleEmbeddedElement(hpe, pre_element, field_name, field_settings)
+          # HPP.Helpers.Field.handleEmbeddedElement(hpe, pre_element, field_name, field_settings) TODO
         else if field_settings.embedded_collection
-          # HPP.Helpers.Field.handleEmbeddedCollection(hpe, pre_element, field_name, field_settings)
+          # HPP.Helpers.Field.handleEmbeddedCollection(hpe, pre_element, field_name, field_settings) TODO
         else
           sv_1 = hpe.fields[field_name]
           if field_settings.selector and sv_1 isnt field_value and sv_1 and field_value
             throw new Error("Selector has changed from #{sv_1} to #{field_value}")
-          HPP.Helpers.Field.validateType(field_name, field_value, field_settings)
           hpe.setField(field_name, field_value, true)
+
+  isPersisted: ->
+    last_saved_snapshot = null
+    HP.Util.reverseForIn @snapshots, (k, v) ->
+      return if last_saved_snapshot
+      last_saved_snapshot = v if v.tag is 'after_post' or v.tag is 'after_put' or v.tag is 'after_get' or v.tag is 'creation'
+    data = last_saved_snapshot.data
+    for k, v of HPP.Helpers.Element.getFields(@)
+      return false if data[k] isnt v
+    return true
 
 class HP.Collection
   constructor: (@scheme, @name) ->
@@ -455,21 +458,6 @@ HP.Util = {
       continue if !o.hasOwnProperty(k)
       f(v, k)
 
-  isOfType: (type, value) ->
-    switch type.toLowerCase()
-      when 'array'
-        Array.isArray(value)
-      when 'string'
-        HP.Util.isString(value)
-      when 'integer'
-        HP.Util.isInteger(value)
-      when 'number'
-        HP.Util.isNumber(value)
-      else
-        for name, fn of HPP.type_tests
-          return fn(value) if type is name
-        throw new Error("Type #{type} not found")
-
   reverseForIn: (obj, f) ->
     arr = []
     for key of obj
@@ -537,7 +525,6 @@ HPP.Helpers = {
       for field_name, field_settings of scheme.data.collections[collection.getName()].fields
         continue if field_settings.only_receive or field_settings.embedded_collection or field_settings.embedded_element
         field_value = element.getField(field_name)
-        HPP.Helpers.Field.validateType(field_name, field_value, field_settings)
         o[field_name] = field_value
       o
   }
@@ -548,30 +535,7 @@ HPP.Helpers = {
     getSingularName: (c) ->
       HPP.Helpers.Collection.getSettings(c).singular
   }
-  Field: {
-    validateType: (field_name, field_value, field_settings) ->
-      if field_value is undefined or field_value is null
-        if field_value is undefined and (field_settings.not_undefined or field_settings.not_nothing)
-          throw new Error("The value of field #{field_name} is undefined, and it should not be")
-
-        if field_value is null and (field_settings.not_null or field_settings.not_nothing)
-          throw new Error("The value of field #{field_name} is null, and it should not be")
-
-      else
-        if field_settings.type
-          if !HP.Util.isOfType(field_settings.type, field_value)
-            HPP.log 'Error value: ', field_value
-            throw new Error("The value of field #{field_name} (value above) is not a #{field_settings.type}")
-
-        else if field_settings.types
-          is_any = false
-          for type in field_settings.types
-            if HPP.Helpers.Field.isOfType(type, field_value)
-              is_any = true
-              break
-          HPP.log 'Error value: ', field_value
-          throw new Error("The value of field #{field_name} (value above) is not of any of these: #{field_settings.types}") if !is_any
-  }
+  Field: {}
 }
 
 HPP.Helpers.Snapshot = {

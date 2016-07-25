@@ -54,21 +54,6 @@ HP.Util = {
       continue if !o.hasOwnProperty(k)
       f(v, k)
 
-  isOfType: (type, value) ->
-    switch type.toLowerCase()
-      when 'array'
-        Array.isArray(value)
-      when 'string'
-        HP.Util.isString(value)
-      when 'integer'
-        HP.Util.isInteger(value)
-      when 'number'
-        HP.Util.isNumber(value)
-      else
-        for name, fn of HPP.type_tests
-          return fn(value) if type is name
-        throw new Error("Type #{type} not found")
-
   reverseForIn: (obj, f) ->
     arr = []
     for key of obj

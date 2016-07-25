@@ -19,5 +19,9 @@
     "!src/*"
   ],
   "dependencies": {},
-  "version": "0.3.2"
+  "version": "0.3.3",
+  "devDependencies": {
+    "angular": "1.5.7",
+    "angular-mocks": "1.5.7"
+  }
 }

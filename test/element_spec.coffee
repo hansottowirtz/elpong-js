@@ -147,6 +147,14 @@ describe 'Element', ->
         @worker.undo('lol')
         expect(@worker.getField('name')).toBe('Wirtz')
 
+      it 'should be persisted', ->
+        expect(@worker.isPersisted()).toBe(true)
+        @worker.setField('name', 'Hans')
+        expect(@worker.isPersisted()).toBe(false)
+        @worker.makeSnapshot('after_put')
+        expect(@worker.isPersisted()).toBe(true)
+
+
     describe 'http', ->
       $httpBackend = null
 

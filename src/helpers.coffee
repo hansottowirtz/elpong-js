@@ -53,7 +53,6 @@ HPP.Helpers = {
       for field_name, field_settings of scheme.data.collections[collection.getName()].fields
         continue if field_settings.only_receive or field_settings.embedded_collection or field_settings.embedded_element
         field_value = element.getField(field_name)
-        HPP.Helpers.Field.validateType(field_name, field_value, field_settings)
         o[field_name] = field_value
       o
   }
@@ -64,28 +63,5 @@ HPP.Helpers = {
     getSingularName: (c) ->
       HPP.Helpers.Collection.getSettings(c).singular
   }
-  Field: {
-    validateType: (field_name, field_value, field_settings) ->
-      if field_value is undefined or field_value is null
-        if field_value is undefined and (field_settings.not_undefined or field_settings.not_nothing)
-          throw new Error("The value of field #{field_name} is undefined, and it should not be")
-
-        if field_value is null and (field_settings.not_null or field_settings.not_nothing)
-          throw new Error("The value of field #{field_name} is null, and it should not be")
-
-      else
-        if field_settings.type
-          if !HP.Util.isOfType(field_settings.type, field_value)
-            HPP.log 'Error value: ', field_value
-            throw new Error("The value of field #{field_name} (value above) is not a #{field_settings.type}")
-
-        else if field_settings.types
-          is_any = false
-          for type in field_settings.types
-            if HPP.Helpers.Field.isOfType(type, field_value)
-              is_any = true
-              break
-          HPP.log 'Error value: ', field_value
-          throw new Error("The value of field #{field_name} (value above) is not of any of these: #{field_settings.types}") if !is_any
-  }
+  Field: {}
 }

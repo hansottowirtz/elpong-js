@@ -8,7 +8,6 @@ HP["private"] = HPP = {
   },
   schemes: {},
   http_function: null,
-  type_tests: [],
   isHpe: function(e) {
     return e.constructor === HP.Element;
   },
@@ -54,10 +53,6 @@ HP.initialize = function() {
 
 HP.setHttpFunction = function(http_function) {
   return HPP.http_function = http_function;
-};
-
-HP.addTypeTest = function(name, fn) {
-  return HPP.type_tests[name] = fn;
 };
 
 HP.Scheme = (function() {
@@ -184,7 +179,6 @@ HP.Element = (function() {
           return;
         }
         field_value = pre_element[field_name];
-        HPP.Helpers.Field.validateType(field_name, field_value, field_settings);
         return hpe.setField(field_name, field_value, true);
       }
     });
@@ -308,7 +302,7 @@ HP.Element = (function() {
   };
 
   Element.prototype.undo = function(n) {
-    var a, d, ds, index, length;
+    var a, d, ds, index, j, len, length, ref, v;
     if (n == null) {
       n = 0;
     }
@@ -332,14 +326,13 @@ HP.Element = (function() {
       }
     } else if (HP.Util.isString(n)) {
       a = null;
-      HP.Util.reverseForIn(this.snapshots, function(k, v) {
-        if (k === 'last') {
-          return;
-        }
+      ref = HPP.Helpers.Snapshot.getSortedArray(this.snapshots);
+      for (j = 0, len = ref.length; j < len; j++) {
+        v = ref[j];
         if (v.tag === n) {
-          return a || (a = v);
+          a || (a = v);
         }
-      });
+      }
       if (a) {
         return this.mergeWith(a.data);
       } else {
@@ -366,11 +359,32 @@ HP.Element = (function() {
           if (field_settings.selector && sv_1 !== field_value && sv_1 && field_value) {
             throw new Error("Selector has changed from " + sv_1 + " to " + field_value);
           }
-          HPP.Helpers.Field.validateType(field_name, field_value, field_settings);
           return hpe.setField(field_name, field_value, true);
         }
       }
     });
+  };
+
+  Element.prototype.isPersisted = function() {
+    var data, k, last_saved_snapshot, ref, v;
+    last_saved_snapshot = null;
+    HP.Util.reverseForIn(this.snapshots, function(k, v) {
+      if (last_saved_snapshot) {
+        return;
+      }
+      if (v.tag === 'after_post' || v.tag === 'after_put' || v.tag === 'after_get' || v.tag === 'creation') {
+        return last_saved_snapshot = v;
+      }
+    });
+    data = last_saved_snapshot.data;
+    ref = HPP.Helpers.Element.getFields(this);
+    for (k in ref) {
+      v = ref[k];
+      if (data[k] !== v) {
+        return false;
+      }
+    }
+    return true;
   };
 
   return Element;
@@ -620,28 +634,6 @@ HP.Util = {
     }
     return results;
   },
-  isOfType: function(type, value) {
-    var fn, name, ref;
-    switch (type.toLowerCase()) {
-      case 'array':
-        return Array.isArray(value);
-      case 'string':
-        return HP.Util.isString(value);
-      case 'integer':
-        return HP.Util.isInteger(value);
-      case 'number':
-        return HP.Util.isNumber(value);
-      default:
-        ref = HPP.type_tests;
-        for (name in ref) {
-          fn = ref[name];
-          if (type === name) {
-            return fn(value);
-          }
-        }
-        throw new Error("Type " + type + " not found");
-    }
-  },
   reverseForIn: function(obj, f) {
     var arr, i, key;
     arr = [];
@@ -714,7 +706,6 @@ HPP.Helpers = {
           continue;
         }
         field_value = element.getField(field_name);
-        HPP.Helpers.Field.validateType(field_name, field_value, field_settings);
         o[field_name] = field_value;
       }
       return o;
@@ -728,40 +719,7 @@ HPP.Helpers = {
       return HPP.Helpers.Collection.getSettings(c).singular;
     }
   },
-  Field: {
-    validateType: function(field_name, field_value, field_settings) {
-      var is_any, j, len, ref, type;
-      if (field_value === void 0 || field_value === null) {
-        if (field_value === void 0 && (field_settings.not_undefined || field_settings.not_nothing)) {
-          throw new Error("The value of field " + field_name + " is undefined, and it should not be");
-        }
-        if (field_value === null && (field_settings.not_null || field_settings.not_nothing)) {
-          throw new Error("The value of field " + field_name + " is null, and it should not be");
-        }
-      } else {
-        if (field_settings.type) {
-          if (!HP.Util.isOfType(field_settings.type, field_value)) {
-            HPP.log('Error value: ', field_value);
-            throw new Error("The value of field " + field_name + " (value above) is not a " + field_settings.type);
-          }
-        } else if (field_settings.types) {
-          is_any = false;
-          ref = field_settings.types;
-          for (j = 0, len = ref.length; j < len; j++) {
-            type = ref[j];
-            if (HPP.Helpers.Field.isOfType(type, field_value)) {
-              is_any = true;
-              break;
-            }
-          }
-          HPP.log('Error value: ', field_value);
-          if (!is_any) {
-            throw new Error("The value of field " + field_name + " (value above) is not of any of these: " + field_settings.types);
-          }
-        }
-      }
-    }
-  }
+  Field: {}
 };
 
 HPP.Helpers.Snapshot = {

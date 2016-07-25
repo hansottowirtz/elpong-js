@@ -1,14 +1,13 @@
 # A Javascript implementation of HTTPong
 #
 # @author Hans Otto Wirtz
-# @version 0.3.2
+# @version 0.3.3
 
 HTTPong = window.HTTPong = HP = {}
 HP.private = HPP = {
   log: -> console.log.apply(console, ['%c HTTPong ', 'background: #80CBC4; color: #fff'].concat(Array.from(arguments)))
   schemes: {}
   http_function: null
-  type_tests: []
   isHpe: (e) ->
     e.constructor is HP.Element
   isHpc: (e) ->
@@ -62,6 +61,3 @@ HP.initialize = ->
 # @return {Object} HP
 HP.setHttpFunction = (http_function) ->
   HPP.http_function = http_function
-
-HP.addTypeTest = (name, fn) ->
-  HPP.type_tests[name] = fn

@@ -16,7 +16,6 @@ class HP.Element
       else
         return if field_settings.only_send
         field_value = pre_element[field_name]
-        HPP.Helpers.Field.validateType(field_name, field_value, field_settings)
         hpe.setField(field_name, field_value, true)
 
     HP.Util.forEach collection_settings.relations.has_many, (relation_settings, relation_collection_name) ->
@@ -129,8 +128,7 @@ class HP.Element
         @last_snapshot_time = d.time
     else if HP.Util.isString(n)
       a = null
-      HP.Util.reverseForIn @snapshots, (k, v) ->
-        return if k == 'last'
+      for v in HPP.Helpers.Snapshot.getSortedArray(@snapshots)
         if v.tag is n
           a ||= v
       if a
@@ -146,12 +144,21 @@ class HP.Element
     HP.Util.forEach collection_settings.fields, (field_settings, field_name) ->
       if field_value = pre_element[field_name]
         if field_settings.embedded_element
-          # HPP.Helpers.Field.handleEmbeddedElement(hpe, pre_element, field_name, field_settings)
+          # HPP.Helpers.Field.handleEmbeddedElement(hpe, pre_element, field_name, field_settings) TODO
         else if field_settings.embedded_collection
-          # HPP.Helpers.Field.handleEmbeddedCollection(hpe, pre_element, field_name, field_settings)
+          # HPP.Helpers.Field.handleEmbeddedCollection(hpe, pre_element, field_name, field_settings) TODO
         else
           sv_1 = hpe.fields[field_name]
           if field_settings.selector and sv_1 isnt field_value and sv_1 and field_value
             throw new Error("Selector has changed from #{sv_1} to #{field_value}")
-          HPP.Helpers.Field.validateType(field_name, field_value, field_settings)
           hpe.setField(field_name, field_value, true)
+
+  isPersisted: ->
+    last_saved_snapshot = null
+    HP.Util.reverseForIn @snapshots, (k, v) ->
+      return if last_saved_snapshot
+      last_saved_snapshot = v if v.tag is 'after_post' or v.tag is 'after_put' or v.tag is 'after_get' or v.tag is 'creation'
+    data = last_saved_snapshot.data
+    for k, v of HPP.Helpers.Element.getFields(@)
+      return false if data[k] isnt v
+    return true
