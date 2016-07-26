@@ -158,6 +158,11 @@ are made after those actions, like `before_get` and `after_put`.
 - When passed in a time, it will revert itself to a snapshot of that time.
 - When passed in a number, it will revert itself n steps.
 
+`isPersisted()`: Compares fields with the last `after_get`, `after_post`
+or `after_put` snapshot. Note: when one of the fields is an object, it will
+return `true` when changing the keys of that object, because the object reference
+is the same. The fields are compared with `===`.
+
 You can loop through snapshots with the `snapshots` key.
 
 #### Merging
