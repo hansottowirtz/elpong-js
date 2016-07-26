@@ -277,6 +277,7 @@ class HP.Element
           hpe.setField(field_name, field_value, true)
 
   isPersisted: ->
+    return false if @isNew()
     last_saved_snapshot = null
     HP.Util.reverseForIn @snapshots, (k, v) ->
       return if last_saved_snapshot

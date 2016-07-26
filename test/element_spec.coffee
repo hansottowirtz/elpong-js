@@ -212,9 +212,11 @@ describe 'Element', ->
 
         worker = @workers.makeNewElement({name: 'Bob'})
         expect(worker.isNew()).toBe(true)
+        expect(worker.isPersisted()).toBe(false)
 
         worker.actions.doPost().then (response) =>
           expect(worker.isNew()).toBe(false)
+          expect(worker.isPersisted()).toBe(true)
 
         $httpBackend.flush()
 

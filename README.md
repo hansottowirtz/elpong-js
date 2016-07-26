@@ -140,6 +140,8 @@ In both cases, it returns a promise.
 
 `setField`: Can be overridden too.
 
+`isNew`: Checks if the element has a selector value.
+
 #### Embedded collections and elements
 
 Can be accessed through their relations.
@@ -161,7 +163,8 @@ are made after those actions, like `before_get` and `after_put`.
 `isPersisted()`: Compares fields with the last `after_get`, `after_post`
 or `after_put` snapshot. Note: when one of the fields is an object, it will
 return `true` when changing the keys of that object, because the object reference
-is the same. The fields are compared with `===`.
+is the same. The fields are compared with `===`. Returns `false` if the element
+is new.
 
 You can loop through snapshots with the `snapshots` key.
 

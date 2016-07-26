@@ -367,6 +367,9 @@ HP.Element = (function() {
 
   Element.prototype.isPersisted = function() {
     var data, k, last_saved_snapshot, ref, v;
+    if (this.isNew()) {
+      return false;
+    }
     last_saved_snapshot = null;
     HP.Util.reverseForIn(this.snapshots, function(k, v) {
       if (last_saved_snapshot) {
