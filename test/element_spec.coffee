@@ -207,6 +207,17 @@ describe 'Element', ->
             expect(@workers.find(8)).not.toBeDefined()
         $httpBackend.flush()
 
+      it 'should be correctly saved', ->
+        reply 'POST', '/api/v1/workers', {id: 8, name: 'Bob'}
+
+        worker = @workers.makeNewElement({name: 'Bob'})
+        expect(worker.isNew()).toBe(true)
+
+        worker.actions.doPost().then (response) =>
+          expect(worker.isNew()).toBe(false)
+
+        $httpBackend.flush()
+
       afterEach ->
         $httpBackend.verifyNoOutstandingExpectation()
         $httpBackend.verifyNoOutstandingRequest()

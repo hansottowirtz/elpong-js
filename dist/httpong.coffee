@@ -206,7 +206,7 @@ class HP.Element
   remove: ->
     hpe = @
     if @isNew()
-      HPP.Util.removeFromArray(@getCollection().new_elements, @)
+      HP.Util.removeFromArray(@getCollection().new_elements, @)
       return {then: ((fn) -> fn()), catch: ->}
     else
       return @actions.doDelete().then ->
@@ -744,6 +744,13 @@ HPP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
   promise.then (response) ->
     hpe.mergeWith response.data if response.data
     hpe.makeSnapshot("after_#{method.toLowerCase()}")
+
+    collection = hpe.getCollection()
+
+    if collection.new_elements.includes(hpe)
+      HP.Util.removeFromArray(collection.new_elements, hpe)
+      collection.elements[hpe.getSelectorValue()] = hpe
+
   return promise
 
 HPP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_options = {}) ->
@@ -766,6 +773,13 @@ HPP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_op
   promise.then (response) ->
     hpe.mergeWith response.data if response.data and !action_settings.returns_other
     hpe.makeSnapshot("after_#{method.toLowerCase()}")
+
+    collection = hpe.getCollection()
+
+    if collection.new_elements.includes(hpe)
+      HP.Util.removeFromArray(collection.new_elements, hpe)
+      collection.elements[hpe.getSelectorValue()] = hpe
+
   return promise
 
 HPP.Helpers.Field.handleEmbeddedCollection = (hpe, pre_element, field_name, field_settings) ->

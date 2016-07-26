@@ -83,7 +83,7 @@ class HP.Element
   remove: ->
     hpe = @
     if @isNew()
-      HPP.Util.removeFromArray(@getCollection().new_elements, @)
+      HP.Util.removeFromArray(@getCollection().new_elements, @)
       return {then: ((fn) -> fn()), catch: ->}
     else
       return @actions.doDelete().then ->
