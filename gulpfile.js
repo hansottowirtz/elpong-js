@@ -11,6 +11,8 @@ var karmaServer = require('karma').Server;
 
 var files = ['./src/index.coffee', './src/scheme.coffee', './src/element.coffee', './src/collection.coffee', , './src/polyfills.coffee', './src/util.coffee', './src/helpers.coffee', './src/*/**/*.coffee']
 
+gulp.task('default', ['test'])
+
 gulp.task('build', ['lint'], function(done) {
   gulp.src(files)
     .pipe(concat('httpong.coffee'))
