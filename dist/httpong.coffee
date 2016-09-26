@@ -267,14 +267,15 @@ class HP.Element
     HP.Util.forEach collection_settings.fields, (field_settings, field_name) ->
       if field_value = pre_element[field_name]
         if field_settings.embedded_element
-          # HPP.Helpers.Field.handleEmbeddedElement(hpe, pre_element, field_name, field_settings) TODO
+          HPP.Helpers.Field.handleEmbeddedElement(hpe, pre_element, field_name, field_settings)
         else if field_settings.embedded_collection
-          # HPP.Helpers.Field.handleEmbeddedCollection(hpe, pre_element, field_name, field_settings) TODO
+          HPP.Helpers.Field.handleEmbeddedCollection(hpe, pre_element, field_name, field_settings)
         else
           sv_1 = hpe.fields[field_name]
           if field_settings.selector and sv_1 isnt field_value and sv_1 and field_value
             throw new Error("Selector has changed from #{sv_1} to #{field_value}")
           hpe.setField(field_name, field_value, true)
+    return @
 
   isPersisted: ->
     return false if @isNew()
@@ -784,15 +785,19 @@ HPP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_op
   return promise
 
 HPP.Helpers.Field.handleEmbeddedCollection = (hpe, pre_element, field_name, field_settings) ->
+  embedded_pre_collection = pre_element[field_name]
+  return if !embedded_pre_collection and !field_settings.required
   collection = hpe.getCollection()
   scheme = collection.getScheme()
   embedded_element_collection = scheme.getCollection(field_name || field_settings.collection)
 
-  HP.Util.forEach pre_element[field_name], (embedded_pre_element) ->
+  HP.Util.forEach embedded_pre_collection, (embedded_pre_element) ->
     embedded_element = new HP.Element(embedded_element_collection, embedded_pre_element)
     embedded_element_collection.addElement(embedded_element)
 
 HPP.Helpers.Field.handleEmbeddedElement = (hpe, pre_element, field_name, field_settings) ->
+  embedded_pre_element = pre_element[field_name]
+  return if !embedded_pre_element and !field_settings.required
   collection = hpe.getCollection()
   scheme = collection.getScheme()
   if field_settings.collection
@@ -800,7 +805,7 @@ HPP.Helpers.Field.handleEmbeddedElement = (hpe, pre_element, field_name, field_s
   else
     embedded_element_collection = scheme.getCollectionBySingularName(field_name)
 
-  embedded_element = embedded_element_collection.makeOrMerge(pre_element[field_name])
+  embedded_element = embedded_element_collection.makeOrMerge(embedded_pre_element)
 
   associated_field_name = field_settings.associated_field || "#{field_name}_#{embedded_element_collection.selector_name}"
   hpe.setField(associated_field_name, embedded_element.getSelectorValue())

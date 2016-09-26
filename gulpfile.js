@@ -19,7 +19,7 @@ gulp.task('build', ['lint'], function(done) {
     .pipe(gulp.dest('./dist/'))
     .pipe(coffee({bare: true}))
     .pipe(gulp.dest('./dist/'))
-    .pipe(uglify({unsafe: true, global_defs: { DEVELOPMENT: false, PRODUCTION: true }}))
+    .pipe(uglify({unsafe: true, global_defs: { DEBUG: false }}))
     .pipe(rename('httpong.min.js'))
     .pipe(gulp.dest('./dist/'))
     .pipe(size({showFiles: true}));
@@ -45,4 +45,13 @@ gulp.task('test', ['compile-schemes', 'build'], function (done) {
     singleRun: true,
     browsers: ['PhantomJS']
   }, done).start();
+});
+
+gulp.task('debug-test', ['compile-schemes', 'build'], function (done) {
+  new karmaServer({
+    configFile: __dirname + '/karma.conf.js',
+    singleRun: false,
+    browsers: ['Chrome']
+  }, done).start();
+  gulp.watch('src/**/*.coffee', ['build']);
 });

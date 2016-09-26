@@ -347,13 +347,13 @@ HP.Element = (function() {
     var collection_settings, hpe;
     hpe = this;
     collection_settings = HPP.Helpers.Collection.getSettings(this.collection);
-    return HP.Util.forEach(collection_settings.fields, function(field_settings, field_name) {
+    HP.Util.forEach(collection_settings.fields, function(field_settings, field_name) {
       var field_value, sv_1;
       if (field_value = pre_element[field_name]) {
         if (field_settings.embedded_element) {
-
+          return HPP.Helpers.Field.handleEmbeddedElement(hpe, pre_element, field_name, field_settings);
         } else if (field_settings.embedded_collection) {
-
+          return HPP.Helpers.Field.handleEmbeddedCollection(hpe, pre_element, field_name, field_settings);
         } else {
           sv_1 = hpe.fields[field_name];
           if (field_settings.selector && sv_1 !== field_value && sv_1 && field_value) {
@@ -363,6 +363,7 @@ HP.Element = (function() {
         }
       }
     });
+    return this;
   };
 
   Element.prototype.isPersisted = function() {
@@ -1017,11 +1018,15 @@ HPP.Helpers.Element.doCustomAction = function(hpe, action_name, action_settings,
 };
 
 HPP.Helpers.Field.handleEmbeddedCollection = function(hpe, pre_element, field_name, field_settings) {
-  var collection, embedded_element_collection, scheme;
+  var collection, embedded_element_collection, embedded_pre_collection, scheme;
+  embedded_pre_collection = pre_element[field_name];
+  if (!embedded_pre_collection && !field_settings.required) {
+    return;
+  }
   collection = hpe.getCollection();
   scheme = collection.getScheme();
   embedded_element_collection = scheme.getCollection(field_name || field_settings.collection);
-  return HP.Util.forEach(pre_element[field_name], function(embedded_pre_element) {
+  return HP.Util.forEach(embedded_pre_collection, function(embedded_pre_element) {
     var embedded_element;
     embedded_element = new HP.Element(embedded_element_collection, embedded_pre_element);
     return embedded_element_collection.addElement(embedded_element);
@@ -1029,7 +1034,11 @@ HPP.Helpers.Field.handleEmbeddedCollection = function(hpe, pre_element, field_na
 };
 
 HPP.Helpers.Field.handleEmbeddedElement = function(hpe, pre_element, field_name, field_settings) {
-  var associated_field_name, collection, embedded_element, embedded_element_collection, scheme;
+  var associated_field_name, collection, embedded_element, embedded_element_collection, embedded_pre_element, scheme;
+  embedded_pre_element = pre_element[field_name];
+  if (!embedded_pre_element && !field_settings.required) {
+    return;
+  }
   collection = hpe.getCollection();
   scheme = collection.getScheme();
   if (field_settings.collection) {
@@ -1037,7 +1046,7 @@ HPP.Helpers.Field.handleEmbeddedElement = function(hpe, pre_element, field_name,
   } else {
     embedded_element_collection = scheme.getCollectionBySingularName(field_name);
   }
-  embedded_element = embedded_element_collection.makeOrMerge(pre_element[field_name]);
+  embedded_element = embedded_element_collection.makeOrMerge(embedded_pre_element);
   associated_field_name = field_settings.associated_field || (field_name + "_" + embedded_element_collection.selector_name);
   return hpe.setField(associated_field_name, embedded_element.getSelectorValue());
 };
