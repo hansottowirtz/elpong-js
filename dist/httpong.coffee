@@ -1,7 +1,7 @@
 # A Javascript implementation of HTTPong
 #
 # @author Hans Otto Wirtz
-# @version 0.3.3
+# @version 0.3.4
 
 HTTPong = window.HTTPong = HP = {}
 HP.private = HPP = {
@@ -773,14 +773,15 @@ HPP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_op
 
   promise = HPP.http_function(options)
   promise.then (response) ->
-    hpe.mergeWith response.data if response.data and !action_settings.returns_other
-    hpe.makeSnapshot("after_#{method.toLowerCase()}")
+    if !action_settings.returns_other
+      hpe.mergeWith response.data if response.data
+      hpe.makeSnapshot("after_#{method.toLowerCase()}")
 
     collection = hpe.getCollection()
 
-    if collection.new_elements.includes(hpe)
+    if (selector_value = hpe.getSelectorValue()) and collection.new_elements.includes(hpe)
       HP.Util.removeFromArray(collection.new_elements, hpe)
-      collection.elements[hpe.getSelectorValue()] = hpe
+      collection.elements[selector_value] = hpe
 
   return promise
 

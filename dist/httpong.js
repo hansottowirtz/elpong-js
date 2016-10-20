@@ -1003,15 +1003,17 @@ HPP.Helpers.Element.doCustomAction = function(hpe, action_name, action_settings,
   options = getOptions(method, HPP.Helpers.Url.createForElement(action_name, action_settings, hpe, user_options), data, user_options.headers);
   promise = HPP.http_function(options);
   promise.then(function(response) {
-    var collection;
-    if (response.data && !action_settings.returns_other) {
-      hpe.mergeWith(response.data);
+    var collection, selector_value;
+    if (!action_settings.returns_other) {
+      if (response.data) {
+        hpe.mergeWith(response.data);
+      }
+      hpe.makeSnapshot("after_" + (method.toLowerCase()));
     }
-    hpe.makeSnapshot("after_" + (method.toLowerCase()));
     collection = hpe.getCollection();
-    if (collection.new_elements.includes(hpe)) {
+    if ((selector_value = hpe.getSelectorValue()) && collection.new_elements.includes(hpe)) {
       HP.Util.removeFromArray(collection.new_elements, hpe);
-      return collection.elements[hpe.getSelectorValue()] = hpe;
+      return collection.elements[selector_value] = hpe;
     }
   });
   return promise;
