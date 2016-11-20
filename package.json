@@ -1,6 +1,6 @@
 {
   "name": "httpong",
-  "version": "0.3.3",
+  "version": "0.3.5",
   "description": "HTTPong for Javascript",
   "main": "dist/httpong.js",
   "dependencies": {},

@@ -568,7 +568,7 @@ HP.Util = {
     return string.charAt(0).toUpperCase() + string.slice(1);
   },
   camelize: function(str) {
-    return str.replace('_', ' ').replace(/(?:^\w|[A-Z]|\b\w)/g, function(letter, index) {
+    return str.replace(/_/g, ' ').replace(/(?:^\w|[A-Z]|\b\w)/g, function(letter, index) {
       if (index === 0) {
         return letter.toLowerCase();
       } else {
@@ -577,7 +577,7 @@ HP.Util = {
     }).replace(/\s+/g, '');
   },
   upperCamelize: function(str) {
-    return str.replace('_', ' ').replace(/(?:^\w|[A-Z]|\b\w)/g, function(letter, index) {
+    return str.replace(/_/g, ' ').replace(/(?:^\w|[A-Z]|\b\w)/g, function(letter, index) {
       return letter.toUpperCase();
     }).replace(/\s+/g, '');
   },

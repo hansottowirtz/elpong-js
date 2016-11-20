@@ -1,7 +1,7 @@
 # A Javascript implementation of HTTPong
 #
 # @author Hans Otto Wirtz
-# @version 0.3.4
+# @version 0.3.5
 
 HTTPong = window.HTTPong = HP = {}
 HP.private = HPP = {
@@ -414,11 +414,11 @@ HP.Util = {
   capitalize: (string) ->
     string.charAt(0).toUpperCase() + string.slice(1)
   camelize: (str) ->
-    str.replace('_', ' ').replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) ->
+    str.replace(/_/g, ' ').replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) ->
       if index == 0 then letter.toLowerCase() else letter.toUpperCase()
     ).replace /\s+/g, ''
   upperCamelize: (str) ->
-    str.replace('_', ' ').replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) ->
+    str.replace(/_/g, ' ').replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) ->
       letter.toUpperCase()
     ).replace /\s+/g, ''
   arrayDiff: (array1, array2) ->
