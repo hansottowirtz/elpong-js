@@ -114,6 +114,35 @@ describe 'Element', ->
       worker = workers.makeNewElement {id: 3, name: 'Otto'}
       expect(-> worker.mergeWith {id: 2, name: 'Hans'} ).toThrow()
 
+    it 'should be finding the right elements', ->
+      tshirts = @scheme.select('tshirts')
+
+      tshirt1 = tshirts.makeNewElement {id: 8, color: 'blue', person_id: 3, brand_id: 5}
+      tshirt2 = tshirts.makeNewElement {id: 9, color: 'red', person_id: 2, brand_id: 5}
+      tshirt3 = tshirts.makeNewElement {id: 10, color: 'green', person_id: 4, brand_id: 6}
+
+      expect(tshirts.find(8)).toBe(tshirt1)
+      expect(tshirts.find(9)).toBe(tshirt2)
+      expect(tshirts.find(10)).toBe(tshirt3)
+
+      expect(tshirts.findBy('id', 9)).toBe(tshirt2)
+      expect(tshirts.findBy(id: 9)).toBe(tshirt2)
+
+      expect(tshirts.findBy(id: 9, color: 'green')).toBe(undefined)
+      expect(tshirts.findBy(id: 9, color: 'red')).toBe(tshirt2)
+      expect(tshirts.findBy(id: 9, color: 'red', person_id: 3)).toBe(undefined)
+      expect(tshirts.findBy(id: 9, color: 'red', person_id: 2, brand_id: 5)).toBe(tshirt2)
+
+      expect(tshirts.findBy(id: 10, color: 'blue')).toBe(undefined)
+      expect(tshirts.findBy(id: 10, color: 'green')).toBe(tshirt3)
+      expect(tshirts.findBy(id: 10, color: 'green', person_id: 2)).toBe(undefined)
+      expect(tshirts.findBy(id: 10, color: 'green', person_id: 4, brand_id: 6)).toBe(tshirt3)
+
+      expect(tshirts.findBy('brand_id', 5, {multiple: true}).includes(tshirt1)).toBe(true)
+      expect(tshirts.findBy('brand_id', 5, {multiple: true}).includes(tshirt2)).toBe(true)
+      expect(tshirts.findBy({brand_id: 5}, {multiple: true}).includes(tshirt1)).toBe(true)
+      expect(tshirts.findBy({brand_id: 5}, {multiple: true}).includes(tshirt2)).toBe(true)
+
     describe 'diff', ->
       beforeEach ->
         workers = @scheme.select('workers')
@@ -153,7 +182,6 @@ describe 'Element', ->
         expect(@worker.isPersisted()).toBe(false)
         @worker.makeSnapshot('after_put')
         expect(@worker.isPersisted()).toBe(true)
-
 
     describe 'http', ->
       $httpBackend = null

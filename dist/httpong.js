@@ -481,17 +481,71 @@ HP.Collection = (function() {
   };
 
   Collection.prototype.findBy = function(field_name, field_value, options) {
-    var arr, element, j, len;
+    var arr, element, is_correct, j, l, len, len1, len2, len3, m, p, props, response_arr;
     if (options == null) {
       options = {
-        without_new: false
+        without_new: false,
+        multiple: false
       };
     }
-    arr = this.getArray(options);
-    for (j = 0, len = arr.length; j < len; j++) {
-      element = arr[j];
-      if (element.getField(field_name, true) === field_value) {
-        return element;
+    if (HP.Util.isString(field_name)) {
+      arr = this.getArray(options);
+      if (options.multiple) {
+        response_arr = [];
+        for (j = 0, len = arr.length; j < len; j++) {
+          element = arr[j];
+          if (element.getField(field_name, true) === field_value) {
+            response_arr.push(element);
+          }
+        }
+        return response_arr;
+      } else {
+        for (l = 0, len1 = arr.length; l < len1; l++) {
+          element = arr[l];
+          if (element.getField(field_name, true) === field_value) {
+            return element;
+          }
+        }
+      }
+    } else {
+      props = field_name;
+      options = field_value || {
+        without_new: false,
+        multiple: false
+      };
+      arr = this.getArray(options);
+      if (options.multiple) {
+        response_arr = [];
+        for (m = 0, len2 = arr.length; m < len2; m++) {
+          element = arr[m];
+          is_correct = true;
+          for (field_name in props) {
+            field_value = props[field_name];
+            if (element.getField(field_name, true) !== field_value) {
+              is_correct = false;
+              break;
+            }
+          }
+          if (is_correct) {
+            response_arr.push(element);
+          }
+        }
+        return response_arr;
+      } else {
+        for (p = 0, len3 = arr.length; p < len3; p++) {
+          element = arr[p];
+          is_correct = true;
+          for (field_name in props) {
+            field_value = props[field_name];
+            if (element.getField(field_name, true) !== field_value) {
+              is_correct = false;
+              break;
+            }
+          }
+          if (is_correct) {
+            return element;
+          }
+        }
       }
     }
   };

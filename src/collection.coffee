@@ -64,10 +64,39 @@ class HP.Collection
   find: (selector_value) ->
     @elements[selector_value]
 
-  findBy: (field_name, field_value, options = {without_new: false}) ->
-    arr = @getArray(options)
-    for element in arr
-      return element if element.getField(field_name, true) == field_value
+  findBy: (field_name, field_value, options = {without_new: false, multiple: false}) ->
+    if HP.Util.isString(field_name)
+      arr = @getArray(options)
+      if options.multiple
+        response_arr = []
+        for element in arr
+          response_arr.push element if element.getField(field_name, true) == field_value
+        return response_arr
+      else
+        for element in arr
+          return element if element.getField(field_name, true) == field_value
+    else
+      props = field_name
+      options = field_value || {without_new: false, multiple: false}
+      arr = @getArray(options)
+      if options.multiple
+        response_arr = []
+        for element in arr
+          is_correct = true
+          for field_name, field_value of props
+            if element.getField(field_name, true) != field_value
+              is_correct = false
+              break
+          response_arr.push element if is_correct
+        return response_arr
+      else
+        for element in arr
+          is_correct = true
+          for field_name, field_value of props
+            if element.getField(field_name, true) != field_value
+              is_correct = false
+              break
+          return element if is_correct
 
   makeNewElement: (pre_element = @default_pre_element) ->
     el = new HP.Element(@, pre_element)
