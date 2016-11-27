@@ -11,7 +11,7 @@
         "belongs_to": {
           "boss": {
             "collection": "humans"
-          },
+          }
         }
       },
       "actions": {
