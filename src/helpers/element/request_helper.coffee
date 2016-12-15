@@ -10,7 +10,7 @@ getOptions = (method, url, data, headers = {}) ->
   }
 
 HPP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
-  hpe.makeSnapshot("before_#{method.toLowerCase()}")
+  hpe.snapshots.make("before_#{method.toLowerCase()}")
   if user_options.data
     data = user_options.data
   else if method isnt 'GET'
@@ -31,7 +31,7 @@ HPP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
   promise = HPP.http_function(options)
   promise.then (response) ->
     hpe.mergeWith response.data if response.data
-    hpe.makeSnapshot("after_#{method.toLowerCase()}")
+    hpe.snapshots.make("after_#{method.toLowerCase()}")
 
     collection = hpe.getCollection()
 
@@ -43,7 +43,7 @@ HPP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
 
 HPP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_options = {}) ->
   method = action_settings.method.toUpperCase()
-  hpe.makeSnapshot("before_#{method.toLowerCase()}")
+  hpe.snapshots.make("before_#{method.toLowerCase()}")
 
   if user_options.data
     data = user_options.data
@@ -61,7 +61,7 @@ HPP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_op
   promise.then (response) ->
     if !action_settings.returns_other
       hpe.mergeWith response.data if response.data
-      hpe.makeSnapshot("after_#{method.toLowerCase()}")
+      hpe.snapshots.make("after_#{method.toLowerCase()}")
 
     collection = hpe.getCollection()
 

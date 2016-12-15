@@ -160,7 +160,7 @@ describe 'Element', ->
 
       it 'should be able to undo multiple steps', ->
         @worker.setField('name', 'Hans')
-        @worker.makeSnapshot()
+        @worker.snapshots.make()
         @worker.setField('name', 'Wirtz')
         @worker.undo(0) # to Hans
         @worker.undo(1) # to Otto
@@ -168,11 +168,11 @@ describe 'Element', ->
 
       it 'should be able to undo to a tag', ->
         @worker.setField('name', 'Hans')
-        @worker.makeSnapshot()
+        @worker.snapshots.make()
         @worker.setField('name', 'Wirtz')
-        @worker.makeSnapshot('lol')
+        @worker.snapshots.make('lol')
         @worker.setField('name', 'Ploep')
-        @worker.makeSnapshot('alo')
+        @worker.snapshots.make('alo')
         @worker.undo('lol')
         expect(@worker.getField('name')).toBe('Wirtz')
 
@@ -180,7 +180,7 @@ describe 'Element', ->
         expect(@worker.isPersisted()).toBe(true)
         @worker.setField('name', 'Hans')
         expect(@worker.isPersisted()).toBe(false)
-        @worker.makeSnapshot('after_put')
+        @worker.snapshots.make('after_put')
         expect(@worker.isPersisted()).toBe(true)
 
     describe 'http', ->

@@ -1,7 +1,7 @@
 # A Javascript implementation of HTTPong
 #
 # @author Hans Otto Wirtz
-# @version 0.3.6
+# @version 0.3.7
 
 HTTPong = window.HTTPong = HP = {}
 HP.private = HPP = {
@@ -126,8 +126,6 @@ class HP.Element
     hpe = @
     @fields = {}
     @relations = {}
-    @snapshots = {}
-    @last_snapshot_time = null
 
     collection_settings = HPP.Helpers.Collection.getSettings(@collection)
 
@@ -169,7 +167,59 @@ class HP.Element
         throw new Error('Element is new') if hpe.isNew() and !action_settings.without_selector
         HPP.Helpers.Element.doCustomAction(hpe, action_name, action_settings, user_options)
 
-    @makeSnapshot('creation')
+    @snapshots = {
+      getLastPersisted: ->
+        return null if hpe.isNew()
+        last_persisted_snapshot = null
+        HP.Util.reverseForIn hpe.snapshots.list, (k, v) ->
+          if v.tag is 'after_post' or v.tag is 'after_put' or v.tag is 'after_get' or v.tag is 'creation'
+            last_persisted_snapshot = v
+            return HP.Util.BREAK
+
+        last_persisted_snapshot
+
+      getLastWithTag: (tag) ->
+        last_snapshot_with_tag = null
+        if HP.Util.isRegex(tag)
+          HP.Util.reverseForIn hpe.snapshots.list, (k, v) ->
+            if tag.test(v.tag)
+              last_snapshot_with_tag = v
+              return HP.Util.BREAK
+        else
+          HP.Util.reverseForIn hpe.snapshots.list, (k, v) ->
+            if v.tag is tag
+              last_snapshot_with_tag = v
+              return HP.Util.BREAK
+        last_snapshot_with_tag
+
+      getLast: ->
+        last_snapshot = null
+        HP.Util.reverseForIn hpe.snapshots.list, (k, v) ->
+          last_snapshot = v
+          return HP.Util.BREAK
+        last_snapshot
+
+      make: (tag) ->
+        date = Date.now()
+        list = hpe.snapshots.list =
+          HPP.Helpers.Snapshot.removeAfter(hpe.last_snapshot_time, hpe.snapshots.list)
+        if list[date]
+          return hpe.snapshots.make(tag) # loop until 1ms has passed
+        s = list[date] = {
+          tag: tag
+          time: date
+          data: HPP.Helpers.Element.getFields(hpe)
+          revert: ->
+            hpe.undo(date)
+        }
+        hpe.last_snapshot_time = date
+        return s
+
+      list: {}
+    }
+    @last_snapshot_time = null
+
+    @snapshots.make('creation')
 
   getCollection: ->
     @collection
@@ -179,22 +229,6 @@ class HP.Element
 
   getSelectorValue: ->
     @fields[@collection.selector_name]
-
-  makeSnapshot: (tag) ->
-    date = Date.now()
-    hpe = @
-    @snapshots = HPP.Helpers.Snapshot.removeAfter(@last_snapshot_time, @snapshots)
-    if @snapshots[date]
-      return @makeSnapshot(tag) # loop until 1ms has passed
-    s = @snapshots[date] = {
-      tag: tag
-      time: date
-      data: HPP.Helpers.Element.getFields(@)
-      revert: ->
-        hpe.undo(date)
-    }
-    @last_snapshot_time = date
-    return s
 
   getField: (field_name) ->
     @fields[field_name]
@@ -234,24 +268,24 @@ class HP.Element
   undo: (n = 0) ->
     if HP.Util.isInteger(n)
       if n > 1000000
-        if @snapshots[n]
-          @mergeWith @snapshots[n].data
+        if @snapshots.list[n]
+          @mergeWith @snapshots.list[n].data
           @last_snapshot_time = n
         else
           throw new Error("Diff at time #{n} does not exist")
       else if n < 0
         throw new Error("#{n} is smaller than 0")
       else
-        ds = HPP.Helpers.Snapshot.getSortedArray(@snapshots)
+        ds = HPP.Helpers.Snapshot.getSortedArray(@snapshots.list)
         length = ds.length
-        index = ds.indexOf(@snapshots[@last_snapshot_time])
+        index = ds.indexOf(@snapshots.list[@last_snapshot_time])
         # index = 0 if index < 0
         d = ds[index - n]
         @mergeWith d.data
         @last_snapshot_time = d.time
     else if HP.Util.isString(n)
       a = null
-      for v in HPP.Helpers.Snapshot.getSortedArray(@snapshots)
+      for v in HPP.Helpers.Snapshot.getSortedArray(@snapshots.list)
         if v.tag is n
           a ||= v
       if a
@@ -279,11 +313,7 @@ class HP.Element
 
   isPersisted: ->
     return false if @isNew()
-    last_saved_snapshot = null
-    HP.Util.reverseForIn @snapshots, (k, v) ->
-      return if last_saved_snapshot
-      last_saved_snapshot = v if v.tag is 'after_post' or v.tag is 'after_put' or v.tag is 'after_get' or v.tag is 'creation'
-    data = last_saved_snapshot.data
+    data = @snapshots.getLastPersisted().data
     for k, v of HPP.Helpers.Element.getFields(@)
       return false if data[k] isnt v
     return true
@@ -434,6 +464,7 @@ String.prototype.includes ||= (e) ->
 # coffeelint: enable=no_this
 
 HP.Util = {
+  BREAK: new Object()
   kebab: (string) ->
     string.toLowerCase().replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '').replace(/(é|ë)/g, 'e').split(' ').join('-')
   unkebab: (string) ->
@@ -474,6 +505,7 @@ HP.Util = {
   merge: (obj1, obj2) ->
     for attr of obj2
       obj1[attr] = obj2[attr]
+    obj1
 
   isInteger: (value) ->
     value is parseInt(value, 10)
@@ -484,19 +516,26 @@ HP.Util = {
   isString: (value) ->
     typeof value == 'string'
 
+  isRegex: (value) ->
+    value instanceof RegExp
+
   forEach: (o, f) ->
     for k, v of o
       continue if !o.hasOwnProperty(k)
-      f(v, k)
+      if f(v, k) is HP.Util.BREAK
+        break
+    return
 
   reverseForIn: (obj, f) ->
     arr = []
+    _break = false
     for key of obj
       # add hasOwnPropertyCheck if needed
       arr.push key
     i = arr.length - 1
-    while i >= 0
-      f.call obj, arr[i], obj[arr[i]]
+    while i >= 0 and not _break
+      v = f.call obj, arr[i], obj[arr[i]]
+      _break = true if v is HP.Util.BREAK
       i--
     return
 }
@@ -570,17 +609,17 @@ HPP.Helpers = {
 }
 
 HPP.Helpers.Snapshot = {
-  getSortedArray: (snapshots) ->
-    arr = Object.values(snapshots)
+  getSortedArray: (snapshots_list) ->
+    arr = Object.values(snapshots_list)
     arr.sort (a, b) -> a.time - b.time
     arr
 
-  removeAfter: (time, snapshots) ->
-    arr = HPP.Helpers.Snapshot.getSortedArray(snapshots)
-    snapshots_2 = {}
+  removeAfter: (time, snapshots_list) ->
+    arr = HPP.Helpers.Snapshot.getSortedArray(snapshots_list)
+    snapshots_list_2 = {}
     for v in arr
-      snapshots_2[v.time] = v if v.time <= time
-    snapshots_2
+      snapshots_list_2[v.time] = v if v.time <= time
+    snapshots_list_2
 }
 
 HPP.Helpers.Collection.doGetAllAction = (hpc, user_options = {}) ->
@@ -753,7 +792,7 @@ getOptions = (method, url, data, headers = {}) ->
   }
 
 HPP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
-  hpe.makeSnapshot("before_#{method.toLowerCase()}")
+  hpe.snapshots.make("before_#{method.toLowerCase()}")
   if user_options.data
     data = user_options.data
   else if method isnt 'GET'
@@ -774,7 +813,7 @@ HPP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
   promise = HPP.http_function(options)
   promise.then (response) ->
     hpe.mergeWith response.data if response.data
-    hpe.makeSnapshot("after_#{method.toLowerCase()}")
+    hpe.snapshots.make("after_#{method.toLowerCase()}")
 
     collection = hpe.getCollection()
 
@@ -786,7 +825,7 @@ HPP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
 
 HPP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_options = {}) ->
   method = action_settings.method.toUpperCase()
-  hpe.makeSnapshot("before_#{method.toLowerCase()}")
+  hpe.snapshots.make("before_#{method.toLowerCase()}")
 
   if user_options.data
     data = user_options.data
@@ -804,7 +843,7 @@ HPP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_op
   promise.then (response) ->
     if !action_settings.returns_other
       hpe.mergeWith response.data if response.data
-      hpe.makeSnapshot("after_#{method.toLowerCase()}")
+      hpe.snapshots.make("after_#{method.toLowerCase()}")
 
     collection = hpe.getCollection()
 

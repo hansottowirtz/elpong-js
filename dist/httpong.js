@@ -165,8 +165,6 @@ HP.Element = (function() {
     hpe = this;
     this.fields = {};
     this.relations = {};
-    this.snapshots = {};
-    this.last_snapshot_time = null;
     collection_settings = HPP.Helpers.Collection.getSettings(this.collection);
     HP.Util.forEach(collection_settings.fields, function(field_settings, field_name) {
       var field_value;
@@ -213,7 +211,72 @@ HP.Element = (function() {
         return HPP.Helpers.Element.doCustomAction(hpe, action_name, action_settings, user_options);
       };
     });
-    this.makeSnapshot('creation');
+    this.snapshots = {
+      getLastPersisted: function() {
+        var last_persisted_snapshot;
+        if (hpe.isNew()) {
+          return null;
+        }
+        last_persisted_snapshot = null;
+        HP.Util.reverseForIn(hpe.snapshots.list, function(k, v) {
+          if (v.tag === 'after_post' || v.tag === 'after_put' || v.tag === 'after_get' || v.tag === 'creation') {
+            last_persisted_snapshot = v;
+            return HP.Util.BREAK;
+          }
+        });
+        return last_persisted_snapshot;
+      },
+      getLastWithTag: function(tag) {
+        var last_snapshot_with_tag;
+        last_snapshot_with_tag = null;
+        if (HP.Util.isRegex(tag)) {
+          HP.Util.reverseForIn(hpe.snapshots.list, function(k, v) {
+            if (tag.test(v.tag)) {
+              last_snapshot_with_tag = v;
+              return HP.Util.BREAK;
+            }
+          });
+        } else {
+          HP.Util.reverseForIn(hpe.snapshots.list, function(k, v) {
+            if (v.tag === tag) {
+              last_snapshot_with_tag = v;
+              return HP.Util.BREAK;
+            }
+          });
+        }
+        return last_snapshot_with_tag;
+      },
+      getLast: function() {
+        var last_snapshot;
+        last_snapshot = null;
+        HP.Util.reverseForIn(hpe.snapshots.list, function(k, v) {
+          last_snapshot = v;
+          return HP.Util.BREAK;
+        });
+        return last_snapshot;
+      },
+      make: function(tag) {
+        var date, list, s;
+        date = Date.now();
+        list = hpe.snapshots.list = HPP.Helpers.Snapshot.removeAfter(hpe.last_snapshot_time, hpe.snapshots.list);
+        if (list[date]) {
+          return hpe.snapshots.make(tag);
+        }
+        s = list[date] = {
+          tag: tag,
+          time: date,
+          data: HPP.Helpers.Element.getFields(hpe),
+          revert: function() {
+            return hpe.undo(date);
+          }
+        };
+        hpe.last_snapshot_time = date;
+        return s;
+      },
+      list: {}
+    };
+    this.last_snapshot_time = null;
+    this.snapshots.make('creation');
   }
 
   Element.prototype.getCollection = function() {
@@ -226,26 +289,6 @@ HP.Element = (function() {
 
   Element.prototype.getSelectorValue = function() {
     return this.fields[this.collection.selector_name];
-  };
-
-  Element.prototype.makeSnapshot = function(tag) {
-    var date, hpe, s;
-    date = Date.now();
-    hpe = this;
-    this.snapshots = HPP.Helpers.Snapshot.removeAfter(this.last_snapshot_time, this.snapshots);
-    if (this.snapshots[date]) {
-      return this.makeSnapshot(tag);
-    }
-    s = this.snapshots[date] = {
-      tag: tag,
-      time: date,
-      data: HPP.Helpers.Element.getFields(this),
-      revert: function() {
-        return hpe.undo(date);
-      }
-    };
-    this.last_snapshot_time = date;
-    return s;
   };
 
   Element.prototype.getField = function(field_name) {
@@ -308,8 +351,8 @@ HP.Element = (function() {
     }
     if (HP.Util.isInteger(n)) {
       if (n > 1000000) {
-        if (this.snapshots[n]) {
-          this.mergeWith(this.snapshots[n].data);
+        if (this.snapshots.list[n]) {
+          this.mergeWith(this.snapshots.list[n].data);
           return this.last_snapshot_time = n;
         } else {
           throw new Error("Diff at time " + n + " does not exist");
@@ -317,16 +360,16 @@ HP.Element = (function() {
       } else if (n < 0) {
         throw new Error(n + " is smaller than 0");
       } else {
-        ds = HPP.Helpers.Snapshot.getSortedArray(this.snapshots);
+        ds = HPP.Helpers.Snapshot.getSortedArray(this.snapshots.list);
         length = ds.length;
-        index = ds.indexOf(this.snapshots[this.last_snapshot_time]);
+        index = ds.indexOf(this.snapshots.list[this.last_snapshot_time]);
         d = ds[index - n];
         this.mergeWith(d.data);
         return this.last_snapshot_time = d.time;
       }
     } else if (HP.Util.isString(n)) {
       a = null;
-      ref = HPP.Helpers.Snapshot.getSortedArray(this.snapshots);
+      ref = HPP.Helpers.Snapshot.getSortedArray(this.snapshots.list);
       for (j = 0, len = ref.length; j < len; j++) {
         v = ref[j];
         if (v.tag === n) {
@@ -367,20 +410,11 @@ HP.Element = (function() {
   };
 
   Element.prototype.isPersisted = function() {
-    var data, k, last_saved_snapshot, ref, v;
+    var data, k, ref, v;
     if (this.isNew()) {
       return false;
     }
-    last_saved_snapshot = null;
-    HP.Util.reverseForIn(this.snapshots, function(k, v) {
-      if (last_saved_snapshot) {
-        return;
-      }
-      if (v.tag === 'after_post' || v.tag === 'after_put' || v.tag === 'after_get' || v.tag === 'creation') {
-        return last_saved_snapshot = v;
-      }
-    });
-    data = last_saved_snapshot.data;
+    data = this.snapshots.getLastPersisted().data;
     ref = HPP.Helpers.Element.getFields(this);
     for (k in ref) {
       v = ref[k];
@@ -609,6 +643,7 @@ Object.values || (Object.values = function values(obj) {
 });
 
 HP.Util = {
+  BREAK: new Object(),
   kebab: function(string) {
     return string.toLowerCase().replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '').replace(/(é|ë)/g, 'e').split(' ').join('-');
   },
@@ -664,12 +699,11 @@ HP.Util = {
     return copy;
   },
   merge: function(obj1, obj2) {
-    var attr, results;
-    results = [];
+    var attr;
     for (attr in obj2) {
-      results.push(obj1[attr] = obj2[attr]);
+      obj1[attr] = obj2[attr];
     }
-    return results;
+    return obj1;
   },
   isInteger: function(value) {
     return value === parseInt(value, 10);
@@ -680,27 +714,34 @@ HP.Util = {
   isString: function(value) {
     return typeof value === 'string';
   },
+  isRegex: function(value) {
+    return value instanceof RegExp;
+  },
   forEach: function(o, f) {
-    var k, results, v;
-    results = [];
+    var k, v;
     for (k in o) {
       v = o[k];
       if (!o.hasOwnProperty(k)) {
         continue;
       }
-      results.push(f(v, k));
+      if (f(v, k) === HP.Util.BREAK) {
+        break;
+      }
     }
-    return results;
   },
   reverseForIn: function(obj, f) {
-    var arr, i, key;
+    var _break, arr, i, key, v;
     arr = [];
+    _break = false;
     for (key in obj) {
       arr.push(key);
     }
     i = arr.length - 1;
-    while (i >= 0) {
-      f.call(obj, arr[i], obj[arr[i]]);
+    while (i >= 0 && !_break) {
+      v = f.call(obj, arr[i], obj[arr[i]]);
+      if (v === HP.Util.BREAK) {
+        _break = true;
+      }
       i--;
     }
   }
@@ -781,25 +822,25 @@ HPP.Helpers = {
 };
 
 HPP.Helpers.Snapshot = {
-  getSortedArray: function(snapshots) {
+  getSortedArray: function(snapshots_list) {
     var arr;
-    arr = Object.values(snapshots);
+    arr = Object.values(snapshots_list);
     arr.sort(function(a, b) {
       return a.time - b.time;
     });
     return arr;
   },
-  removeAfter: function(time, snapshots) {
-    var arr, j, len, snapshots_2, v;
-    arr = HPP.Helpers.Snapshot.getSortedArray(snapshots);
-    snapshots_2 = {};
+  removeAfter: function(time, snapshots_list) {
+    var arr, j, len, snapshots_list_2, v;
+    arr = HPP.Helpers.Snapshot.getSortedArray(snapshots_list);
+    snapshots_list_2 = {};
     for (j = 0, len = arr.length; j < len; j++) {
       v = arr[j];
       if (v.time <= time) {
-        snapshots_2[v.time] = v;
+        snapshots_list_2[v.time] = v;
       }
     }
-    return snapshots_2;
+    return snapshots_list_2;
   }
 };
 
@@ -1010,7 +1051,7 @@ HPP.Helpers.Element.doAction = function(hpe, method, user_options) {
   if (user_options == null) {
     user_options = {};
   }
-  hpe.makeSnapshot("before_" + (method.toLowerCase()));
+  hpe.snapshots.make("before_" + (method.toLowerCase()));
   if (user_options.data) {
     data = user_options.data;
   } else if (method !== 'GET') {
@@ -1032,7 +1073,7 @@ HPP.Helpers.Element.doAction = function(hpe, method, user_options) {
     if (response.data) {
       hpe.mergeWith(response.data);
     }
-    hpe.makeSnapshot("after_" + (method.toLowerCase()));
+    hpe.snapshots.make("after_" + (method.toLowerCase()));
     collection = hpe.getCollection();
     if (collection.new_elements.includes(hpe)) {
       HP.Util.removeFromArray(collection.new_elements, hpe);
@@ -1048,7 +1089,7 @@ HPP.Helpers.Element.doCustomAction = function(hpe, action_name, action_settings,
     user_options = {};
   }
   method = action_settings.method.toUpperCase();
-  hpe.makeSnapshot("before_" + (method.toLowerCase()));
+  hpe.snapshots.make("before_" + (method.toLowerCase()));
   if (user_options.data) {
     data = user_options.data;
   } else if (!action_settings.without_data) {
@@ -1062,7 +1103,7 @@ HPP.Helpers.Element.doCustomAction = function(hpe, action_name, action_settings,
       if (response.data) {
         hpe.mergeWith(response.data);
       }
-      hpe.makeSnapshot("after_" + (method.toLowerCase()));
+      hpe.snapshots.make("after_" + (method.toLowerCase()));
     }
     collection = hpe.getCollection();
     if ((selector_value = hpe.getSelectorValue()) && collection.new_elements.includes(hpe)) {

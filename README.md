@@ -148,7 +148,7 @@ Can be accessed through their relations.
 
 #### Snapshots
 
-`makeSnapshot(tag)`: Makes a snapshot of the fields and returns a snapshot object,
+`snapshots.make(tag)`: Makes a snapshot of the fields and returns a snapshot object,
 with a `tag`, `time`, `data` and `revert` key.
 If you call `revert`, the element fields will revert themselves to that snapshot.
 
@@ -160,13 +160,21 @@ are made after those actions, like `before_get` and `after_put`.
 - When passed in a time, it will revert itself to a snapshot of that time.
 - When passed in a number, it will revert itself n steps.
 
-`isPersisted()`: Compares fields with the last `after_get`, `after_post`
-or `after_put` snapshot. Note: when one of the fields is an object, it will
+`isPersisted()`: Compares fields with the `getLastPersisted()`.
+Note: when one of the fields is an object, it will
 return `true` when changing the keys of that object, because the object reference
 is the same. The fields are compared with `===`. Returns `false` if the element
 is new.
 
-You can loop through snapshots with the `snapshots` key.
+`getLastPersisted()`: Gets last snapshot where the tag is `after_get`, `after_post`
+,`after_put` or `creation`.
+
+`getLast()`: Gets last snapshot
+
+`getLastWithTag(tag)`: Gets last snapshot where the tag matches the tag string
+or regex.
+
+You can loop through snapshots with the `snapshots.list` key.
 
 #### Merging
 

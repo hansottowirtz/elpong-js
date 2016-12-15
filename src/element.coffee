@@ -3,8 +3,6 @@ class HP.Element
     hpe = @
     @fields = {}
     @relations = {}
-    @snapshots = {}
-    @last_snapshot_time = null
 
     collection_settings = HPP.Helpers.Collection.getSettings(@collection)
 
@@ -46,7 +44,59 @@ class HP.Element
         throw new Error('Element is new') if hpe.isNew() and !action_settings.without_selector
         HPP.Helpers.Element.doCustomAction(hpe, action_name, action_settings, user_options)
 
-    @makeSnapshot('creation')
+    @snapshots = {
+      getLastPersisted: ->
+        return null if hpe.isNew()
+        last_persisted_snapshot = null
+        HP.Util.reverseForIn hpe.snapshots.list, (k, v) ->
+          if v.tag is 'after_post' or v.tag is 'after_put' or v.tag is 'after_get' or v.tag is 'creation'
+            last_persisted_snapshot = v
+            return HP.Util.BREAK
+
+        last_persisted_snapshot
+
+      getLastWithTag: (tag) ->
+        last_snapshot_with_tag = null
+        if HP.Util.isRegex(tag)
+          HP.Util.reverseForIn hpe.snapshots.list, (k, v) ->
+            if tag.test(v.tag)
+              last_snapshot_with_tag = v
+              return HP.Util.BREAK
+        else
+          HP.Util.reverseForIn hpe.snapshots.list, (k, v) ->
+            if v.tag is tag
+              last_snapshot_with_tag = v
+              return HP.Util.BREAK
+        last_snapshot_with_tag
+
+      getLast: ->
+        last_snapshot = null
+        HP.Util.reverseForIn hpe.snapshots.list, (k, v) ->
+          last_snapshot = v
+          return HP.Util.BREAK
+        last_snapshot
+
+      make: (tag) ->
+        date = Date.now()
+        list = hpe.snapshots.list =
+          HPP.Helpers.Snapshot.removeAfter(hpe.last_snapshot_time, hpe.snapshots.list)
+        if list[date]
+          return hpe.snapshots.make(tag) # loop until 1ms has passed
+        s = list[date] = {
+          tag: tag
+          time: date
+          data: HPP.Helpers.Element.getFields(hpe)
+          revert: ->
+            hpe.undo(date)
+        }
+        hpe.last_snapshot_time = date
+        return s
+
+      list: {}
+    }
+    @last_snapshot_time = null
+
+    @snapshots.make('creation')
 
   getCollection: ->
     @collection
@@ -56,22 +106,6 @@ class HP.Element
 
   getSelectorValue: ->
     @fields[@collection.selector_name]
-
-  makeSnapshot: (tag) ->
-    date = Date.now()
-    hpe = @
-    @snapshots = HPP.Helpers.Snapshot.removeAfter(@last_snapshot_time, @snapshots)
-    if @snapshots[date]
-      return @makeSnapshot(tag) # loop until 1ms has passed
-    s = @snapshots[date] = {
-      tag: tag
-      time: date
-      data: HPP.Helpers.Element.getFields(@)
-      revert: ->
-        hpe.undo(date)
-    }
-    @last_snapshot_time = date
-    return s
 
   getField: (field_name) ->
     @fields[field_name]
@@ -111,24 +145,24 @@ class HP.Element
   undo: (n = 0) ->
     if HP.Util.isInteger(n)
       if n > 1000000
-        if @snapshots[n]
-          @mergeWith @snapshots[n].data
+        if @snapshots.list[n]
+          @mergeWith @snapshots.list[n].data
           @last_snapshot_time = n
         else
           throw new Error("Diff at time #{n} does not exist")
       else if n < 0
         throw new Error("#{n} is smaller than 0")
       else
-        ds = HPP.Helpers.Snapshot.getSortedArray(@snapshots)
+        ds = HPP.Helpers.Snapshot.getSortedArray(@snapshots.list)
         length = ds.length
-        index = ds.indexOf(@snapshots[@last_snapshot_time])
+        index = ds.indexOf(@snapshots.list[@last_snapshot_time])
         # index = 0 if index < 0
         d = ds[index - n]
         @mergeWith d.data
         @last_snapshot_time = d.time
     else if HP.Util.isString(n)
       a = null
-      for v in HPP.Helpers.Snapshot.getSortedArray(@snapshots)
+      for v in HPP.Helpers.Snapshot.getSortedArray(@snapshots.list)
         if v.tag is n
           a ||= v
       if a
@@ -156,11 +190,7 @@ class HP.Element
 
   isPersisted: ->
     return false if @isNew()
-    last_saved_snapshot = null
-    HP.Util.reverseForIn @snapshots, (k, v) ->
-      return if last_saved_snapshot
-      last_saved_snapshot = v if v.tag is 'after_post' or v.tag is 'after_put' or v.tag is 'after_get' or v.tag is 'creation'
-    data = last_saved_snapshot.data
+    data = @snapshots.getLastPersisted().data
     for k, v of HPP.Helpers.Element.getFields(@)
       return false if data[k] isnt v
     return true

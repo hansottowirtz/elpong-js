@@ -1,4 +1,5 @@
 HP.Util = {
+  BREAK: new Object()
   kebab: (string) ->
     string.toLowerCase().replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '').replace(/(é|ë)/g, 'e').split(' ').join('-')
   unkebab: (string) ->
@@ -39,6 +40,7 @@ HP.Util = {
   merge: (obj1, obj2) ->
     for attr of obj2
       obj1[attr] = obj2[attr]
+    obj1
 
   isInteger: (value) ->
     value is parseInt(value, 10)
@@ -49,19 +51,26 @@ HP.Util = {
   isString: (value) ->
     typeof value == 'string'
 
+  isRegex: (value) ->
+    value instanceof RegExp
+
   forEach: (o, f) ->
     for k, v of o
       continue if !o.hasOwnProperty(k)
-      f(v, k)
+      if f(v, k) is HP.Util.BREAK
+        break
+    return
 
   reverseForIn: (obj, f) ->
     arr = []
+    _break = false
     for key of obj
       # add hasOwnPropertyCheck if needed
       arr.push key
     i = arr.length - 1
-    while i >= 0
-      f.call obj, arr[i], obj[arr[i]]
+    while i >= 0 and not _break
+      v = f.call obj, arr[i], obj[arr[i]]
+      _break = true if v is HP.Util.BREAK
       i--
     return
 }
