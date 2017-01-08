@@ -34,7 +34,7 @@ module.exports = function(config) {
   //     version: '11'
   //   }
   // }
-  console.log(process.env.SAUCE_ACCESS_KEY[3]);
+  console.log(process.env.SAUCE_ACCESS_KEY);
 
   config.set({
     sauceLabs: {testName: 'Karma'},
