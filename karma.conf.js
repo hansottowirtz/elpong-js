@@ -34,9 +34,9 @@ module.exports = function(config) {
   //     version: '11'
   //   }
   // }
-
+  console.log(process.env.SAUCE_USERNAME);
   config.set({
-    sauceLabs: {testName: 'Web App Unit Tests'},
+    sauceLabs: {testName: 'Karma'},
     customLaunchers: customLaunchers,
     basePath: '',
     frameworks: ['jasmine'],
