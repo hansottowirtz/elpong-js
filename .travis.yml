@@ -1,8 +1,13 @@
 language: node_js
 node_js:
-  - 0.12.7
+- 0.12.7
 install:
-  - npm install -g gulp-cli bower coffee-script
-  - npm install
-  - bower install
-script: gulp test
+- npm install -g gulp-cli bower coffee-script
+- npm install
+- bower install
+script: gulp travis-test
+addons:
+  sauce_connect:
+    username: hansottowirtz
+  jwt:
+    secure: TIeMJ4PgsAV/U9pfj8cNgWVF/PkF/BfY9Qnovjerx0S4MSdSZldm3btJVHrpoE3MSvBlo3z5lq7VMEVShhHDY9T/ss1a1SortCJNwt3f1uHLLI4zVfDixpvg/WYZYkRSjTOppkcPbIto/ZujSX01+lrZU4mB7rcJi2vGyruAXW9I8QwatXWcEYhaUZ2xjHekhNygUMCfqjEkZ+mOpBwacCDOuSYgeawb9+/TY7mYRDFHDcksfay6ryevfFh+3SK8oKZdRIegMKvc+2t8Za6rUFUEdIx2nJXN7o30T1KRW+nHg/MVDYCul+pYsTMyqvOQ+JLJCcIsVVwo7B3oTFo6k6SBPZU2P4ZjK3mxF6Ha1kUXtraEFPX/7B80V0j/G0dVRtydc3tC7deKSRkyr+3PF9BjdU5QRS5gwWs5ey5jnKArdH02rHeTUb8kWnRyrQLyWlAKj0j6qfhXIQuP0NJia2NMwBHwPltXaK46pqgdpq+GyvWD9icGFoBsK0/SAp6V/KiuP0dEw43AbWigN7NSID7P0pKVB1W3BLJ6G2YtX2Ki3q7s6pK1PXbX+L0nkteYVxG2ZWn4nX/mD67QtYMKDkZcQFdJUGqC8mzZTCmFOqnPXMqSTsOHvsZ/jd3ODX3mrXdyhrjWcHBoz/md9vNWFc6amPqCtDybL0N/kNwNTcc=

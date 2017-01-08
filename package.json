@@ -23,7 +23,8 @@
     "karma-jasmine": "^1.0.2",
     "karma-json-fixtures-preprocessor": "0.0.6",
     "karma-phantomjs-launcher": "^1.0.1",
-    "karma-safari-launcher": "^1.0.0"
+    "karma-safari-launcher": "^1.0.0",
+    "karma-sauce-launcher": "^1.1.0"
   },
   "scripts": {
     "test": "gulp test"
