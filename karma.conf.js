@@ -72,6 +72,9 @@ module.exports = function(config) {
     autoWatch: false,
     browsers: Object.keys(customLaunchers),
     singleRun: true,
-    concurrency: Infinity
+    concurrency: Infinity,
+    connectOptions: {
+      logfile: 'sauce-connect.log'
+    }
   })
 }
