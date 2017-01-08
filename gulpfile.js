@@ -47,7 +47,7 @@ gulp.task('test', ['compile-schemes', 'build'], function (done) {
   }, done).start();
 });
 
-gulp.task('travis-test', ['test'], function (done) {
+gulp.task('travis-test', ['compile-schemes', 'build'], function (done) {
   new karmaServer({
     configFile: __dirname + '/karma.conf.js'
   }, done).start();
