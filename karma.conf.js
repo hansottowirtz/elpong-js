@@ -39,6 +39,7 @@ module.exports = function(config) {
     sauceLabs: {testName: 'Karma'},
     customLaunchers: customLaunchers,
     tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER,
+    startConnect: false,
     basePath: '',
     frameworks: ['jasmine'],
     files: [
