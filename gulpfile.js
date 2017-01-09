@@ -44,23 +44,27 @@ gulp.task('compile-schemes', function() {
 
 gulp.task('lint', function(done) {
   gulp.src('./src/*.coffee')
-      .pipe(coffeelint())
-      .pipe(coffeelint.reporter('coffeelint-stylish'))
+    .pipe(coffeelint())
+    .pipe(coffeelint.reporter('coffeelint-stylish'))
   setTimeout(done, 500)
 });
 
-gulp.task('test', ['compile-schemes', 'build'], function(done) {
+gulp.task('test', ['karma-test']);
+
+gulp.task('karma-test', ['compile-schemes', 'build'], function(done) {
   new karmaServer({
     configFile: __dirname + '/karma.conf.js',
     browsers: ['PhantomJS']
   }, done).start();
 });
 
-gulp.task('full-test', ['test'], function(done) {
+gulp.task('saucelabs-test', function(done) {
   new karmaServer({
     configFile: __dirname + '/karma.conf.js'
   }, done).start();
 });
+
+gulp.task('travis-test', ['test', 'saucelabs-test']);
 
 gulp.task('debug-test', ['compile-schemes', 'build'], function(done) {
   new karmaServer({

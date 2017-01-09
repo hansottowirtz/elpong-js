@@ -80,7 +80,7 @@ module.exports = function(config) {
     reporters: ['progress', 'saucelabs'],
     port: 9876,
     colors: true,
-    logLevel: config.LOG_DEBUG,
+    logLevel: config.LOG_INFO,
     autoWatch: false,
     browsers: Object.keys(customLaunchers), // overridden by certain gulp tasks
     singleRun: true,
