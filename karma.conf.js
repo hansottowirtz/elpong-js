@@ -1,6 +1,3 @@
-// Karma configuration
-// Generated on Fri Jun 24 2016 00:45:30 GMT+0200 (CEST)
-
 module.exports = function(config) {
   var customLaunchers = {
     'SL_Chrome': {
@@ -53,7 +50,8 @@ module.exports = function(config) {
 
   config.set({
     sauceLabs: {
-      testName: 'HTTPong Karma Test'
+      testName: 'HTTPong Karma Test',
+      startConnect: false
     },
     customLaunchers: customLaunchers,
     basePath: '',
@@ -94,7 +92,6 @@ module.exports = function(config) {
   if (process.env.TRAVIS) {
     var buildLabel = 'TRAVIS #' + process.env.TRAVIS_BUILD_NUMBER + ' (' + process.env.TRAVIS_BUILD_ID + ')';
     config.sauceLabs.build = buildLabel;
-    config.sauceLabs.startConnect = false;
     config.sauceLabs.tunnelIdentifier = process.env.TRAVIS_JOB_NUMBER;
     config.sauceLabs.recordScreenshots = true;
   }

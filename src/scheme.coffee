@@ -45,9 +45,9 @@ class HP.Scheme
     parser = document.createElement('a')
     parser.href = url
     @location = {
-      is_other_domain: parser.host isnt window.location.host
+      is_other_domain: parser.host and (parser.host isnt window.location.host)
       protocol: parser.protocol
-      host: parser.host
+      host: parser.host || window.location.host
       path: HPP.Helpers.Url.trimSlashes(parser.pathname)
     }
 
