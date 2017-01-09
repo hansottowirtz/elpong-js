@@ -36,10 +36,15 @@ module.exports = function(config) {
   // }
 
   config.set({
-    sauceLabs: {testName: 'Karma'},
+    sauceLabs: {
+      testName: 'Karma',
+      connectOptions: {
+        tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER
+      },
+      startConnect: false,
+      logfile: 'sauce_connect.log'
+    },
     customLaunchers: customLaunchers,
-    tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER,
-    startConnect: false,
     basePath: '',
     frameworks: ['jasmine'],
     files: [
