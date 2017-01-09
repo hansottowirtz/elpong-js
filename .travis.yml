@@ -2,9 +2,9 @@ language: node_js
 node_js:
 - 0.12.7
 install:
-- echo 'skipping this to speed it up'
-# - npm install -g gulp-cli bower coffee-script
-# - npm install
+- npm install -g gulp-cli bower coffee-script
+- npm install
+- echo 'skipping bower to speed it up'
 # - bower install
 script: gulp travis-test
 addons:
