@@ -11,13 +11,16 @@
 ## Getting started
 
 ```bash
-bower install httpong-js --save
+npm install httpong --save
+```
+```bash
+bower install httpong --save
 ```
 or download it [here](https://github.com/hansottowirtz/httpong-js/archive/master.zip)
 ```html
-<script src="/scripts/httpong-js/dist/httpong.js"></script>
+<script src="/scripts/httpong/dist/httpong.js"></script>
 <!-- or -->
-<script src="/scripts/httpong-js/dist/httpong.min.js"></script>
+<script src="/scripts/httpong/dist/httpong.min.js"></script>
 ```
 
 ```javascript
