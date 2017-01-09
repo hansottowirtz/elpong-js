@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/hansottowirtz/httpong-js.svg?branch=master)](https://travis-ci.org/hansottowirtz/httpong-js)
 
+[![Sauce Test Status](https://saucelabs.com/browser-matrix/hansottowirtz.svg)](https://saucelabs.com/u/hansottowirtz)
+
 ### If you don't understand the basics of HTTPong, please read the first lines of [the spec][spec].
 
 ### Although this is a draft, everything is tested and it should work in most modern browsers.

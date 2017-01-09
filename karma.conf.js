@@ -52,7 +52,9 @@ module.exports = function(config) {
   }
 
   config.set({
-    sauceLabs: {},
+    sauceLabs: {
+      testName: 'HTTPong Karma Test'
+    },
     customLaunchers: customLaunchers,
     basePath: '',
     frameworks: ['jasmine'],
