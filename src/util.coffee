@@ -73,4 +73,16 @@ HP.Util = {
       _break = true if v is HP.Util.BREAK
       i--
     return
+
+  endsWith: (string, search) ->
+    if string.endsWith
+      string.endsWith(search)
+    else
+      string.substr(-search.length) == search
+
+  startsWith: (string, search) ->
+    if string.startsWith
+      string.startsWith(search)
+    else
+      string.substr(0, search.length) == search
 }

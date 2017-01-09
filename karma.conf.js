@@ -51,7 +51,8 @@ module.exports = function(config) {
   config.set({
     sauceLabs: {
       testName: 'HTTPong Karma Test',
-      startConnect: false
+      startConnect: false,
+      recordScreenshots: true
     },
     customLaunchers: customLaunchers,
     basePath: '',
@@ -90,9 +91,7 @@ module.exports = function(config) {
     concurrency: Infinity
   })
   if (process.env.TRAVIS) {
-    var buildLabel = 'TRAVIS #' + process.env.TRAVIS_BUILD_NUMBER + ' (' + process.env.TRAVIS_BUILD_ID + ')';
-    config.sauceLabs.build = buildLabel;
+    config.sauceLabs.build = 'Travis #' + process.env.TRAVIS_BUILD_NUMBER + ' (' + process.env.TRAVIS_BUILD_ID + ')';
     config.sauceLabs.tunnelIdentifier = process.env.TRAVIS_JOB_NUMBER;
-    config.sauceLabs.recordScreenshots = true;
   }
 }

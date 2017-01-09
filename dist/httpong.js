@@ -1,4 +1,4 @@
-var HP, HPP, HTTPong, base, base1, base2, getOptions;
+var HP, HPP, HTTPong, base, base1, getOptions;
 
 HTTPong = window.HTTPong = HP = {};
 
@@ -65,7 +65,7 @@ HP.Scheme = (function() {
     }
     this.data = pre_scheme;
     this.collections = {};
-    this.location = null;
+    this.api_url = null;
     if (!options.no_normalize) {
       this.normalize();
     }
@@ -135,23 +135,14 @@ HP.Scheme = (function() {
   Scheme.prototype.select = Scheme.prototype.getCollection;
 
   Scheme.prototype.setApiUrl = function(url) {
-    var parser;
-    parser = document.createElement('a');
-    parser.href = url;
-    return this.location = {
-      is_other_domain: parser.host !== window.location.host,
-      protocol: parser.protocol,
-      host: parser.host,
-      path: HPP.Helpers.Url.trimSlashes(parser.pathname)
-    };
+    this.api_url = HPP.Helpers.Url.trimSlashes(url);
+    if (!(HP.Util.startsWith(this.api_url, 'http://') || HP.Util.startsWith(this.api_url, 'https://'))) {
+      return this.api_url = "/" + this.api_url;
+    }
   };
 
   Scheme.prototype.getApiUrl = function() {
-    if (this.location.is_other_domain) {
-      return this.location.protocol + "//" + this.location.host + "/" + this.location.path;
-    } else {
-      return "/" + this.location.path;
-    }
+    return this.api_url;
   };
 
   return Scheme;
@@ -630,15 +621,11 @@ Object.values || (Object.values = function values(obj) {
 }
 );
 
-(base = String.prototype).endsWith || (base.endsWith = function(suffix) {
-  return this.indexOf(suffix, this.length - suffix.length) !== -1;
-});
-
-(base1 = Array.prototype).includes || (base1.includes = function(e) {
+(base = Array.prototype).includes || (base.includes = function(e) {
   return this.indexOf(e) > -1;
 });
 
-(base2 = String.prototype).includes || (base2.includes = function(e) {
+(base1 = String.prototype).includes || (base1.includes = function(e) {
   return this.indexOf(e) > -1;
 });
 
@@ -743,6 +730,20 @@ HP.Util = {
         _break = true;
       }
       i--;
+    }
+  },
+  endsWith: function(string, search) {
+    if (string.endsWith && false) {
+      return string.endsWith(search);
+    } else {
+      return string.substr(-search.length) === search;
+    }
+  },
+  startsWith: function(string, search) {
+    if (string.startsWith && false) {
+      return string.startsWith(search);
+    } else {
+      return string.substr(0, search.length) === search;
     }
   }
 };
@@ -851,7 +852,6 @@ HPP.Helpers.Collection.doGetAllAction = function(hpc, user_options) {
   }
   data = user_options.data;
   options = getOptions('GET', HPP.Helpers.Url.createForCollection('GET', hpc, user_options), data, user_options.headers);
-  console.log(JSON.stringify(options));
   promise = HPP.http_function(options);
   promise.then(function(response) {
     var j, len, pre_element, ref, results;
@@ -893,6 +893,40 @@ HPP.Helpers.Collection.doCustomAction = function(hpc, action_name, action_settin
     suffix: action_settings.path || action_name
   }), data, user_options.headers);
   return HPP.http_function(options);
+};
+
+HPP.Helpers.Field.handleEmbeddedCollection = function(hpe, pre_element, field_name, field_settings) {
+  var collection, embedded_element_collection, embedded_pre_collection, scheme;
+  embedded_pre_collection = pre_element[field_name];
+  if (!embedded_pre_collection && !field_settings.required) {
+    return;
+  }
+  collection = hpe.getCollection();
+  scheme = collection.getScheme();
+  embedded_element_collection = scheme.getCollection(field_name || field_settings.collection);
+  return HP.Util.forEach(embedded_pre_collection, function(embedded_pre_element) {
+    var embedded_element;
+    embedded_element = new HP.Element(embedded_element_collection, embedded_pre_element);
+    return embedded_element_collection.addElement(embedded_element);
+  });
+};
+
+HPP.Helpers.Field.handleEmbeddedElement = function(hpe, pre_element, field_name, field_settings) {
+  var associated_field_name, collection, embedded_element, embedded_element_collection, embedded_pre_element, scheme;
+  embedded_pre_element = pre_element[field_name];
+  if (!embedded_pre_element && !field_settings.required) {
+    return;
+  }
+  collection = hpe.getCollection();
+  scheme = collection.getScheme();
+  if (field_settings.collection) {
+    embedded_element_collection = scheme.getCollection(field_settings.collection);
+  } else {
+    embedded_element_collection = scheme.getCollectionBySingularName(field_name);
+  }
+  embedded_element = embedded_element_collection.makeOrMerge(embedded_pre_element);
+  associated_field_name = field_settings.associated_field || (field_name + "_" + embedded_element_collection.selector_name);
+  return hpe.setField(associated_field_name, embedded_element.getSelectorValue());
 };
 
 HPP.Helpers.Element.setupBelongsToRelation = function(hpe, relation_collection_singular_name, relation_settings) {
@@ -1113,38 +1147,4 @@ HPP.Helpers.Element.doCustomAction = function(hpe, action_name, action_settings,
     }
   });
   return promise;
-};
-
-HPP.Helpers.Field.handleEmbeddedCollection = function(hpe, pre_element, field_name, field_settings) {
-  var collection, embedded_element_collection, embedded_pre_collection, scheme;
-  embedded_pre_collection = pre_element[field_name];
-  if (!embedded_pre_collection && !field_settings.required) {
-    return;
-  }
-  collection = hpe.getCollection();
-  scheme = collection.getScheme();
-  embedded_element_collection = scheme.getCollection(field_name || field_settings.collection);
-  return HP.Util.forEach(embedded_pre_collection, function(embedded_pre_element) {
-    var embedded_element;
-    embedded_element = new HP.Element(embedded_element_collection, embedded_pre_element);
-    return embedded_element_collection.addElement(embedded_element);
-  });
-};
-
-HPP.Helpers.Field.handleEmbeddedElement = function(hpe, pre_element, field_name, field_settings) {
-  var associated_field_name, collection, embedded_element, embedded_element_collection, embedded_pre_element, scheme;
-  embedded_pre_element = pre_element[field_name];
-  if (!embedded_pre_element && !field_settings.required) {
-    return;
-  }
-  collection = hpe.getCollection();
-  scheme = collection.getScheme();
-  if (field_settings.collection) {
-    embedded_element_collection = scheme.getCollection(field_settings.collection);
-  } else {
-    embedded_element_collection = scheme.getCollectionBySingularName(field_name);
-  }
-  embedded_element = embedded_element_collection.makeOrMerge(embedded_pre_element);
-  associated_field_name = field_settings.associated_field || (field_name + "_" + embedded_element_collection.selector_name);
-  return hpe.setField(associated_field_name, embedded_element.getSelectorValue());
 };

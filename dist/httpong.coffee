@@ -66,7 +66,7 @@ class HP.Scheme
   constructor: (pre_scheme, options = {no_normalize: false, no_create_collections: false}) ->
     @data = pre_scheme
     @collections = {}
-    @location = null
+    @api_url = null
     @normalize() unless options.no_normalize
     @createCollections() unless options.no_create_collections
 
@@ -106,20 +106,12 @@ class HP.Scheme
   select: @::getCollection
 
   setApiUrl: (url) ->
-    parser = document.createElement('a')
-    parser.href = url
-    @location = {
-      is_other_domain: parser.host isnt window.location.host
-      protocol: parser.protocol
-      host: parser.host
-      path: HPP.Helpers.Url.trimSlashes(parser.pathname)
-    }
+    @api_url = HPP.Helpers.Url.trimSlashes(url)
+    unless HP.Util.startsWith(@api_url, 'http://') or HP.Util.startsWith(@api_url, 'https://')
+      @api_url = "/#{@api_url}"
 
   getApiUrl: ->
-    if @location.is_other_domain
-      "#{@location.protocol}//#{@location.host}/#{@location.path}"
-    else
-      "/#{@location.path}"
+    @api_url
 
 class HP.Element
   constructor: (@collection, pre_element) ->
@@ -451,10 +443,6 @@ Object.values ||= `function values(obj) {
 }
 `
 
-String.prototype.endsWith ||= `function(suffix) {
-  return this.indexOf(suffix, this.length - suffix.length) !== -1;
-}`
-
 Array.prototype.includes ||= (e) ->
   this.indexOf(e) > -1
 
@@ -538,6 +526,18 @@ HP.Util = {
       _break = true if v is HP.Util.BREAK
       i--
     return
+
+  endsWith: (string, search) ->
+    if string.endsWith and false
+      string.endsWith(search)
+    else
+      string.substr(-search.length) == search
+
+  startsWith: (string, search) ->
+    if string.startsWith and false
+      string.startsWith(search)
+    else
+      string.substr(0, search.length) == search
 }
 
 HPP.Helpers = {
@@ -632,8 +632,6 @@ HPP.Helpers.Collection.doGetAllAction = (hpc, user_options = {}) ->
     user_options.headers
   )
 
-  console.log JSON.stringify(options)
-
   promise = HPP.http_function(options)
   promise.then (response) ->
     for pre_element in response.data
@@ -667,6 +665,32 @@ HPP.Helpers.Collection.doCustomAction = (hpc, action_name, action_settings, user
   )
 
   HPP.http_function(options)
+
+HPP.Helpers.Field.handleEmbeddedCollection = (hpe, pre_element, field_name, field_settings) ->
+  embedded_pre_collection = pre_element[field_name]
+  return if !embedded_pre_collection and !field_settings.required
+  collection = hpe.getCollection()
+  scheme = collection.getScheme()
+  embedded_element_collection = scheme.getCollection(field_name || field_settings.collection)
+
+  HP.Util.forEach embedded_pre_collection, (embedded_pre_element) ->
+    embedded_element = new HP.Element(embedded_element_collection, embedded_pre_element)
+    embedded_element_collection.addElement(embedded_element)
+
+HPP.Helpers.Field.handleEmbeddedElement = (hpe, pre_element, field_name, field_settings) ->
+  embedded_pre_element = pre_element[field_name]
+  return if !embedded_pre_element and !field_settings.required
+  collection = hpe.getCollection()
+  scheme = collection.getScheme()
+  if field_settings.collection
+    embedded_element_collection = scheme.getCollection(field_settings.collection)
+  else
+    embedded_element_collection = scheme.getCollectionBySingularName(field_name)
+
+  embedded_element = embedded_element_collection.makeOrMerge(embedded_pre_element)
+
+  associated_field_name = field_settings.associated_field || "#{field_name}_#{embedded_element_collection.selector_name}"
+  hpe.setField(associated_field_name, embedded_element.getSelectorValue())
 
 HPP.Helpers.Element.setupBelongsToRelation = (hpe, relation_collection_singular_name, relation_settings) ->
   collection = hpe.getCollection()
@@ -854,29 +878,3 @@ HPP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_op
       collection.elements[selector_value] = hpe
 
   return promise
-
-HPP.Helpers.Field.handleEmbeddedCollection = (hpe, pre_element, field_name, field_settings) ->
-  embedded_pre_collection = pre_element[field_name]
-  return if !embedded_pre_collection and !field_settings.required
-  collection = hpe.getCollection()
-  scheme = collection.getScheme()
-  embedded_element_collection = scheme.getCollection(field_name || field_settings.collection)
-
-  HP.Util.forEach embedded_pre_collection, (embedded_pre_element) ->
-    embedded_element = new HP.Element(embedded_element_collection, embedded_pre_element)
-    embedded_element_collection.addElement(embedded_element)
-
-HPP.Helpers.Field.handleEmbeddedElement = (hpe, pre_element, field_name, field_settings) ->
-  embedded_pre_element = pre_element[field_name]
-  return if !embedded_pre_element and !field_settings.required
-  collection = hpe.getCollection()
-  scheme = collection.getScheme()
-  if field_settings.collection
-    embedded_element_collection = scheme.getCollection(field_settings.collection)
-  else
-    embedded_element_collection = scheme.getCollectionBySingularName(field_name)
-
-  embedded_element = embedded_element_collection.makeOrMerge(embedded_pre_element)
-
-  associated_field_name = field_settings.associated_field || "#{field_name}_#{embedded_element_collection.selector_name}"
-  hpe.setField(associated_field_name, embedded_element.getSelectorValue())
