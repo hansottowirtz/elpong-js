@@ -42,12 +42,11 @@ gulp.task('lint', function (done) {
 gulp.task('test', ['compile-schemes', 'build'], function (done) {
   new karmaServer({
     configFile: __dirname + '/karma.conf.js',
-    singleRun: true,
     browsers: ['PhantomJS']
   }, done).start();
 });
 
-gulp.task('travis-test', ['compile-schemes', 'build'], function (done) {
+gulp.task('full-test', ['test'], function (done) {
   new karmaServer({
     configFile: __dirname + '/karma.conf.js'
   }, done).start();

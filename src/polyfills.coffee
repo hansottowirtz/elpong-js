@@ -11,10 +11,6 @@ Object.values ||= `function values(obj) {
 }
 `
 
-String.prototype.endsWith ||= `function(suffix) {
-  return this.indexOf(suffix, this.length - suffix.length) !== -1;
-}`
-
 Array.prototype.includes ||= (e) ->
   this.indexOf(e) > -1
 

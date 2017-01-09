@@ -1,4 +1,4 @@
-var HP, HPP, HTTPong, base, base1, base2, getOptions;
+var HP, HPP, HTTPong, base, base1, getOptions;
 
 HTTPong = window.HTTPong = HP = {};
 
@@ -65,7 +65,7 @@ HP.Scheme = (function() {
     }
     this.data = pre_scheme;
     this.collections = {};
-    this.location = null;
+    this.api_url = null;
     if (!options.no_normalize) {
       this.normalize();
     }
@@ -135,23 +135,14 @@ HP.Scheme = (function() {
   Scheme.prototype.select = Scheme.prototype.getCollection;
 
   Scheme.prototype.setApiUrl = function(url) {
-    var parser;
-    parser = document.createElement('a');
-    parser.href = url;
-    return this.location = {
-      is_other_domain: parser.host !== window.location.host,
-      protocol: parser.protocol,
-      host: parser.host,
-      path: HPP.Helpers.Url.trimSlashes(parser.pathname)
-    };
+    this.api_url = HPP.Helpers.Url.trimSlashes(url);
+    if (!(HP.Util.startsWith(this.api_url, 'http://') || HP.Util.startsWith(this.api_url, 'https://'))) {
+      return this.api_url = "/" + this.api_url;
+    }
   };
 
   Scheme.prototype.getApiUrl = function() {
-    if (this.location.is_other_domain) {
-      return this.location.protocol + "//" + this.location.host + "/" + this.location.path;
-    } else {
-      return "/" + this.location.path;
-    }
+    return this.api_url;
   };
 
   return Scheme;
@@ -630,15 +621,11 @@ Object.values || (Object.values = function values(obj) {
 }
 );
 
-(base = String.prototype).endsWith || (base.endsWith = function(suffix) {
-  return this.indexOf(suffix, this.length - suffix.length) !== -1;
-});
-
-(base1 = Array.prototype).includes || (base1.includes = function(e) {
+(base = Array.prototype).includes || (base.includes = function(e) {
   return this.indexOf(e) > -1;
 });
 
-(base2 = String.prototype).includes || (base2.includes = function(e) {
+(base1 = String.prototype).includes || (base1.includes = function(e) {
   return this.indexOf(e) > -1;
 });
 
@@ -743,6 +730,20 @@ HP.Util = {
         _break = true;
       }
       i--;
+    }
+  },
+  endsWith: function(string, search) {
+    if (string.endsWith && false) {
+      return string.endsWith(search);
+    } else {
+      return string.substr(-search.length) === search;
+    }
+  },
+  startsWith: function(string, search) {
+    if (string.startsWith && false) {
+      return string.startsWith(search);
+    } else {
+      return string.substr(0, search.length) === search;
     }
   }
 };

@@ -2,7 +2,7 @@ class HP.Scheme
   constructor: (pre_scheme, options = {no_normalize: false, no_create_collections: false}) ->
     @data = pre_scheme
     @collections = {}
-    @location = null
+    @api_url = null
     @normalize() unless options.no_normalize
     @createCollections() unless options.no_create_collections
 
@@ -42,17 +42,9 @@ class HP.Scheme
   select: @::getCollection
 
   setApiUrl: (url) ->
-    parser = document.createElement('a')
-    parser.href = url
-    @location = {
-      is_other_domain: parser.host isnt window.location.host
-      protocol: parser.protocol
-      host: parser.host
-      path: HPP.Helpers.Url.trimSlashes(parser.pathname)
-    }
+    @api_url = HPP.Helpers.Url.trimSlashes(url)
+    unless HP.Util.startsWith(@api_url, 'http://') or HP.Util.startsWith(@api_url, 'https://')
+      @api_url = "/#{@api_url}"
 
   getApiUrl: ->
-    if @location.is_other_domain
-      "#{@location.protocol}//#{@location.host}/#{@location.path}"
-    else
-      "/#{@location.path}"
+    @api_url

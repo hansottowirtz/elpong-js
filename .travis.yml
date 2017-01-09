@@ -5,7 +5,7 @@ install:
 - npm install -g gulp-cli bower coffee-script
 - npm install
 - bower install
-script: gulp travis-test
+script: gulp full-test
 addons:
   sauce_connect:
     username: hansottowirtz
