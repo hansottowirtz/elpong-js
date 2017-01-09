@@ -1,32 +1,46 @@
 module.exports = function(config) {
   var customLaunchers = {
-    'SL_Chrome': {
+    'SL_Chrome_26': {
       base: 'SauceLabs',
       browserName: 'chrome',
-      version: '40'
+      version: '26'
     },
-    'SL_Firefox': {
+    'SL_Chrome_dev': {
+      base: 'SauceLabs',
+      browserName: 'chrome',
+      version: 'dev'
+    },
+    'SL_Firefox_10': {
       base: 'SauceLabs',
       browserName: 'firefox',
-      version: '30'
+      version: '10'
     },
-    'SL_Safari_8': {
+    'SL_Firefox_dev': {
+      base: 'SauceLabs',
+      browserName: 'firefox',
+      version: 'dev'
+    },
+    'SL_Safari_6': {
       base: 'SauceLabs',
       browserName: 'safari',
-      platform: 'OS X 10.10',
-      version: '8'
+      version: '6'
     },
-    'SL_IE_8': {
+    'SL_Safari_10': {
+      base: 'SauceLabs',
+      browserName: 'safari',
+      version: '10'
+    },
+    'SL_IE_9': {
       base: 'SauceLabs',
       browserName: 'internet explorer',
-      platform: 'Windows XP',
-      version: '8'
+      platform: 'Windows 7',
+      version: '9'
     },
-    'SL_iOS': {
+    'SL_IE_11': {
       base: 'SauceLabs',
-      browserName: 'iphone',
-      platform: 'OS X 10.10',
-      version: '8.1'
+      browserName: 'internet explorer',
+      platform: 'Windows 10',
+      version: '11'
     }
   }
 
@@ -68,7 +82,7 @@ module.exports = function(config) {
     colors: true,
     logLevel: config.LOG_DEBUG,
     autoWatch: false,
-    browsers: Object.keys(customLaunchers),
+    browsers: Object.keys(customLaunchers), // overridden by certain gulp tasks
     singleRun: true,
     concurrency: Infinity
   })
