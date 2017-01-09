@@ -1,7 +1,7 @@
 # A Javascript implementation of HTTPong
 #
 # @author Hans Otto Wirtz
-# @version 0.3.7
+# @version 0.3.8
 
 HTTPong = window.HTTPong = HP = {}
 HP.private = HPP = {

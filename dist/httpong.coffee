@@ -1,7 +1,7 @@
 # A Javascript implementation of HTTPong
 #
 # @author Hans Otto Wirtz
-# @version 0.3.7
+# @version 0.3.8
 
 HTTPong = window.HTTPong = HP = {}
 HP.private = HPP = {
@@ -528,13 +528,13 @@ HP.Util = {
     return
 
   endsWith: (string, search) ->
-    if string.endsWith and false
+    if string.endsWith
       string.endsWith(search)
     else
       string.substr(-search.length) == search
 
   startsWith: (string, search) ->
-    if string.startsWith and false
+    if string.startsWith
       string.startsWith(search)
     else
       string.substr(0, search.length) == search
@@ -621,76 +621,6 @@ HPP.Helpers.Snapshot = {
       snapshots_list_2[v.time] = v if v.time <= time
     snapshots_list_2
 }
-
-HPP.Helpers.Collection.doGetAllAction = (hpc, user_options = {}) ->
-  data = user_options.data
-
-  options = getOptions(
-    'GET',
-    HPP.Helpers.Url.createForCollection('GET', hpc, user_options),
-    data,
-    user_options.headers
-  )
-
-  promise = HPP.http_function(options)
-  promise.then (response) ->
-    for pre_element in response.data
-      hpc.makeOrMerge(pre_element)
-  return promise
-
-HPP.Helpers.Collection.doGetOneAction = (hpc, selector_value, user_options = {}) ->
-  data = user_options.data
-
-  options = getOptions(
-    'GET',
-    HPP.Helpers.Url.createForCollection('GET', hpc, {suffix: selector_value}),
-    data,
-    user_options.headers
-  )
-  promise = HPP.http_function(options)
-  promise.then (response) ->
-    hpc.makeOrMerge(response.data)
-  return promise
-
-HPP.Helpers.Collection.doCustomAction = (hpc, action_name, action_settings, user_options = {}) ->
-  method = action_settings.method.toUpperCase()
-
-  data = user_options.data
-
-  options = getOptions(
-    method,
-    HPP.Helpers.Url.createForCollection('GET', hpc, {suffix: action_settings.path || action_name})
-    data,
-    user_options.headers
-  )
-
-  HPP.http_function(options)
-
-HPP.Helpers.Field.handleEmbeddedCollection = (hpe, pre_element, field_name, field_settings) ->
-  embedded_pre_collection = pre_element[field_name]
-  return if !embedded_pre_collection and !field_settings.required
-  collection = hpe.getCollection()
-  scheme = collection.getScheme()
-  embedded_element_collection = scheme.getCollection(field_name || field_settings.collection)
-
-  HP.Util.forEach embedded_pre_collection, (embedded_pre_element) ->
-    embedded_element = new HP.Element(embedded_element_collection, embedded_pre_element)
-    embedded_element_collection.addElement(embedded_element)
-
-HPP.Helpers.Field.handleEmbeddedElement = (hpe, pre_element, field_name, field_settings) ->
-  embedded_pre_element = pre_element[field_name]
-  return if !embedded_pre_element and !field_settings.required
-  collection = hpe.getCollection()
-  scheme = collection.getScheme()
-  if field_settings.collection
-    embedded_element_collection = scheme.getCollection(field_settings.collection)
-  else
-    embedded_element_collection = scheme.getCollectionBySingularName(field_name)
-
-  embedded_element = embedded_element_collection.makeOrMerge(embedded_pre_element)
-
-  associated_field_name = field_settings.associated_field || "#{field_name}_#{embedded_element_collection.selector_name}"
-  hpe.setField(associated_field_name, embedded_element.getSelectorValue())
 
 HPP.Helpers.Element.setupBelongsToRelation = (hpe, relation_collection_singular_name, relation_settings) ->
   collection = hpe.getCollection()
@@ -878,3 +808,73 @@ HPP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_op
       collection.elements[selector_value] = hpe
 
   return promise
+
+HPP.Helpers.Collection.doGetAllAction = (hpc, user_options = {}) ->
+  data = user_options.data
+
+  options = getOptions(
+    'GET',
+    HPP.Helpers.Url.createForCollection('GET', hpc, user_options),
+    data,
+    user_options.headers
+  )
+
+  promise = HPP.http_function(options)
+  promise.then (response) ->
+    for pre_element in response.data
+      hpc.makeOrMerge(pre_element)
+  return promise
+
+HPP.Helpers.Collection.doGetOneAction = (hpc, selector_value, user_options = {}) ->
+  data = user_options.data
+
+  options = getOptions(
+    'GET',
+    HPP.Helpers.Url.createForCollection('GET', hpc, {suffix: selector_value}),
+    data,
+    user_options.headers
+  )
+  promise = HPP.http_function(options)
+  promise.then (response) ->
+    hpc.makeOrMerge(response.data)
+  return promise
+
+HPP.Helpers.Collection.doCustomAction = (hpc, action_name, action_settings, user_options = {}) ->
+  method = action_settings.method.toUpperCase()
+
+  data = user_options.data
+
+  options = getOptions(
+    method,
+    HPP.Helpers.Url.createForCollection('GET', hpc, {suffix: action_settings.path || action_name})
+    data,
+    user_options.headers
+  )
+
+  HPP.http_function(options)
+
+HPP.Helpers.Field.handleEmbeddedCollection = (hpe, pre_element, field_name, field_settings) ->
+  embedded_pre_collection = pre_element[field_name]
+  return if !embedded_pre_collection and !field_settings.required
+  collection = hpe.getCollection()
+  scheme = collection.getScheme()
+  embedded_element_collection = scheme.getCollection(field_name || field_settings.collection)
+
+  HP.Util.forEach embedded_pre_collection, (embedded_pre_element) ->
+    embedded_element = new HP.Element(embedded_element_collection, embedded_pre_element)
+    embedded_element_collection.addElement(embedded_element)
+
+HPP.Helpers.Field.handleEmbeddedElement = (hpe, pre_element, field_name, field_settings) ->
+  embedded_pre_element = pre_element[field_name]
+  return if !embedded_pre_element and !field_settings.required
+  collection = hpe.getCollection()
+  scheme = collection.getScheme()
+  if field_settings.collection
+    embedded_element_collection = scheme.getCollection(field_settings.collection)
+  else
+    embedded_element_collection = scheme.getCollectionBySingularName(field_name)
+
+  embedded_element = embedded_element_collection.makeOrMerge(embedded_pre_element)
+
+  associated_field_name = field_settings.associated_field || "#{field_name}_#{embedded_element_collection.selector_name}"
+  hpe.setField(associated_field_name, embedded_element.getSelectorValue())
