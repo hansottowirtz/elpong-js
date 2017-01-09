@@ -894,6 +894,40 @@ HPP.Helpers.Collection.doCustomAction = function(hpc, action_name, action_settin
   return HPP.http_function(options);
 };
 
+HPP.Helpers.Field.handleEmbeddedCollection = function(hpe, pre_element, field_name, field_settings) {
+  var collection, embedded_element_collection, embedded_pre_collection, scheme;
+  embedded_pre_collection = pre_element[field_name];
+  if (!embedded_pre_collection && !field_settings.required) {
+    return;
+  }
+  collection = hpe.getCollection();
+  scheme = collection.getScheme();
+  embedded_element_collection = scheme.getCollection(field_name || field_settings.collection);
+  return HP.Util.forEach(embedded_pre_collection, function(embedded_pre_element) {
+    var embedded_element;
+    embedded_element = new HP.Element(embedded_element_collection, embedded_pre_element);
+    return embedded_element_collection.addElement(embedded_element);
+  });
+};
+
+HPP.Helpers.Field.handleEmbeddedElement = function(hpe, pre_element, field_name, field_settings) {
+  var associated_field_name, collection, embedded_element, embedded_element_collection, embedded_pre_element, scheme;
+  embedded_pre_element = pre_element[field_name];
+  if (!embedded_pre_element && !field_settings.required) {
+    return;
+  }
+  collection = hpe.getCollection();
+  scheme = collection.getScheme();
+  if (field_settings.collection) {
+    embedded_element_collection = scheme.getCollection(field_settings.collection);
+  } else {
+    embedded_element_collection = scheme.getCollectionBySingularName(field_name);
+  }
+  embedded_element = embedded_element_collection.makeOrMerge(embedded_pre_element);
+  associated_field_name = field_settings.associated_field || (field_name + "_" + embedded_element_collection.selector_name);
+  return hpe.setField(associated_field_name, embedded_element.getSelectorValue());
+};
+
 HPP.Helpers.Element.setupBelongsToRelation = function(hpe, relation_collection_singular_name, relation_settings) {
   var collection, collection_field_name, collection_selector_field, field_name, relation_collection;
   collection = hpe.getCollection();
@@ -1112,38 +1146,4 @@ HPP.Helpers.Element.doCustomAction = function(hpe, action_name, action_settings,
     }
   });
   return promise;
-};
-
-HPP.Helpers.Field.handleEmbeddedCollection = function(hpe, pre_element, field_name, field_settings) {
-  var collection, embedded_element_collection, embedded_pre_collection, scheme;
-  embedded_pre_collection = pre_element[field_name];
-  if (!embedded_pre_collection && !field_settings.required) {
-    return;
-  }
-  collection = hpe.getCollection();
-  scheme = collection.getScheme();
-  embedded_element_collection = scheme.getCollection(field_name || field_settings.collection);
-  return HP.Util.forEach(embedded_pre_collection, function(embedded_pre_element) {
-    var embedded_element;
-    embedded_element = new HP.Element(embedded_element_collection, embedded_pre_element);
-    return embedded_element_collection.addElement(embedded_element);
-  });
-};
-
-HPP.Helpers.Field.handleEmbeddedElement = function(hpe, pre_element, field_name, field_settings) {
-  var associated_field_name, collection, embedded_element, embedded_element_collection, embedded_pre_element, scheme;
-  embedded_pre_element = pre_element[field_name];
-  if (!embedded_pre_element && !field_settings.required) {
-    return;
-  }
-  collection = hpe.getCollection();
-  scheme = collection.getScheme();
-  if (field_settings.collection) {
-    embedded_element_collection = scheme.getCollection(field_settings.collection);
-  } else {
-    embedded_element_collection = scheme.getCollectionBySingularName(field_name);
-  }
-  embedded_element = embedded_element_collection.makeOrMerge(embedded_pre_element);
-  associated_field_name = field_settings.associated_field || (field_name + "_" + embedded_element_collection.selector_name);
-  return hpe.setField(associated_field_name, embedded_element.getSelectorValue());
 };

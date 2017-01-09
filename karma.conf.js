@@ -2,91 +2,100 @@
 // Generated on Fri Jun 24 2016 00:45:30 GMT+0200 (CEST)
 
 module.exports = function(config) {
+  var customLaunchers = {
+    'SL_Chrome': {
+      base: 'SauceLabs',
+      browserName: 'chrome',
+      version: '51'
+    },
+    'SL_Firefox': {
+      base: 'SauceLabs',
+      browserName: 'firefox',
+      version: '47'
+    },
+    'SL_Safari_8': {
+      base: 'SauceLabs',
+      browserName: 'safari',
+      platform: 'OS X 10.10',
+      version: '8'
+    },
+    'SL_Safari_9': {
+      base: 'SauceLabs',
+      browserName: 'safari',
+      platform: 'OS X 10.11',
+      version: '9'
+    },
+    'SL_IE_9': {
+      base: 'SauceLabs',
+      browserName: 'internet explorer',
+      platform: 'Windows 2008',
+      version: '9'
+    },
+    'SL_IE_10': {
+      base: 'SauceLabs',
+      browserName: 'internet explorer',
+      platform: 'Windows 2012',
+      version: '10'
+    },
+    'SL_IE_11': {
+      base: 'SauceLabs',
+      browserName: 'internet explorer',
+      platform: 'Windows 8.1',
+      version: '11'
+    },
+    'SL_iOS': {
+      base: 'SauceLabs',
+      browserName: 'iphone',
+      platform: 'OS X 10.10',
+      version: '8.1'
+    }
+  }
+
   config.set({
-
-    // base path that will be used to resolve all patterns (eg. files, exclude)
+    sauceLabs: {
+      testName: 'HTTPong Karma Test'
+    },
+    customLaunchers: customLaunchers,
     basePath: '',
-
-
-    // frameworks to use
-    // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
     frameworks: ['jasmine'],
-
-
-    // list of files / patterns to load in the browser
     files: [
       'bower_components/angular/angular.js',
       'bower_components/angular-mocks/angular-mocks.js',
       'test/fixtures/**/*.json',
       'dist/httpong.js',
-      // 'src/*.coffee',
       'test/**/*_spec.coffee'
     ],
-
-
-    // list of files to exclude
-    exclude: [
-    ],
-
-
-    // preprocess matching files before serving them to the browser
-    // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
+    exclude: [],
     preprocessors: {
-      // '**/*.html': ['html2js'],
       '**/*.json': ['json_fixtures'],
       '**/*.coffee': ['coffee']
     },
-
     jsonFixturesPreprocessor: {
       variableName: '__json__'
     },
-
     plugins: [
       'karma-json-fixtures-preprocessor',
       'karma-jasmine',
-      // 'karma-fixture',
-      // 'karma-html2js-preprocessor',
       'karma-coffee-preprocessor',
       'karma-chrome-launcher',
       'karma-safari-launcher',
-      'karma-phantomjs-launcher'
+      'karma-phantomjs-launcher',
+      'karma-sauce-launcher'
     ],
-
-
-    // test results reporter to use
-    // possible values: 'dots', 'progress'
-    // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress'],
-
-
-    // web server port
+    reporters: ['progress', 'saucelabs'],
     port: 9876,
-
-
-    // enable / disable colors in the output (reporters and logs)
     colors: true,
-
-
-    // level of logging
-    // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_INFO,
-
-
-    // enable / disable watching file and executing tests whenever any file changes
+    logLevel: config.LOG_DEBUG,
     autoWatch: false,
-
-
-    // start these browsers
-    // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome'],
-
-
-    // Continuous Integration mode
-    // if true, Karma captures browsers, runs the tests and exits
+    browsers: Object.keys(customLaunchers),
     singleRun: true,
-
-    // Concurrency level
-    // how many browser should be started simultaneous
     concurrency: Infinity
   })
+  if (process.env.TRAVIS) {
+    var buildLabel = 'TRAVIS #' + process.env.TRAVIS_BUILD_NUMBER + ' (' + process.env.TRAVIS_BUILD_ID + ')';
+    config.sauceLabs.build = buildLabel;
+    config.sauceLabs.startConnect = false;
+    config.sauceLabs.tunnelIdentifier = process.env.TRAVIS_JOB_NUMBER;
+    config.sauceLabs.recordScreenshots = true;
+  }
 }

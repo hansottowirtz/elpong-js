@@ -666,6 +666,32 @@ HPP.Helpers.Collection.doCustomAction = (hpc, action_name, action_settings, user
 
   HPP.http_function(options)
 
+HPP.Helpers.Field.handleEmbeddedCollection = (hpe, pre_element, field_name, field_settings) ->
+  embedded_pre_collection = pre_element[field_name]
+  return if !embedded_pre_collection and !field_settings.required
+  collection = hpe.getCollection()
+  scheme = collection.getScheme()
+  embedded_element_collection = scheme.getCollection(field_name || field_settings.collection)
+
+  HP.Util.forEach embedded_pre_collection, (embedded_pre_element) ->
+    embedded_element = new HP.Element(embedded_element_collection, embedded_pre_element)
+    embedded_element_collection.addElement(embedded_element)
+
+HPP.Helpers.Field.handleEmbeddedElement = (hpe, pre_element, field_name, field_settings) ->
+  embedded_pre_element = pre_element[field_name]
+  return if !embedded_pre_element and !field_settings.required
+  collection = hpe.getCollection()
+  scheme = collection.getScheme()
+  if field_settings.collection
+    embedded_element_collection = scheme.getCollection(field_settings.collection)
+  else
+    embedded_element_collection = scheme.getCollectionBySingularName(field_name)
+
+  embedded_element = embedded_element_collection.makeOrMerge(embedded_pre_element)
+
+  associated_field_name = field_settings.associated_field || "#{field_name}_#{embedded_element_collection.selector_name}"
+  hpe.setField(associated_field_name, embedded_element.getSelectorValue())
+
 HPP.Helpers.Element.setupBelongsToRelation = (hpe, relation_collection_singular_name, relation_settings) ->
   collection = hpe.getCollection()
   if !relation_settings.polymorphic
@@ -852,29 +878,3 @@ HPP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_op
       collection.elements[selector_value] = hpe
 
   return promise
-
-HPP.Helpers.Field.handleEmbeddedCollection = (hpe, pre_element, field_name, field_settings) ->
-  embedded_pre_collection = pre_element[field_name]
-  return if !embedded_pre_collection and !field_settings.required
-  collection = hpe.getCollection()
-  scheme = collection.getScheme()
-  embedded_element_collection = scheme.getCollection(field_name || field_settings.collection)
-
-  HP.Util.forEach embedded_pre_collection, (embedded_pre_element) ->
-    embedded_element = new HP.Element(embedded_element_collection, embedded_pre_element)
-    embedded_element_collection.addElement(embedded_element)
-
-HPP.Helpers.Field.handleEmbeddedElement = (hpe, pre_element, field_name, field_settings) ->
-  embedded_pre_element = pre_element[field_name]
-  return if !embedded_pre_element and !field_settings.required
-  collection = hpe.getCollection()
-  scheme = collection.getScheme()
-  if field_settings.collection
-    embedded_element_collection = scheme.getCollection(field_settings.collection)
-  else
-    embedded_element_collection = scheme.getCollectionBySingularName(field_name)
-
-  embedded_element = embedded_element_collection.makeOrMerge(embedded_pre_element)
-
-  associated_field_name = field_settings.associated_field || "#{field_name}_#{embedded_element_collection.selector_name}"
-  hpe.setField(associated_field_name, embedded_element.getSelectorValue())
