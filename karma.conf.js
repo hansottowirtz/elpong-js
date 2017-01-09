@@ -1,50 +1,46 @@
 module.exports = function(config) {
   var customLaunchers = {
-    'SL_Chrome': {
+    'SL_Chrome_26': {
       base: 'SauceLabs',
       browserName: 'chrome',
-      version: '51'
+      version: '26'
     },
-    'SL_Firefox': {
+    'SL_Chrome_dev': {
+      base: 'SauceLabs',
+      browserName: 'chrome',
+      version: 'dev'
+    },
+    'SL_Firefox_10': {
       base: 'SauceLabs',
       browserName: 'firefox',
-      version: '47'
+      version: '10'
     },
-    'SL_Safari_8': {
+    'SL_Firefox_dev': {
+      base: 'SauceLabs',
+      browserName: 'firefox',
+      version: 'dev'
+    },
+    'SL_Safari_6': {
       base: 'SauceLabs',
       browserName: 'safari',
-      platform: 'OS X 10.10',
-      version: '8'
+      version: '6'
     },
-    'SL_Safari_9': {
+    'SL_Safari_10': {
       base: 'SauceLabs',
       browserName: 'safari',
-      platform: 'OS X 10.11',
-      version: '9'
+      version: '10'
     },
     'SL_IE_9': {
       base: 'SauceLabs',
       browserName: 'internet explorer',
-      platform: 'Windows 2008',
+      platform: 'Windows 7',
       version: '9'
-    },
-    'SL_IE_10': {
-      base: 'SauceLabs',
-      browserName: 'internet explorer',
-      platform: 'Windows 2012',
-      version: '10'
     },
     'SL_IE_11': {
       base: 'SauceLabs',
       browserName: 'internet explorer',
-      platform: 'Windows 8.1',
+      platform: 'Windows 10',
       version: '11'
-    },
-    'SL_iOS': {
-      base: 'SauceLabs',
-      browserName: 'iphone',
-      platform: 'OS X 10.10',
-      version: '8.1'
     }
   }
 
@@ -86,7 +82,7 @@ module.exports = function(config) {
     colors: true,
     logLevel: config.LOG_DEBUG,
     autoWatch: false,
-    browsers: Object.keys(customLaunchers),
+    browsers: Object.keys(customLaunchers), // overridden by certain gulp tasks
     singleRun: true,
     concurrency: Infinity
   })
