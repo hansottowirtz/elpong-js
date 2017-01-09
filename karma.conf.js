@@ -34,11 +34,11 @@ module.exports = function(config) {
   //     version: '11'
   //   }
   // }
-  console.log(process.env.SAUCE_ACCESS_KEY);
 
   config.set({
     sauceLabs: {testName: 'Karma'},
     customLaunchers: customLaunchers,
+    tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER,
     basePath: '',
     frameworks: ['jasmine'],
     files: [
@@ -72,9 +72,6 @@ module.exports = function(config) {
     autoWatch: false,
     browsers: Object.keys(customLaunchers),
     singleRun: true,
-    concurrency: Infinity,
-    connectOptions: {
-      logfile: 'sauce-connect.log'
-    }
+    concurrency: Infinity
   })
 }
