@@ -3,7 +3,7 @@
 # @author Hans Otto Wirtz
 # @version 0.3.8
 
-HTTPong = window.HTTPong = HP = {}
+HTTPong = HP = {}
 HP.private = HPP = {
   log: -> console.log.apply(console, ['%c HTTPong ', 'background: #80CBC4; color: #fff'].concat(Array.from(arguments)))
   schemes: {}

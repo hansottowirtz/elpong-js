@@ -6,6 +6,8 @@ var rename = require('gulp-rename');
 var cson = require('gulp-cson');
 var coffeelint = require('gulp-coffeelint');
 var size = require('gulp-size');
+var umd = require('gulp-umd');
+
 var reporter = require('coffeelint-stylish').reporter;
 var karmaServer = require('karma').Server;
 
@@ -18,6 +20,14 @@ gulp.task('build', ['lint'], function(done) {
     .pipe(concat('httpong.coffee'))
     .pipe(gulp.dest('./dist/'))
     .pipe(coffee({bare: true}))
+    .pipe(umd({
+      exports: function() {
+        return 'HTTPong';
+      },
+      namespace: function() {
+        return 'HTTPong';
+      }
+    }))
     .pipe(gulp.dest('./dist/'))
     .pipe(uglify({unsafe: true, global_defs: { DEBUG: false }}))
     .pipe(rename('httpong.min.js'))
@@ -32,27 +42,27 @@ gulp.task('compile-schemes', function() {
     .pipe(gulp.dest('./test/fixtures'))
 });
 
-gulp.task('lint', function (done) {
+gulp.task('lint', function(done) {
   gulp.src('./src/*.coffee')
       .pipe(coffeelint())
       .pipe(coffeelint.reporter('coffeelint-stylish'))
   setTimeout(done, 500)
 });
 
-gulp.task('test', ['compile-schemes', 'build'], function (done) {
+gulp.task('test', ['compile-schemes', 'build'], function(done) {
   new karmaServer({
     configFile: __dirname + '/karma.conf.js',
     browsers: ['PhantomJS']
   }, done).start();
 });
 
-gulp.task('full-test', ['test'], function (done) {
+gulp.task('full-test', ['test'], function(done) {
   new karmaServer({
     configFile: __dirname + '/karma.conf.js'
   }, done).start();
 });
 
-gulp.task('debug-test', ['compile-schemes', 'build'], function (done) {
+gulp.task('debug-test', ['compile-schemes', 'build'], function(done) {
   new karmaServer({
     configFile: __dirname + '/karma.conf.js',
     singleRun: false,

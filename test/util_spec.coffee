@@ -19,18 +19,18 @@ describe 'Util', ->
 
   it 'should loop right', ->
     last = null
-    HP.Util.forEach [1, 2, 3, 4], (v) ->
+    HTTPong.Util.forEach [1, 2, 3, 4], (v) ->
       last = v
-      return HP.Util.BREAK
+      return HTTPong.Util.BREAK
     expect(last).toBe(1)
 
   it 'should reverse loop right', ->
     last = null
-    HP.Util.reverseForIn {'1': 1, '2': 2, '3': 3, '4': 4}, (k, v) ->
+    HTTPong.Util.reverseForIn {'1': 1, '2': 2, '3': 3, '4': 4}, (k, v) ->
       last = v
-      return HP.Util.BREAK
+      return HTTPong.Util.BREAK
     expect(last).toBe(4)
     last = null
-    HP.Util.reverseForIn {'1': 1, '2': 2, '3': 3, '4': 4}, (k, v) ->
+    HTTPong.Util.reverseForIn {'1': 1, '2': 2, '3': 3, '4': 4}, (k, v) ->
       last = v
     expect(last).toBe(1)

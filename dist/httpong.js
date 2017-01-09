@@ -1,6 +1,15 @@
+;(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.HTTPong = factory();
+  }
+}(this, function() {
 var HP, HPP, HTTPong, base, base1, getOptions;
 
-HTTPong = window.HTTPong = HP = {};
+HTTPong = HP = {};
 
 HP["private"] = HPP = {
   log: function() {
@@ -845,6 +854,56 @@ HPP.Helpers.Snapshot = {
   }
 };
 
+HPP.Helpers.Collection.doGetAllAction = function(hpc, user_options) {
+  var data, options, promise;
+  if (user_options == null) {
+    user_options = {};
+  }
+  data = user_options.data;
+  options = getOptions('GET', HPP.Helpers.Url.createForCollection('GET', hpc, user_options), data, user_options.headers);
+  promise = HPP.http_function(options);
+  promise.then(function(response) {
+    var j, len, pre_element, ref, results;
+    ref = response.data;
+    results = [];
+    for (j = 0, len = ref.length; j < len; j++) {
+      pre_element = ref[j];
+      results.push(hpc.makeOrMerge(pre_element));
+    }
+    return results;
+  });
+  return promise;
+};
+
+HPP.Helpers.Collection.doGetOneAction = function(hpc, selector_value, user_options) {
+  var data, options, promise;
+  if (user_options == null) {
+    user_options = {};
+  }
+  data = user_options.data;
+  options = getOptions('GET', HPP.Helpers.Url.createForCollection('GET', hpc, {
+    suffix: selector_value
+  }), data, user_options.headers);
+  promise = HPP.http_function(options);
+  promise.then(function(response) {
+    return hpc.makeOrMerge(response.data);
+  });
+  return promise;
+};
+
+HPP.Helpers.Collection.doCustomAction = function(hpc, action_name, action_settings, user_options) {
+  var data, method, options;
+  if (user_options == null) {
+    user_options = {};
+  }
+  method = action_settings.method.toUpperCase();
+  data = user_options.data;
+  options = getOptions(method, HPP.Helpers.Url.createForCollection('GET', hpc, {
+    suffix: action_settings.path || action_name
+  }), data, user_options.headers);
+  return HPP.http_function(options);
+};
+
 HPP.Helpers.Element.setupBelongsToRelation = function(hpe, relation_collection_singular_name, relation_settings) {
   var collection, collection_field_name, collection_selector_field, field_name, relation_collection;
   collection = hpe.getCollection();
@@ -1065,56 +1124,6 @@ HPP.Helpers.Element.doCustomAction = function(hpe, action_name, action_settings,
   return promise;
 };
 
-HPP.Helpers.Collection.doGetAllAction = function(hpc, user_options) {
-  var data, options, promise;
-  if (user_options == null) {
-    user_options = {};
-  }
-  data = user_options.data;
-  options = getOptions('GET', HPP.Helpers.Url.createForCollection('GET', hpc, user_options), data, user_options.headers);
-  promise = HPP.http_function(options);
-  promise.then(function(response) {
-    var j, len, pre_element, ref, results;
-    ref = response.data;
-    results = [];
-    for (j = 0, len = ref.length; j < len; j++) {
-      pre_element = ref[j];
-      results.push(hpc.makeOrMerge(pre_element));
-    }
-    return results;
-  });
-  return promise;
-};
-
-HPP.Helpers.Collection.doGetOneAction = function(hpc, selector_value, user_options) {
-  var data, options, promise;
-  if (user_options == null) {
-    user_options = {};
-  }
-  data = user_options.data;
-  options = getOptions('GET', HPP.Helpers.Url.createForCollection('GET', hpc, {
-    suffix: selector_value
-  }), data, user_options.headers);
-  promise = HPP.http_function(options);
-  promise.then(function(response) {
-    return hpc.makeOrMerge(response.data);
-  });
-  return promise;
-};
-
-HPP.Helpers.Collection.doCustomAction = function(hpc, action_name, action_settings, user_options) {
-  var data, method, options;
-  if (user_options == null) {
-    user_options = {};
-  }
-  method = action_settings.method.toUpperCase();
-  data = user_options.data;
-  options = getOptions(method, HPP.Helpers.Url.createForCollection('GET', hpc, {
-    suffix: action_settings.path || action_name
-  }), data, user_options.headers);
-  return HPP.http_function(options);
-};
-
 HPP.Helpers.Field.handleEmbeddedCollection = function(hpe, pre_element, field_name, field_settings) {
   var collection, embedded_element_collection, embedded_pre_collection, scheme;
   embedded_pre_collection = pre_element[field_name];
@@ -1148,3 +1157,6 @@ HPP.Helpers.Field.handleEmbeddedElement = function(hpe, pre_element, field_name,
   associated_field_name = field_settings.associated_field || (field_name + "_" + embedded_element_collection.selector_name);
   return hpe.setField(associated_field_name, embedded_element.getSelectorValue());
 };
+
+return HTTPong;
+}));
