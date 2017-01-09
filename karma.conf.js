@@ -36,14 +36,7 @@ module.exports = function(config) {
   // }
 
   config.set({
-    sauceLabs: {
-      testName: 'Karma',
-      connectOptions: {
-        tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER
-      },
-      startConnect: false,
-      logfile: 'sauce_connect.log'
-    },
+    sauceLabs: {},
     customLaunchers: customLaunchers,
     basePath: '',
     frameworks: ['jasmine'],
@@ -74,10 +67,17 @@ module.exports = function(config) {
     reporters: ['progress', 'saucelabs'],
     port: 9876,
     colors: true,
-    logLevel: config.LOG_INFO,
+    logLevel: config.LOG_DEBUG,
     autoWatch: false,
     browsers: Object.keys(customLaunchers),
     singleRun: true,
     concurrency: Infinity
   })
+  if (process.env.TRAVIS) {
+    var buildLabel = 'TRAVIS #' + process.env.TRAVIS_BUILD_NUMBER + ' (' + process.env.TRAVIS_BUILD_ID + ')';
+    config.sauceLabs.build = buildLabel;
+    config.sauceLabs.startConnect = false;
+    config.sauceLabs.tunnelIdentifier = process.env.TRAVIS_JOB_NUMBER;
+    config.sauceLabs.recordScreenshots = true;
+  }
 }
