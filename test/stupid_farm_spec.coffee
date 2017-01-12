@@ -8,29 +8,20 @@ describe 'Stupid Farm', ->
     @apples = @scheme.select('apples')
     @apple_stems = @scheme.select('apple_stems')
 
-  afterEach ->
-    HTTPong.private.schemes = {}
-
   describe 'relations', ->
     beforeEach ->
 
     afterEach ->
 
   describe 'actions', ->
-    $httpBackend = null
+    httpBackend = null
 
-    beforeEach inject ($injector) ->
-      $httpBackend = $injector.get('$httpBackend')
-      $http = $injector.get('$http')
-      HTTPong.setHttpFunction($http)
+    beforeEach ->
+      httpBackend = new HttpBackend()
       @scheme.setApiUrl('/api')
 
-    reply = (method, url, data, status) ->
-      $httpBackend.expect(method, url).respond ->
-        [(status || 200), JSON.stringify(data), {'Content-Type': 'application/json'}]
-
-    it 'apple should have a stem', ->
-      reply('GET', '/api/apples',
+    it 'apple should have a stem', (done) ->
+      httpBackend.reply('GET', '/api/apples',
         [
           {
             "id": 5,
@@ -47,9 +38,6 @@ describe 'Stupid Farm', ->
         stem = apple.relations.getStem()
         expect(stem.getField('id')).toBe(3)
         expect(stem.relations.getApple()).toBe(apple)
+        httpBackend.done(done)
 
-      $httpBackend.flush()
-
-    afterEach ->
-      $httpBackend.verifyNoOutstandingExpectation()
-      $httpBackend.verifyNoOutstandingRequest()
+      httpBackend.flush()

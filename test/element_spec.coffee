@@ -1,21 +1,8 @@
 describe 'Element', ->
   describe 'stupid farm', ->
-    $httpBackend = null
-
-    beforeEach inject(($injector) ->
-      # Set up the mock http service responses
-      $httpBackend = $injector.get('$httpBackend')
-      # backend definition common for all tests
-      geeseHandler = $httpBackend.when('GET', '/api/v1/geese').respond([{id: 1, name: 'Bob'}])
-
+    beforeEach ->
       @pre_scheme = window.__json__["test/fixtures/stupid-farm/scheme"]
       @scheme = window.HTTPong.addScheme(@pre_scheme)
-    )
-
-    afterEach ->
-      HTTPong.private.schemes = {}
-      $httpBackend.verifyNoOutstandingExpectation()
-      $httpBackend.verifyNoOutstandingRequest()
 
     it 'should have the right fields', ->
       collection = @scheme.select('geese')
@@ -43,13 +30,9 @@ describe 'Element', ->
       expect(apple.relations.getStem().getField('id')).toBe(3)
 
   describe 'pulser', ->
-    beforeEach inject(($injector) ->
+    beforeEach ->
       @pre_scheme = window.__json__["test/fixtures/pulser/scheme"]
       @scheme = window.HTTPong.addScheme(@pre_scheme)
-    )
-
-    afterEach ->
-      HTTPong.private.schemes = {}
 
     it 'should have working polymorphic associations', ->
       plugs = @scheme.select('plugs')
@@ -80,13 +63,9 @@ describe 'Element', ->
       expect(device_plugs[3]).not.toBeDefined()
 
   describe 'clothes', ->
-    beforeEach inject(($injector) ->
+    beforeEach ->
       @pre_scheme = window.__json__["test/fixtures/clothes/scheme"]
       @scheme = window.HTTPong.addScheme(@pre_scheme)
-    )
-
-    afterEach ->
-      HTTPong.private.schemes = {}
 
     it 'should work', ->
       workers = @scheme.select('workers')
@@ -184,70 +163,60 @@ describe 'Element', ->
         expect(@worker.isPersisted()).toBe(true)
 
     describe 'http', ->
-      $httpBackend = null
+      httpBackend = null
 
-      reply = (method, url, data, status) ->
-        $httpBackend.when(method, url).respond ->
-          [(status || 200), JSON.stringify(data), {'Content-Type': 'application/json'}]
+      beforeEach ->
+        httpBackend = new HttpBackend()
 
-
-      beforeEach inject(($injector) ->
-        # Set up the mock http service responses
-        $httpBackend = $injector.get('$httpBackend')
-        # backend definition common for all tests
-
-        $http = $injector.get('$http')
-
-        HTTPong.setHttpFunction($http)
         @scheme.setApiUrl('/api/v1')
 
         @workers = @scheme.select('workers')
-      )
 
-      it 'should be able to get multiple instances', ->
-        reply 'GET', '/api/v1/workers', [{id: 8, name: 'Bob'}]
+      it 'should be able to get multiple instances', (done) ->
+        httpBackend.reply 'GET', '/api/v1/workers', [{id: 8, name: 'Bob'}]
 
         @workers.actions.doGetAll().then (response) =>
           expect(response.status).toEqual(200)
           expect(response.data).toEqual([{id: 8, name: 'Bob'}])
           w = @workers.getArray()[0]
           expect(@workers.getArray()[0].getField('id')).toBe(8)
-        $httpBackend.flush()
+          httpBackend.done(done)
+        httpBackend.flush()
 
-      it 'should be able to get and update accordingly', ->
-        reply 'GET', '/api/v1/workers', [{id: 8, name: 'Bob'}, {id: 9, name: 'Jef'}]
-        reply 'GET', '/api/v1/workers/8', {id: 8, name: 'Bart'}
+      it 'should be able to get and update accordingly', (done) ->
+        httpBackend.reply 'GET', '/api/v1/workers', [{id: 8, name: 'Bob'}, {id: 9, name: 'Jef'}]
+        httpBackend.reply 'GET', '/api/v1/workers/8', {id: 8, name: 'Bart'}
 
         @workers.actions.doGetAll().then (response) =>
           worker = @workers.find(8)
           expect(worker.getField('name')).toBe('Bob')
           worker.actions.doGet().then (response) ->
             expect(worker.getField('name')).toBe('Bart')
-        $httpBackend.flush()
+            httpBackend.done(done)
+        httpBackend.flush()
 
-      it 'should be correctly removed', ->
-        reply 'GET', '/api/v1/workers/8', {id: 8, name: 'Bob'}
-        reply 'DELETE', '/api/v1/workers/8', null
+      it 'should be correctly removed', (done) ->
+        httpBackend.reply 'GET', '/api/v1/workers/8', {id: 8, name: 'Bob'}
+        httpBackend.reply 'DELETE', '/api/v1/workers/8', undefined, 204
 
         @workers.actions.doGetOne(8).then (response) =>
           worker = @workers.find(8)
           worker.remove().then =>
             expect(@workers.find(8)).not.toBeDefined()
-        $httpBackend.flush()
+            httpBackend.done(done)
+        httpBackend.flush()
 
-      it 'should be correctly saved', ->
-        reply 'POST', '/api/v1/workers', {id: 8, name: 'Bob'}
+      it 'should be correctly saved', (done) ->
+        httpBackend.reply 'POST', '/api/v1/workers', {id: 8, name: 'Bob'}
 
         worker = @workers.makeNewElement({name: 'Bob'})
         expect(worker.isNew()).toBe(true)
         expect(worker.isPersisted()).toBe(false)
 
         worker.actions.doPost().then (response) =>
+          console.log response
           expect(worker.isNew()).toBe(false)
           expect(worker.isPersisted()).toBe(true)
+          httpBackend.done(done)
 
-        $httpBackend.flush()
-
-      afterEach ->
-        $httpBackend.verifyNoOutstandingExpectation()
-        $httpBackend.verifyNoOutstandingRequest()
+        httpBackend.flush()

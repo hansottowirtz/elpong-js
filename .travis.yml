@@ -2,9 +2,8 @@ language: node_js
 node_js:
 - 0.12.7
 install:
-- npm install -g gulp-cli bower coffee-script
+- npm install -g gulp-cli coffee-script
 - npm install
-- bower install
 script: gulp travis-test
 addons:
   sauce_connect:

@@ -1,14 +1,3 @@
-getOptions = (method, url, data, headers = {}) ->
-  headers.Accept = headers['Content-Type'] = 'application/json'
-  {
-    method: method
-    url: url
-    data: JSON.stringify(data || {})
-    headers: headers
-    dataType: 'json'
-    responseType: 'json'
-  }
-
 HPP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
   hpe.snapshots.make("before_#{method.toLowerCase()}")
   if user_options.data
@@ -21,14 +10,12 @@ HPP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
   else
     throw new Error('Element is new') if hpe.isNew()
 
-  options = getOptions(
-    method,
+  promise = HPP.Helpers.Ajax.executeRequest(
     HPP.Helpers.Url.createForElement(method, {}, hpe, user_options),
+    method,
     data,
     user_options.headers
   )
-
-  promise = HPP.http_function(options)
   promise.then (response) ->
     hpe.mergeWith response.data if response.data
     hpe.snapshots.make("after_#{method.toLowerCase()}")
@@ -50,14 +37,12 @@ HPP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_op
   else if not action_settings.without_data
     data = HPP.Helpers.Element.toData(hpe)
 
-  options = getOptions(
-    method,
+  promise = HPP.Helpers.Ajax.executeRequest(
     HPP.Helpers.Url.createForElement(action_name, action_settings, hpe, user_options)
+    method,
     data,
     user_options.headers
   )
-
-  promise = HPP.http_function(options)
   promise.then (response) ->
     if !action_settings.returns_other
       hpe.mergeWith response.data if response.data

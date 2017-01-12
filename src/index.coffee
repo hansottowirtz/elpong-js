@@ -5,13 +5,15 @@
 
 HTTPong = HP = {}
 HP.private = HPP = {
-  log: -> console.log.apply(console, ['%c HTTPong ', 'background: #80CBC4; color: #fff'].concat(Array.from(arguments)))
+  log: ->
+    console.log.apply(console, ['%c HTTPong ', 'background: #80CBC4; color: #fff'].concat(Array.from(arguments)))
   schemes: {}
   http_function: null
   isHpe: (e) ->
     e.constructor is HP.Element
   isHpc: (e) ->
     e.constructor is HP.Collection
+  Helpers: {}
 }
 
 # Adds a scheme
@@ -59,5 +61,36 @@ HP.initialize = ->
 # @note Like $http or jQuery.ajax
 # @param {Function} http_function The function.
 # @return {Object} HP
-HP.setHttpFunction = (http_function) ->
-  HPP.http_function = http_function
+HP.setHttpFunction = (fn, type) ->
+  if type is 'jquery' or
+  (typeof jQuery isnt 'undefined' and fn is jQuery.ajax)
+    HPP.http_function = (url, object) ->
+      deferred = jQuery.Deferred()
+      ajax = fn(url, object)
+      ajax.then (data, status, jqxhr) ->
+        deferred.resolve({data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders()})
+      ajax.catch (data, status, jqxhr) ->
+        deferred.reject({data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders()})
+      return deferred
+
+  else if type is 'fetch' or
+  (typeof window isnt 'undefined' and fn is window.fetch)
+    HPP.http_function = (url, object) ->
+      new Promise (resolve, reject) ->
+        object.body = object.data
+        http_promise = fn(url, object)
+        http_promise.then (response) ->
+          if response.headers.get('content-type') isnt 'application/json'
+            resolve(response)
+          else
+            json_promise = response.json()
+            json_promise.then (json) ->
+              response.data = json
+              resolve(response)
+            json_promise.catch reject
+        http_promise.catch reject
+
+  else # angular or similar
+    HPP.http_function = (url, object) ->
+      fn(object)
+  return

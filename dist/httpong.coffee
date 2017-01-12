@@ -5,13 +5,15 @@
 
 HTTPong = HP = {}
 HP.private = HPP = {
-  log: -> console.log.apply(console, ['%c HTTPong ', 'background: #80CBC4; color: #fff'].concat(Array.from(arguments)))
+  log: ->
+    console.log.apply(console, ['%c HTTPong ', 'background: #80CBC4; color: #fff'].concat(Array.from(arguments)))
   schemes: {}
   http_function: null
   isHpe: (e) ->
     e.constructor is HP.Element
   isHpc: (e) ->
     e.constructor is HP.Collection
+  Helpers: {}
 }
 
 # Adds a scheme
@@ -59,8 +61,39 @@ HP.initialize = ->
 # @note Like $http or jQuery.ajax
 # @param {Function} http_function The function.
 # @return {Object} HP
-HP.setHttpFunction = (http_function) ->
-  HPP.http_function = http_function
+HP.setHttpFunction = (fn, type) ->
+  if type is 'jquery' or
+  (typeof jQuery isnt 'undefined' and fn is jQuery.ajax)
+    HPP.http_function = (url, object) ->
+      deferred = jQuery.Deferred()
+      ajax = fn(url, object)
+      ajax.then (data, status, jqxhr) ->
+        deferred.resolve({data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders()})
+      ajax.catch (data, status, jqxhr) ->
+        deferred.reject({data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders()})
+      return deferred
+
+  else if type is 'fetch' or
+  (typeof window isnt 'undefined' and fn is window.fetch)
+    HPP.http_function = (url, object) ->
+      new Promise (resolve, reject) ->
+        object.body = object.data
+        http_promise = fn(url, object)
+        http_promise.then (response) ->
+          if response.headers.get('content-type') isnt 'application/json'
+            resolve(response)
+          else
+            json_promise = response.json()
+            json_promise.then (json) ->
+              response.data = json
+              resolve(response)
+            json_promise.catch reject
+        http_promise.catch reject
+
+  else # angular or similar
+    HPP.http_function = (url, object) ->
+      fn(object)
+  return
 
 class HP.Scheme
   constructor: (pre_scheme, options = {no_normalize: false, no_create_collections: false}) ->
@@ -540,73 +573,53 @@ HP.Util = {
       string.substr(0, search.length) == search
 }
 
-HPP.Helpers = {
-  Url: {
-    # Creates the api url for an element
-    #
-    # @param {String} action_name           The action name, custom or 'GET', 'POST', 'PUT', 'DELETE'.
-    # @param {HP.Element} element      The element.
-    # @param {Object} user_options          The user_options, keys: suffix, path.
-    #
-    # @return undefined [Description]
-    createForElement: (action_name, action_settings, element, user_options) ->
-      collection = element.getCollection()
-      scheme = collection.getScheme()
-      api_url = scheme.getApiUrl()
-      throw new Error('Api url has not yet been set') if !api_url
-
-      if user_options.path
-        path = HPP.Helpers.Url.trimSlashes(user_options.path)
-        url = "#{api_url}/#{path}"
-      else
-        url = "#{api_url}/#{collection.getName()}"
-        url = "#{url}/#{element.getSelectorValue()}" unless action_settings.without_selector or action_name is 'POST'
-
-      if action_settings.method # is custom action
-        url = "#{url}/#{action_settings.path || action_name}"
-
-      url = "#{url}/#{user_options.suffix}" if user_options.suffix
-      url
-
-    createForCollection: (action_name, collection, user_options) ->
-      url = "#{collection.getScheme().getApiUrl()}/#{collection.getName()}" #HPP.Helpers.Url.createForCollection(, hpe, user_options) # (action_name, element, user_options = {}, suffix)
-      url = "#{url}/#{user_options.suffix}" if user_options.suffix
-      url
-
-    trimSlashes: (s) ->
-      s.replace(/\/$/, '').replace(/^\//, '')
-
-  }
-  Element: {
-    toData: (element) ->
-      collection = element.getCollection()
-      o = HPP.Helpers.Element.getFields(element)
-
-      # data = {}
-      # data[HPP.Helpers.Collection.getSingularName(collection)] = o
-      # data
-
-      data = o
-
-    getFields: (element) ->
-      collection = element.getCollection()
-      scheme = collection.getScheme()
-      o = {}
-      for field_name, field_settings of scheme.data.collections[collection.getName()].fields
-        continue if field_settings.only_receive or field_settings.embedded_collection or field_settings.embedded_element
-        field_value = element.getField(field_name)
-        o[field_name] = field_value
-      o
-  }
-  Collection: {
-    getSettings: (c) ->
-      c.getScheme().data.collections[c.getName()]
-
-    getSingularName: (c) ->
-      HPP.Helpers.Collection.getSettings(c).singular
-  }
-  Field: {}
+HPP.Helpers.Ajax = {
+  executeRequest: (url, method, data, headers = {}) ->
+    headers['Accept'] = headers['Content-Type'] = 'application/json'
+    options = {
+      method: method
+      url: url
+      data: JSON.stringify(if data is undefined then {} else data)
+      headers: headers
+      dataType: 'json'
+      responseType: 'json'
+    }
+    options.type = options.method
+    options.body = options.data
+    HPP.http_function(options.url, options)
 }
+
+HPP.Helpers.Collection = {
+  getSettings: (c) ->
+    c.getScheme().data.collections[c.getName()]
+
+  getSingularName: (c) ->
+    HPP.Helpers.Collection.getSettings(c).singular
+}
+
+HPP.Helpers.Element = {
+  toData: (element) ->
+    collection = element.getCollection()
+    o = HPP.Helpers.Element.getFields(element)
+
+    # data = {}
+    # data[HPP.Helpers.Collection.getSingularName(collection)] = o
+    # data
+
+    data = o
+
+  getFields: (element) ->
+    collection = element.getCollection()
+    scheme = collection.getScheme()
+    o = {}
+    for field_name, field_settings of scheme.data.collections[collection.getName()].fields
+      continue if field_settings.only_receive or field_settings.embedded_collection or field_settings.embedded_element
+      field_value = element.getField(field_name)
+      o[field_name] = field_value
+    o
+}
+
+HPP.Helpers.Field = {}
 
 HPP.Helpers.Snapshot = {
   getSortedArray: (snapshots_list) ->
@@ -622,17 +635,51 @@ HPP.Helpers.Snapshot = {
     snapshots_list_2
 }
 
+HPP.Helpers.Url = {
+  # Creates the api url for an element
+  #
+  # @param {String} action_name           The action name, custom or 'GET', 'POST', 'PUT', 'DELETE'.
+  # @param {HP.Element} element      The element.
+  # @param {Object} user_options          The user_options, keys: suffix, path.
+  #
+  # @return undefined [Description]
+  createForElement: (action_name, action_settings, element, user_options) ->
+    collection = element.getCollection()
+    scheme = collection.getScheme()
+    api_url = scheme.getApiUrl()
+    throw new Error('Api url has not yet been set') if !api_url
+
+    if user_options.path
+      path = HPP.Helpers.Url.trimSlashes(user_options.path)
+      url = "#{api_url}/#{path}"
+    else
+      url = "#{api_url}/#{collection.getName()}"
+      url = "#{url}/#{element.getSelectorValue()}" unless action_settings.without_selector or action_name is 'POST'
+
+    if action_settings.method # is custom action
+      url = "#{url}/#{action_settings.path || action_name}"
+
+    url = "#{url}/#{user_options.suffix}" if user_options.suffix
+    url
+
+  createForCollection: (action_name, collection, user_options) ->
+    url = "#{collection.getScheme().getApiUrl()}/#{collection.getName()}" #HPP.Helpers.Url.createForCollection(, hpe, user_options) # (action_name, element, user_options = {}, suffix)
+    url = "#{url}/#{user_options.suffix}" if user_options.suffix
+    url
+
+  trimSlashes: (s) ->
+    s.replace(/\/$/, '').replace(/^\//, '')
+}
+
 HPP.Helpers.Collection.doGetAllAction = (hpc, user_options = {}) ->
   data = user_options.data
 
-  options = getOptions(
-    'GET',
+  promise = HPP.Helpers.Ajax.executeRequest(
     HPP.Helpers.Url.createForCollection('GET', hpc, user_options),
+    'GET',
     data,
     user_options.headers
   )
-
-  promise = HPP.http_function(options)
   promise.then (response) ->
     for pre_element in response.data
       hpc.makeOrMerge(pre_element)
@@ -641,15 +688,14 @@ HPP.Helpers.Collection.doGetAllAction = (hpc, user_options = {}) ->
 HPP.Helpers.Collection.doGetOneAction = (hpc, selector_value, user_options = {}) ->
   data = user_options.data
 
-  options = getOptions(
-    'GET',
+  promise = HPP.Helpers.Ajax.executeRequest(
     HPP.Helpers.Url.createForCollection('GET', hpc, {suffix: selector_value}),
+    'GET',
     data,
     user_options.headers
   )
-  promise = HPP.http_function(options)
   promise.then (response) ->
-    hpc.makeOrMerge(response.data)
+    hpc.makeOrMerge response.data if response.data
   return promise
 
 HPP.Helpers.Collection.doCustomAction = (hpc, action_name, action_settings, user_options = {}) ->
@@ -657,40 +703,12 @@ HPP.Helpers.Collection.doCustomAction = (hpc, action_name, action_settings, user
 
   data = user_options.data
 
-  options = getOptions(
-    method,
+  HPP.Helpers.Ajax.executeRequest(
     HPP.Helpers.Url.createForCollection('GET', hpc, {suffix: action_settings.path || action_name})
+    method,
     data,
     user_options.headers
   )
-
-  HPP.http_function(options)
-
-HPP.Helpers.Field.handleEmbeddedCollection = (hpe, pre_element, field_name, field_settings) ->
-  embedded_pre_collection = pre_element[field_name]
-  return if !embedded_pre_collection and !field_settings.required
-  collection = hpe.getCollection()
-  scheme = collection.getScheme()
-  embedded_element_collection = scheme.getCollection(field_name || field_settings.collection)
-
-  HP.Util.forEach embedded_pre_collection, (embedded_pre_element) ->
-    embedded_element = new HP.Element(embedded_element_collection, embedded_pre_element)
-    embedded_element_collection.addElement(embedded_element)
-
-HPP.Helpers.Field.handleEmbeddedElement = (hpe, pre_element, field_name, field_settings) ->
-  embedded_pre_element = pre_element[field_name]
-  return if !embedded_pre_element and !field_settings.required
-  collection = hpe.getCollection()
-  scheme = collection.getScheme()
-  if field_settings.collection
-    embedded_element_collection = scheme.getCollection(field_settings.collection)
-  else
-    embedded_element_collection = scheme.getCollectionBySingularName(field_name)
-
-  embedded_element = embedded_element_collection.makeOrMerge(embedded_pre_element)
-
-  associated_field_name = field_settings.associated_field || "#{field_name}_#{embedded_element_collection.selector_name}"
-  hpe.setField(associated_field_name, embedded_element.getSelectorValue())
 
 HPP.Helpers.Element.setupBelongsToRelation = (hpe, relation_collection_singular_name, relation_settings) ->
   collection = hpe.getCollection()
@@ -806,17 +824,6 @@ HPP.Helpers.Element.setupHasOneRelation = (hpe, relation_collection_singular_nam
 
   hpe.relations["get#{HP.Util.upperCamelize(relation_collection_singular_name)}"] = -> HPP.Helpers.Element.getHasManyRelationFunction(hpe, collection, relation_settings, relation_collection)()[0]
 
-getOptions = (method, url, data, headers = {}) ->
-  headers.Accept = headers['Content-Type'] = 'application/json'
-  {
-    method: method
-    url: url
-    data: JSON.stringify(data || {})
-    headers: headers
-    dataType: 'json'
-    responseType: 'json'
-  }
-
 HPP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
   hpe.snapshots.make("before_#{method.toLowerCase()}")
   if user_options.data
@@ -829,14 +836,12 @@ HPP.Helpers.Element.doAction = (hpe, method, user_options = {}) ->
   else
     throw new Error('Element is new') if hpe.isNew()
 
-  options = getOptions(
-    method,
+  promise = HPP.Helpers.Ajax.executeRequest(
     HPP.Helpers.Url.createForElement(method, {}, hpe, user_options),
+    method,
     data,
     user_options.headers
   )
-
-  promise = HPP.http_function(options)
   promise.then (response) ->
     hpe.mergeWith response.data if response.data
     hpe.snapshots.make("after_#{method.toLowerCase()}")
@@ -858,14 +863,12 @@ HPP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_op
   else if not action_settings.without_data
     data = HPP.Helpers.Element.toData(hpe)
 
-  options = getOptions(
-    method,
+  promise = HPP.Helpers.Ajax.executeRequest(
     HPP.Helpers.Url.createForElement(action_name, action_settings, hpe, user_options)
+    method,
     data,
     user_options.headers
   )
-
-  promise = HPP.http_function(options)
   promise.then (response) ->
     if !action_settings.returns_other
       hpe.mergeWith response.data if response.data
@@ -878,3 +881,29 @@ HPP.Helpers.Element.doCustomAction = (hpe, action_name, action_settings, user_op
       collection.elements[selector_value] = hpe
 
   return promise
+
+HPP.Helpers.Field.handleEmbeddedCollection = (hpe, pre_element, field_name, field_settings) ->
+  embedded_pre_collection = pre_element[field_name]
+  return if !embedded_pre_collection and !field_settings.required
+  collection = hpe.getCollection()
+  scheme = collection.getScheme()
+  embedded_element_collection = scheme.getCollection(field_name || field_settings.collection)
+
+  HP.Util.forEach embedded_pre_collection, (embedded_pre_element) ->
+    embedded_element = new HP.Element(embedded_element_collection, embedded_pre_element)
+    embedded_element_collection.addElement(embedded_element)
+
+HPP.Helpers.Field.handleEmbeddedElement = (hpe, pre_element, field_name, field_settings) ->
+  embedded_pre_element = pre_element[field_name]
+  return if !embedded_pre_element and !field_settings.required
+  collection = hpe.getCollection()
+  scheme = collection.getScheme()
+  if field_settings.collection
+    embedded_element_collection = scheme.getCollection(field_settings.collection)
+  else
+    embedded_element_collection = scheme.getCollectionBySingularName(field_name)
+
+  embedded_element = embedded_element_collection.makeOrMerge(embedded_pre_element)
+
+  associated_field_name = field_settings.associated_field || "#{field_name}_#{embedded_element_collection.selector_name}"
+  hpe.setField(associated_field_name, embedded_element.getSelectorValue())

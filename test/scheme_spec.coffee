@@ -29,6 +29,3 @@ describe 'Scheme', ->
       expect(@scheme.getApiUrl()).toBe('/api/v1')
       @scheme.setApiUrl('/api/v1')
       expect(@scheme.getApiUrl()).toBe('/api/v1')
-
-    afterAll ->
-      HTTPong.private.schemes = {}

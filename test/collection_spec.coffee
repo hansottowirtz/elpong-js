@@ -1,6 +1,6 @@
 describe 'Collection', ->
   describe 'pulser', ->
-    beforeAll ->
+    beforeEach ->
       pre_scheme = window.__json__["test/fixtures/pulser/scheme"]
       @scheme = window.HTTPong.addScheme(pre_scheme)
       @users = @scheme.select('users')
@@ -16,11 +16,8 @@ describe 'Collection', ->
       expect(@users.getSingularName()).toBe('user')
       expect(@plugs.getSingularName()).toBe('plug')
 
-    afterAll ->
-      HTTPong.private.schemes = {}
-
   describe 'stupid farm', ->
-    beforeAll ->
+    beforeEach ->
       pre_scheme = window.__json__["test/fixtures/stupid-farm/scheme"]
       @scheme = window.HTTPong.addScheme(pre_scheme)
       @geese = @scheme.getCollection('geese')
@@ -33,6 +30,3 @@ describe 'Collection', ->
 
     it 'should have the right default element', ->
       expect(@geese.default_pre_element).toEqual({name: 'Bob'})
-
-    afterAll ->
-      HTTPong.private.schemes = {}

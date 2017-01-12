@@ -1,27 +1,17 @@
 describe 'Element', ->
   describe 'snapshots', ->
-    $httpBackend = null
+    httpBackend = null
 
-    beforeEach inject(($injector) ->
-      $httpBackend = $injector.get('$httpBackend')
-
-      $http = $injector.get('$http')
-
-      HTTPong.setHttpFunction($http)
+    beforeEach ->
+      httpBackend = new HttpBackend()
 
       @pre_scheme = window.__json__['test/fixtures/animal-farm/scheme']
       @scheme = window.HTTPong.addScheme(@pre_scheme)
       @scheme.setApiUrl('/api/v1')
 
-      geeseHandler = $httpBackend.when('POST', '/api/v1/humans').respond({id: 1, name: 'Bob'})
-    )
+      httpBackend.reply 'POST', '/api/v1/humans', {id: 1, name: 'Bob'}
 
-    afterEach ->
-      HTTPong.private.schemes = {}
-      $httpBackend.verifyNoOutstandingExpectation()
-      $httpBackend.verifyNoOutstandingRequest()
-
-    it 'should have the right fields', ->
+    it 'should have the right fields', (done) ->
       collection = @scheme.select('humans')
       bob = collection.makeNewElement()
       jef = collection.makeNewElement(name: 'Jef')
@@ -50,5 +40,6 @@ describe 'Element', ->
         expect(bob.snapshots.getLast().data.name).toBe('Bob 2')
         expect(bob.snapshots.getLastPersisted().tag).toBe('after_post')
         expect(bob.snapshots.getLast().tag).toBe('random_tag')
+        httpBackend.done(done)
 
-      $httpBackend.flush()
+      httpBackend.flush()

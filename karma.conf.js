@@ -52,41 +52,62 @@ module.exports = function(config) {
     },
     customLaunchers: customLaunchers,
     basePath: '',
-    frameworks: ['jasmine'],
+    frameworks: ['source-map-support', 'jasmine'],
     files: [
-      'bower_components/angular/angular.js',
-      'bower_components/angular-mocks/angular-mocks.js',
       'test/fixtures/**/*.json',
       'dist/httpong.js',
+      'test/spec_helper.coffee',
       'test/**/*_spec.coffee'
     ],
     exclude: [],
     preprocessors: {
       '**/*.json': ['json_fixtures'],
-      '**/*.coffee': ['coffee']
+      '**/*.coffee': ['coffee'],
+      '**/*.js': ['env']
     },
     jsonFixturesPreprocessor: {
       variableName: '__json__'
     },
     plugins: [
+      'karma-env-preprocessor',
       'karma-json-fixtures-preprocessor',
       'karma-jasmine',
       'karma-coffee-preprocessor',
       'karma-chrome-launcher',
       'karma-safari-launcher',
       'karma-phantomjs-launcher',
-      'karma-sauce-launcher'
+      'karma-sauce-launcher',
+      'karma-source-map-support'
     ],
-    reporters: ['progress', 'saucelabs'],
+    reporters: ['progress'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: false,
     browsers: Object.keys(customLaunchers), // overridden by certain gulp tasks
     singleRun: true,
-    concurrency: Infinity
+    concurrency: Infinity,
+    envPreprocessor: [
+     'FRAMEWORK'
+   ],
+    coffeePreprocessor: {
+      options: {
+        sourceMap: true
+      }
+    }
   })
+  switch (process.env.FRAMEWORK) {
+    case 'jquery':
+      config.files.unshift('node_modules/jquery/dist/jquery.js', 'node_modules/jquery-mockjax/dist/jquery.mockjax.js');
+      break;
+    case 'fetch':
+      config.files.unshift('node_modules/promise-polyfill/promise.js', 'node_modules/whatwg-fetch/fetch.js', 'node_modules/fetch-mock/es5/client-browserified.js');
+      break;
+    default:
+      config.files.unshift('node_modules/angular/angular.js', 'node_modules/angular-mocks/angular-mocks.js');
+  }
   if (process.env.TRAVIS) {
+    config.reporters.push('saucelabs')
     config.sauceLabs.build = 'Travis #' + process.env.TRAVIS_BUILD_NUMBER + ' (' + process.env.TRAVIS_BUILD_ID + ')';
     config.sauceLabs.tunnelIdentifier = process.env.TRAVIS_JOB_NUMBER;
   }

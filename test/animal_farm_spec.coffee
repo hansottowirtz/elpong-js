@@ -8,9 +8,6 @@ describe 'Animal Farm', ->
     @pigs = @scheme.select('pigs')
     @humans = @scheme.select('humans')
 
-  afterEach ->
-    HTTPong.private.schemes = {}
-
   describe 'relations', ->
     beforeEach ->
       @napoleon = @pigs.makeNewElement {id: 1, name: 'Napoleon', boss_id: null}
@@ -27,29 +24,21 @@ describe 'Animal Farm', ->
       expect(pigs[0]).toBe(@snowball)
       expect(pigs[1]).not.toBeDefined()
 
-
   describe 'actions', ->
-    $httpBackend = null
+    httpBackend = new HttpBackend()
 
-    beforeEach inject ($injector) ->
-      $httpBackend = $injector.get('$httpBackend')
-      $http = $injector.get('$http')
-      HTTPong.setHttpFunction($http)
+    beforeEach ->
       @scheme.setApiUrl('/api')
 
       @napoleon = @pigs.makeNewElement {id: 1, name: 'Napoleon', boss_id: null}
 
-    afterEach ->
-      $httpBackend.verifyNoOutstandingExpectation()
-      $httpBackend.verifyNoOutstandingRequest()
+    a 'pig should be able to oink', (done) ->
+      httpBackend.reply 'PUT', '/api/pigs/1/oink', undefined, 204
 
-    reply = (method, url, data, status) ->
-      $httpBackend.expect(method, url).respond ->
-        [(status || 200), JSON.stringify(data), {'Content-Type': 'application/json'}]
-
-    a 'pig should be able to oink', ->
-      reply 'PUT', '/api/pigs/1/oink', null
-
-      @napoleon.actions.doOink().then =>
+      @napoleon.actions.doOink().then (response) =>
+        debugger
+        console.log response
         expect(@napoleon.getField('name')).toBe('Napoleon')
-      $httpBackend.flush()
+        httpBackend.done(done)
+
+      httpBackend.flush()
