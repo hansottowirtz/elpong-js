@@ -58,10 +58,13 @@ They can be retrieved with `scheme.select(collection_name)`
 You can get an array of the elements in a collection with `collection.getArray()`
 
 Finding a specific object can be done with: `collection.find(id)` (if `id` is the selector),
-or `collection.findBy('name', name)`
+or `collection.findBy('name', name)`.
+You can also use an object for finding by multiple fields: `collection.findBy({name: name})`.
+If you want to search for multiple elements with that name,
+use `collection.findBy({name: name}, {multiple: true})`.
 
 To load data into the collection, you can use `collection.actions.doGetAll()`,
-or `collection.actions.doGetOne(id)`
+or `collection.actions.doGetOne(id)`.
 
 To preload data, which is recommended, create a meta tag with
 `name=httpong-collection`, `scheme=scheme_name`, `content=array` and `collection=name`.<br/>
@@ -122,6 +125,9 @@ pig.actions.doDelete();
 
 pig.actions.doOink(); // sends a PUT to /api/pigs/8/oink
 ```
+
+Actions and collection actions (e.g. `doGetAll()`) return a promise that returns
+the response object.
 
 #### Relations
 
@@ -200,7 +206,6 @@ the other data using `mergeWith`.
 
 The library includes some polyfills for:<br/>
 `Object.values`,
-`String.prototype.endsWith`,
 `Array.prototype.includes`,
 `String.prototype.includes`
 
@@ -214,6 +219,10 @@ The `then` and `catch` functions should return a response object with a
 `data` key, that holds the parsed JSON object.<br/>
 `$http` and `jQuery.ajax` support this out of the box.<br/>
 If you don't work with Angular or jQuery, you can use [window.fetch](fetch).
+
+```javascript
+HTTPong.setHttpFunction(window.fetch)
+```
 
 ### Frameworks
 
@@ -230,6 +239,7 @@ Fork it, then do something like this:
 ```bash
 git clone https://github.com/<you>/httpong-js
 cd httpong-js
+git checkout -b add-a-feature
 npm install
 gulp test
 ```
