@@ -99,8 +99,7 @@
       "relations": {
         "belongs_to": {
           "block": {
-            "polymorphic": true,
-            "collection_selector_field": "id"
+            "polymorphic": true
           },
           "endplug": {
             "collection": "plugs"

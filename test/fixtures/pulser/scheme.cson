@@ -77,7 +77,6 @@ collections:
       belongs_to:
         block:
           polymorphic: true
-          collection_selector_field: 'id'
           # collection_field: 'block_collection'
           # field: 'block_id'
         endplug:
