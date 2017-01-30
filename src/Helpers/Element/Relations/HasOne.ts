@@ -1,25 +1,25 @@
-module Elpong {
-  export namespace ElementHelper {
-    export namespace Relations {
-      export namespace HasOne {
-        export function setup(element: Element, relation_collection_singular_name: string, relation_config: HasOneRelationConfiguration) {
-          let relation_collection;
-          let collection = element.collection();
-          let collection_config = element.collection().configuration();
+import { Element } from '../../../Element';
+import { HasMany } from './HasMany';
+import { HasOneRelationConfiguration } from '../../../Configuration';
+import { SchemeHelper } from '../../SchemeHelper';
+import { Util } from '../../../Util';
 
-          let scheme = collection.scheme();
+export namespace HasOne {
+  export function setup(element: Element, relation_collection_singular_name: string, relation_config: HasOneRelationConfiguration) {
+    let relation_collection;
+    let collection = element.collection();
+    let collection_config = element.collection().configuration();
 
-          if (relation_config.collection) {
-            relation_collection = scheme.select(relation_config.collection);
-          } else {
-            relation_collection = SchemeHelper.getCollectionBySingularName(scheme, relation_collection_singular_name);
-          }
+    let scheme = collection.scheme();
 
-          return element.relations[Util.camelize(relation_collection_singular_name)] = () => {
-            Relations.HasMany.getHasManyRelationFunction(element, collection, relation_config, relation_collection)()[0];
-          }
-        }
-      }
+    if (relation_config.collection) {
+      relation_collection = scheme.select(relation_config.collection);
+    } else {
+      relation_collection = SchemeHelper.getCollectionBySingularName(scheme, relation_collection_singular_name);
+    }
+
+    return element.relations[Util.camelize(relation_collection_singular_name)] = () => {
+      HasMany.getHasManyRelationFunction(element, collection, relation_config, relation_collection)()[0];
     }
   }
 }

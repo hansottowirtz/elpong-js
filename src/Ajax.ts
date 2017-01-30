@@ -1,97 +1,97 @@
 /// <reference path="../typings/index.d.ts"/>
 
-module Elpong {
-  // export interface AjaxPromise extends Promise<any> {
-  // }
-  export interface AjaxPromise {
-    then: Function
-  } //Promise<any> //|JQueryPromise<{}>;
-  export interface AjaxResponse extends Response {
-    data: any;
+// export interface AjaxPromise extends Promise<any> {
+// }
+export interface AjaxPromise {
+  then: Function
+} //Promise<any> //|JQueryPromise<{}>;
+
+export interface AjaxResponse extends Response {
+  data: any;
+}
+
+export type AjaxFunction = (url: string, instruction: AjaxInstruction) => AjaxPromise;
+
+export interface AjaxObject {
+  data: Object;
+}
+
+export interface AjaxInstruction {
+  data: Object;
+  method: string;
+  headers: Object;
+  [prop: string]: any;
+}
+
+export namespace Ajax {
+  let ajax_function: AjaxFunction;
+
+  export function executeRequest(url: string, method: string, data: Object, headers: Object) {
+    if (headers == null) { headers = {}; }
+    headers['Accept'] = headers['Content-Type'] = 'application/json';
+    let options = {
+      method: method,
+      url: method,
+      data: JSON.stringify(data === undefined ? {} : data),
+      headers: headers,
+      dataType: 'json',
+      responseType: 'json'
+    };
+    options['type'] = options.method;
+    options['body'] = options.data;
+    return ajax_function(options.url, options);
   }
-  export type AjaxFunction = (url: string, instruction: AjaxInstruction) => AjaxPromise;
 
-  export namespace Ajax {
-    let ajax_function: AjaxFunction;
-
-    export function executeRequest(url: string, method: string, data: Object, headers: Object) {
-      if (headers == null) { headers = {}; }
-      headers['Accept'] = headers['Content-Type'] = 'application/json';
-      let options = {
-        method: method,
-        url: method,
-        data: JSON.stringify(data === undefined ? {} : data),
-        headers: headers,
-        dataType: 'json',
-        responseType: 'json'
-      };
-      options['type'] = options.method;
-      options['body'] = options.data;
-      return ajax_function(options.url, options);
+  // Set the http function used for requests
+  // The function should accept one object with keys
+  // method, url, params, headers
+  // and return a promise-like object
+  // with then and catch
+  //
+  // @note Like $http or jQuery.ajax
+  // @param {Function} fn The function.
+  // @param {string} type The function.
+  export function setAjaxFunction(fn: Function, type?: string) {
+    if (typeof type === 'undefined') {
+      if ((typeof jQuery !== 'undefined') && (fn === jQuery.ajax))
+        var type = 'jquery';
+      else if ((typeof fetch !== 'undefined') && (fn === fetch))
+        var type = 'fetch';
     }
 
-    // Set the http function used for requests
-    // The function should accept one object with keys
-    // method, url, params, headers
-    // and return a promise-like object
-    // with then and catch
-    //
-    // @note Like $http or jQuery.ajax
-    // @param {Function} fn The function.
-    // @param {string} type The function.
-    export function setAjax(fn: Function, type?: string) {
-      if (typeof type === 'undefined') {
-        if ((typeof jQuery !== 'undefined') && (fn === jQuery.ajax))
-          var type = 'jquery';
-        else if ((typeof fetch !== 'undefined') && (fn === fetch))
-          var type = 'fetch';
-      }
-
-      switch (type) {
-        case 'jquery':
-          ajax_function = function(url: string, instruction: AjaxInstruction) {
-            let deferred = jQuery.Deferred();
-            let ajax = fn(url, instruction);
-            ajax.then((data: any, status: any, jqxhr: any) => deferred.resolve({data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders()}));
-            ajax.catch((data: any, status: any, jqxhr: any) => deferred.reject({data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders()}));
-            return deferred.promise();
-          }
-          break;
-        case 'fetch':
-          ajax_function = (url: string, instruction: AjaxInstruction) => {
-            return new Promise(function(resolve, reject) {
-              instruction['body'] = instruction.data;
-              let http_promise = fn(url, instruction) as Promise<Response>;
-              http_promise.then(function(response: Response) {
-                if (response.headers.get('content-type') !== 'application/json') {
+    switch (type) {
+      case 'jquery':
+        ajax_function = function(url: string, instruction: AjaxInstruction) {
+          let deferred = jQuery.Deferred();
+          let ajax = fn(url, instruction);
+          ajax.then((data: any, status: any, jqxhr: any) => deferred.resolve({data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders()}));
+          ajax.catch((data: any, status: any, jqxhr: any) => deferred.reject({data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders()}));
+          return deferred.promise();
+        }
+        break;
+      case 'fetch':
+        ajax_function = (url: string, instruction: AjaxInstruction) => {
+          return new Promise(function(resolve, reject) {
+            instruction['body'] = instruction.data;
+            let http_promise = fn(url, instruction) as Promise<Response>;
+            http_promise.then(function(response: Response) {
+              if (response.headers.get('content-type') !== 'application/json') {
+                resolve(response);
+              } else {
+                let json_promise = response.json();
+                json_promise.then(function(json: string) {
+                  response['data'] = json; // typescript ignores square brackets
                   resolve(response);
-                } else {
-                  let json_promise = response.json();
-                  json_promise.then(function(json: string) {
-                    response['data'] = json; // typescript ignores square brackets
-                    resolve(response);
-                  });
-                  json_promise.catch(reject);
-                }
-              });
-              http_promise.catch(reject);
+                });
+                json_promise.catch(reject);
+              }
             });
-          }
-          break;
-        default:
-          this.http_function = (url: string, instruction: AjaxInstruction) => fn(instruction);
-      }
+            http_promise.catch(reject);
+          });
+        }
+        break;
+      default:
+        this.ajax_function = (url: string, instruction: AjaxInstruction) => fn(instruction);
     }
-  }
-
-  export interface AjaxObject {
-    data: Object;
-  }
-
-  export interface AjaxInstruction {
-    data: Object;
-    method: string;
-    headers: Object;
-    [prop: string]: any;
   }
 }

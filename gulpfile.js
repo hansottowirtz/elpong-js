@@ -1,16 +1,9 @@
 var gulp = require('gulp');
-var coffee = require('gulp-coffee');
 var uglify = require('gulp-uglify');
-var concat = require('gulp-concat');
 var rename = require('gulp-rename');
 var cson = require('gulp-cson');
-var coffeelint = require('gulp-coffeelint');
 var size = require('gulp-size');
-var umd = require('gulp-umd');
-var ts = require('gulp-typescript');
 var webpack = require('webpack-stream');
-
-var reporter = require('coffeelint-stylish').reporter;
 var karmaServer = require('karma').Server;
 
 // var files = ['./src/index.coffee', './src/scheme.coffee', './src/element.coffee', './src/collection.coffee', , './src/polyfills.coffee', './src/util.coffee', './src/*/*.coffee', './src/*/*/**/*.coffee']
@@ -19,37 +12,11 @@ var files = ['./src/index.js', './src/scheme.js', './src/element.js', './src/col
 
 gulp.task('default', ['test']);
 
-gulp.task('build', ['build:ts', 'build:concat', 'build:umd', 'build:uglify']);
+gulp.task('build', ['build:webpack', 'build:uglify']);
 
-gulp.task('build:ts', function() {
-  return gulp.src('src/**/*.ts')
-    .pipe(ts.createProject('tsconfig.json')()).js
-    .pipe(gulp.dest('built/'));
-});
-
-// gulp.task('build:concat', function() {
-//   return gulp.src('built/**/*.js')
-//     .pipe(concat('elpong-x.js'))
-//     // .pipe(rename())
-//     .pipe(gulp.dest('dist/'));
-// });
-gulp.task('build:concat', function() {
-  return gulp.src('src/**/*.ts')
-    .pipe(concat('elpong-x.ts'))
-    // .pipe(rename())
-    .pipe(gulp.dest('dist/'));
-});
-
-gulp.task('build:umd', function() {
-  return gulp.src('built/**/*.js')
-    .pipe(umd({
-      exports: function() {
-        return 'Elpong';
-      },
-      namespace: function() {
-        return 'Elpong';
-      }
-    }))
+gulp.task('build:webpack', function() {
+  return gulp.src('src/main.ts')
+    .pipe(webpack(require('./webpack.config.js')))
     .pipe(gulp.dest('dist/'));
 });
 
@@ -62,6 +29,7 @@ gulp.task('build:uglify', function() {
         }
       }
     }))
+    .pipe(rename('elpong.min.js'))
     .pipe(gulp.dest('dist/'));
 });
 
@@ -118,9 +86,9 @@ gulp.task('test:frameworks', ['test:build'], function(done){
   testWithFramework(frameworks[0], partlyDone);
 })
 
-gulp.task('debug-test', ['test:build'], function(done) {
-  gulp.watch('src/**/*', ['test:build']);
-  gulp.watch('test/**/*', ['test:build']);
+gulp.task('test:karma:debug', ['test:build'], function(done) {
+  gulp.watch('src/**/*', ['build']);
+  gulp.watch('test/**/*', ['build']);
   return new karmaServer({
     configFile: __dirname + '/karma.conf.js',
     singleRun: false,

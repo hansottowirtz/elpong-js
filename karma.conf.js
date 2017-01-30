@@ -46,7 +46,7 @@ module.exports = function(config) {
 
   config.set({
     sauceLabs: {
-      testName: 'HTTPong Karma Test',
+      testName: 'Elpong Karma Test',
       startConnect: false,
       recordScreenshots: true
     },
@@ -54,30 +54,29 @@ module.exports = function(config) {
     basePath: '',
     frameworks: ['source-map-support', 'jasmine'],
     files: [
-      'test/fixtures/**/*.json',
-      'dist/httpong.js',
-      'test/spec_helper.coffee',
-      'test/**/*_spec.coffee'
+      'spec/fixtures/**/*.json',
+      'src/**/*.ts',
+      // 'spec/**/spec_helper.coffee',
+      // 'spec/**/util_spec.coffee',
+      'spec/**/util_spec.ts'
     ],
     exclude: [],
     preprocessors: {
       '**/*.json': ['json_fixtures'],
-      '**/*.coffee': ['coffee'],
+      '**/*.ts': ['webpack'],
+      '**/*.coffee': ['webpack'],
       '**/*.js': ['env']
-    },
-    jsonFixturesPreprocessor: {
-      variableName: '__json__'
     },
     plugins: [
       'karma-env-preprocessor',
       'karma-json-fixtures-preprocessor',
       'karma-jasmine',
-      'karma-coffee-preprocessor',
       'karma-chrome-launcher',
       'karma-safari-launcher',
       'karma-phantomjs-launcher',
       'karma-sauce-launcher',
-      'karma-source-map-support'
+      'karma-source-map-support',
+      'karma-webpack'
     ],
     reporters: ['progress'],
     port: 9876,
@@ -89,10 +88,19 @@ module.exports = function(config) {
     concurrency: Infinity,
     envPreprocessor: [
      'FRAMEWORK'
-   ],
-    coffeePreprocessor: {
-      options: {
-        sourceMap: true
+    ],
+    jsonFixturesPreprocessor: {
+      variableName: '__json__'
+    },
+    webpack: {
+      resolve: {
+        extensions: ['.ts', '.coffee', '.js']
+      },
+      module: {
+        loaders: [
+          { test: /\.coffee$/, loader: 'coffee-loader' },
+          { test: /\.ts$/, loader: 'awesome-typescript-loader' }
+        ]
       }
     }
   })

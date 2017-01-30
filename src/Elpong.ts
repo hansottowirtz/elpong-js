@@ -1,45 +1,52 @@
-module Elpong {
-  declare let DEBUG: boolean;
+import { Scheme } from './Scheme';
+import { Collection } from './Collection';
+import { SchemeConfiguration } from './Configuration';
+import { ElpongError } from './Errors';
+import { Util } from './Util';
+import { Ajax } from './Ajax';
 
-  interface SchemeMap {
-    [name: string]: Scheme;
+declare let DEBUG: boolean;
+
+interface SchemeMap {
+  [name: string]: Scheme;
+}
+
+interface CollectionMap {
+  [name: string]: Collection;
+}
+
+let schemes: SchemeMap = {};
+
+export namespace Elpong {
+  export function add(scheme_config: SchemeConfiguration | Object): Scheme {
+    let scheme = new Scheme(scheme_config);
+    return schemes[scheme.name] = scheme;
   }
-  
-  interface CollectionMap {
-    [name: string]: Collection;
-  }
 
-  let schemes: SchemeMap = {};
-
-  export const ElpongStatic = {
-    addScheme: (scheme_configuration: SchemeConfiguration) => {
-      let scheme = new Scheme(scheme_configuration);
-      schemes[scheme.name] = scheme;
-    },
-
-    scheme: (name: string) => {
-      let scheme: Scheme;
-      if (scheme = schemes[name]) {
-        return scheme;
-      }
-      throw new ElpongError('schmnf', name); // Scheme not found
-    },
-
-    load: () => {
-      let scheme_tags: NodeListOf<HTMLMetaElement> =
-        document.querySelectorAll('meta[name=httpong-scheme]') as NodeListOf<HTMLMetaElement>;
-
-      if (!scheme_tags.length && !Object.keys(schemes).length) {
-        throw new ElpongError('elpgns');
-      }
-
-      for (let scheme_tag of Util.arrayFromHTML(scheme_tags) as HTMLMetaElement[]) {
-        ElpongStatic.addScheme(JSON.parse(scheme_tag.content));
-      }
-
-      // TODO: load preloaded elements
-
-      return ElpongStatic;
+  export function get(name: string): Scheme {
+    let scheme: Scheme;
+    if (scheme = schemes[name]) {
+      return scheme;
     }
+    throw new ElpongError('schmnf', name); // Scheme not found
+  }
+
+  export function load(): void {
+    let scheme_tags: NodeListOf<HTMLMetaElement> =
+      document.querySelectorAll('meta[name=elpong-scheme]') as NodeListOf<HTMLMetaElement>;
+
+    if (!scheme_tags.length && !Object.keys(schemes).length) {
+      throw new ElpongError('elpgns');
+    }
+
+    for (let scheme_tag of Util.arrayFromHTML(scheme_tags) as HTMLMetaElement[]) {
+      Elpong.add(JSON.parse(scheme_tag.content));
+    }
+
+    // TODO: load preloaded elements
+  }
+
+  export function setAjax(fn: Function): void {
+    Ajax.setAjaxFunction(fn);
   }
 }

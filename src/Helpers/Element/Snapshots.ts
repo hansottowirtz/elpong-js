@@ -1,25 +1,21 @@
-module Elpong {
-  export namespace ElementHelper {
-    export namespace Snapshots {
-      export function getSortedArray(snapshots_list) {
-        let arr = Util.values(snapshots_list);
-        arr.sort((a, b) => a.time - b.time);
-        return arr;
-      }
+import { Util } from '../../Util';
 
-      export function removeAfter(time, snapshots_list) {
-        let arr = getSortedArray(snapshots_list);
-        let snapshots_list_2 = {};
-        for (let v of arr) {
-          if (v.time <= time) { snapshots_list_2[v.time] = v; }
-        }
-        return snapshots_list_2;
-      }
+export namespace Snapshots {
+  export function getSortedArray(snapshots_list) {
+    let arr = Util.values(snapshots_list);
+    arr.sort((a, b) => a.time - b.time);
+    return arr;
+  }
+
+  export function removeAfter(time, snapshots_list) {
+    let arr = getSortedArray(snapshots_list);
+    let snapshots_list_2 = {};
+    for (let v of arr) {
+      if (v.time <= time) { snapshots_list_2[v.time] = v; }
     }
+    return snapshots_list_2;
   }
 }
-
-
 
 // import Element from '../../Element';
 //
