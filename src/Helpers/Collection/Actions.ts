@@ -1,23 +1,28 @@
-import { Collection, CollectionActionOptions } from '../../Collection';
-import { Ajax, AjaxPromise, AjaxResponse } from '../../Ajax';
+import { Collection } from '../../Collection';
+import { Ajax, AjaxResponse, AjaxData, AjaxHeaders } from '../../Ajax';
 import { UrlHelper, UrlOptions } from '../UrlHelper';
 import { SelectorValue } from '../../Element';
 import { CollectionActionConfiguration } from '../../Configuration';
+import { PreElement } from '../../PreElement';
+
+export interface CollectionActionOptions {
+  data?: AjaxData;
+  headers?: AjaxHeaders;
+}
 
 export namespace Actions {
   export function executeGetAll(collection: Collection, action_options: CollectionActionOptions) {
     if (!action_options) { action_options = {}; }
     let data = action_options.data;
 
-    let promise: AjaxPromise;
-    promise = Ajax.executeRequest(
+    let promise = Ajax.executeRequest(
       UrlHelper.createForCollection('GET', collection, action_options as UrlOptions),
       'GET',
       data,
       action_options.headers
     );
     promise.then((response: AjaxResponse) => {
-      response.data.map((pre_element) => {
+      response.data.map((pre_element: PreElement) => {
         collection.buildOrMerge(pre_element);
       });
     });
@@ -34,7 +39,7 @@ export namespace Actions {
       data,
       action_options.headers
     );
-    promise.then(function(response) {
+    promise.then(function(response: AjaxResponse) {
       if (response.data) { return collection.buildOrMerge(response.data); }
     });
     return promise;

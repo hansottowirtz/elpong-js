@@ -2,7 +2,9 @@ import { Scheme } from './Scheme';
 import { PreElement } from './PreElement';
 import { CollectionHelper } from './Helpers';
 import { Element, SelectorValue } from './Element';
-import { Util } from './Util'
+import { Util } from './Util';
+import { ActionConfiguration } from './Configuration';
+import { Actions, CollectionActionOptions } from './Helpers/Collection/Actions';
 
 interface ElementMap {
   [key: string]: Element;
@@ -14,17 +16,16 @@ interface CollectionActions {
   [action_name: string]: Function;
 }
 
-export interface CollectionActionOptions {
-  data?: Object
-  headers?: Object
-}
-
 interface CollectionArrayOptions {
   no_new?: boolean;
 }
 
-interface CollectionFindByOptions extends CollectionArrayOptions {
+export interface CollectionFindByOptions extends CollectionArrayOptions {
   multiple?: boolean;
+}
+
+interface FieldsKeyValueMap {
+  [key: string]: any;
 }
 
 export class Collection {
@@ -59,17 +60,17 @@ export class Collection {
     //     # HPP.http_function(new_options)
 
     this.actions = {
-      getAll(user_options: CollectionActionOptions) {
-        return CollectionHelper.Actions.executeGetAll(this, user_options);
+      getAll: (user_options: CollectionActionOptions) => {
+        return Actions.executeGetAll(this, user_options);
       },
-      getOne(selector_value: SelectorValue, user_options: CollectionActionOptions) {
-        return CollectionHelper.Actions.executeGetOne(this, selector_value, user_options);
+      getOne: (selector_value: SelectorValue, user_options: CollectionActionOptions) => {
+        return Actions.executeGetOne(this, selector_value, user_options);
       }
     };
 
-    Util.forEach(config.collection_actions, (action_settings, action_name) => {
-      this.actions[Util.camelize(action_name)] = (user_options) => {
-        CollectionHelper.Actions.executeCustom(this, action_name, action_settings, user_options);
+    Util.forEach(config.collection_actions, (action_config: ActionConfiguration, action_name: string) => {
+      this.actions[Util.camelize(action_name)] = (action_options: CollectionActionOptions) => {
+        Actions.executeCustom(this, action_name, action_config, action_options);
       }
     });
   }
@@ -105,16 +106,16 @@ export class Collection {
     return arr.concat(Util.values(this.elements));
   }
 
-  find(selector_value: SelectorValue) {
-    return this.elements[selector_value];
+  find(selector_value: SelectorValue): Element|null {
+    return this.elements[selector_value] || null;
   }
 
-  findBy(fields_key_value_map: Object, find_options: CollectionFindByOptions) {
+  findBy(fields_key_value_map: FieldsKeyValueMap, find_options: CollectionFindByOptions): Element|Element[]|null {
     if (!find_options) { find_options = {}; }
 
     let is_correct;
     let arr = this.array(find_options);
-    let response_arr = [];
+    let response_arr: Element[] = [];
 
     for (let element of arr) {
       is_correct = true;
@@ -134,8 +135,12 @@ export class Collection {
         }
       }
     }
-
-    return response_arr;
+    if (find_options.multiple) {
+      return response_arr;
+    }
+    else {
+      return null;
+    }
   }
 
   build(pre_element: PreElement) {

@@ -1,15 +1,11 @@
 {
   "name": "clothes",
+  "selector": "id",
   "collections": {
     "workers": {
       "fields": {
-        "id": {
-          "selector": true,
-          "type": "Integer"
-        },
-        "name": {
-          "type": "String"
-        }
+        "id": {},
+        "name": {}
       },
       "relations": {
         "has_many": {
@@ -22,21 +18,10 @@
     },
     "tshirts": {
       "fields": {
-        "id": {
-          "selector": true,
-          "type": "Integer"
-        },
-        "color": {
-          "type": "String"
-        },
-        "person_id": {
-          "reference": true,
-          "type": "Integer"
-        },
-        "brand_id": {
-          "reference": true,
-          "type": "Integer"
-        }
+        "id": {},
+        "color": {},
+        "person_id": {},
+        "brand_id": {}
       },
       "relations": {
         "belongs_to": {
@@ -50,13 +35,8 @@
     },
     "brands": {
       "fields": {
-        "id": {
-          "selector": true,
-          "type": "Integer"
-        },
-        "name": {
-          "type": "String"
-        }
+        "id": {},
+        "name": {}
       },
       "relations": {
         "has_many": {

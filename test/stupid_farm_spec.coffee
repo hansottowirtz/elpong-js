@@ -2,8 +2,7 @@ describe 'Stupid Farm', ->
   a = an = it
 
   beforeEach ->
-    pre_scheme = window.__json__["test/fixtures/stupid-farm/scheme"] # loads the scheme
-    @scheme = window.HTTPong.addScheme(pre_scheme) # adds the scheme
+    @scheme = Elpong.add(require('./fixtures/stupid-farm/scheme.json5'))
 
     @apples = @scheme.select('apples')
     @apple_stems = @scheme.select('apple_stems')

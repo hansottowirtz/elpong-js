@@ -18,7 +18,6 @@ function isSchemeConfiguration(sc: SchemeConfiguration | Object): sc is SchemeCo
 
 export class Scheme {
   name: string;
-  singular_name: string;
   private _configuration: SchemeConfiguration;
   _collections: CollectionMap;
   private api_url: string;
@@ -33,7 +32,6 @@ export class Scheme {
     this._configuration = _sc;
     this.name = _sc.name;
     this._collections = {};
-    this.api_url = null;
 
     // Create collections
     for (let collection_name in _sc.collections) {

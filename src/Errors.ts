@@ -1,4 +1,5 @@
-if (typeof DEBUG !== 'undefined' && !DEBUG) {
+declare var DEBUG: boolean;
+if (typeof DEBUG === 'undefined') {
   var DEBUG = true;
 }
 
@@ -14,7 +15,11 @@ if (DEBUG) {
     'elenew': 'Element is new',
     'elesna': 'Element has a selector value but is in new_elements array',
     'elense': 'Element has no selector value but is in elements object',
-    'apinur': 'Api url has not yet been set'
+    'apinur': 'Api url has not yet been set',
+    'fldnsa': 'Field should be an array of selectors',
+    'elesch': 'Element selector changed',
+    'elesnf': 'Snapshot not found',
+    'elesti': 'Invalid snapshot identifier: must be number <= list.length, string or RegExp'
   }
 }
 

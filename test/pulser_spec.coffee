@@ -1,7 +1,6 @@
 describe 'Pulser', ->
   beforeEach ->
-    @pre_scheme = window.__json__["test/fixtures/pulser/scheme"] # loads the scheme
-    @scheme = window.HTTPong.addScheme(@pre_scheme) # adds the scheme
+    @scheme = Elpong.add(require('./fixtures/pulser/scheme.json5'))
 
     @users = @scheme.select('users')
 

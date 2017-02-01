@@ -1,26 +1,26 @@
-var gulp = require('gulp');
-var uglify = require('gulp-uglify');
-var rename = require('gulp-rename');
-var cson = require('gulp-cson');
-var size = require('gulp-size');
-var webpack = require('webpack-stream');
-var karmaServer = require('karma').Server;
+const gulp = require('gulp');
+const uglify = require('gulp-uglify');
+const rename = require('gulp-rename');
+const cson = require('gulp-cson');
+const size = require('gulp-size');
+const webpack = require('webpack-stream');
+const karmaServer = require('karma').Server;
 
 // var files = ['./src/index.coffee', './src/scheme.coffee', './src/element.coffee', './src/collection.coffee', , './src/polyfills.coffee', './src/util.coffee', './src/*/*.coffee', './src/*/*/**/*.coffee']
 // var files = ['./src/index.ts', './src/scheme.ts', './src/element.ts', './src/collection.ts', , './src/polyfills.ts', './src/util.ts', './src/*/*.ts', './src/*/*/**/*.ts']
-var files = ['./src/index.js', './src/scheme.js', './src/element.js', './src/collection.js', , './src/polyfills.js', './src/util.js', './src/*/*.js', './src/*/*/**/*.js']
+const files = ['./src/index.js', './src/scheme.js', './src/element.js', './src/collection.js', , './src/polyfills.js', './src/util.js', './src/*/*.js', './src/*/*/**/*.js']
 
 gulp.task('default', ['test']);
 
 gulp.task('build', ['build:webpack', 'build:uglify']);
 
-gulp.task('build:webpack', function() {
+gulp.task('build:webpack', () => {
   return gulp.src('src/main.ts')
     .pipe(webpack(require('./webpack.config.js')))
     .pipe(gulp.dest('dist/'));
 });
 
-gulp.task('build:uglify', function() {
+gulp.task('build:uglify', () => {
   return gulp.src('dist/elpong.js')
     .pipe(uglify({
       compress: {
@@ -33,13 +33,13 @@ gulp.task('build:uglify', function() {
     .pipe(gulp.dest('dist/'));
 });
 
-gulp.task('test:build:schemes', function() {
+gulp.task('test:build:schemes', () => {
   return gulp.src('./test/fixtures/*/scheme.cson')
     .pipe(cson())
     .pipe(gulp.dest('./test/fixtures'));
 });
 
-gulp.task('lint', function() {
+gulp.task('lint', () => {
   return gulp.src('./src/*.coffee')
     .pipe(coffeelint())
     .pipe(coffeelint.reporter('coffeelint-stylish'));
@@ -49,7 +49,7 @@ gulp.task('test', ['test:karma']);
 
 gulp.task('test:build', ['test:build:schemes', 'build']);
 
-testWithFramework = function(framework, done) {
+testWithFramework = (framework, done) => {
   process.env.FRAMEWORK = framework;
   console.log('Testing ' + framework);
   return new karmaServer({
@@ -58,11 +58,11 @@ testWithFramework = function(framework, done) {
   }, done).start();
 }
 
-gulp.task('test:karma', ['test:build'], function(done) {
+gulp.task('test:karma', ['test:build'], (done) => {
   return testWithFramework('angular', done);
 });
 
-gulp.task('test:saucelabs', ['test:build'], function(done) {
+gulp.task('test:saucelabs', ['test:build'], (done) => {
   return new karmaServer({
     configFile: __dirname + '/karma.conf.js'
   }, done).start();
@@ -70,7 +70,7 @@ gulp.task('test:saucelabs', ['test:build'], function(done) {
 
 gulp.task('test:travis', ['test:frameworks', 'test:saucelabs']);
 
-gulp.task('test:frameworks', ['test:build'], function(done){
+gulp.task('test:frameworks', ['test:build'], (done) => {
   var frameworks = ['angular', 'jquery', 'fetch'];
   var i = 0;
   var partlyDone = function(exitcode){
@@ -86,7 +86,7 @@ gulp.task('test:frameworks', ['test:build'], function(done){
   testWithFramework(frameworks[0], partlyDone);
 })
 
-gulp.task('test:karma:debug', ['test:build'], function(done) {
+gulp.task('test:karma:debug', ['test:build'], (done) => {
   gulp.watch('src/**/*', ['build']);
   gulp.watch('test/**/*', ['build']);
   return new karmaServer({

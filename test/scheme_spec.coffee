@@ -1,8 +1,7 @@
 describe 'Scheme', ->
   describe 'pulser', ->
     beforeAll ->
-      @pre_scheme = window.__json__["test/fixtures/pulser/scheme"]
-      @scheme = window.HTTPong.addScheme(@pre_scheme)
+      @scheme = Elpong.add(require('./fixtures/pulser/scheme.json5'))
 
     it 'should be existing', ->
       expect(HTTPong.getScheme('pulser')).toBeDefined()

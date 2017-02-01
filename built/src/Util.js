@@ -1,9 +1,5 @@
 "use strict";
 exports.Util = {
-    BREAK: new Object(),
-    kebab: function (string) {
-        return string.toLowerCase().replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '').replace(/(é|ë)/g, 'e').split(' ').join('-');
-    },
     capitalize: function (string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     },
@@ -17,9 +13,6 @@ exports.Util = {
             }
         }).replace(/\s+/g, '');
     },
-    arrayDiff: function (array1, array2) {
-        return array1.filter(function (i) { return array2.indexOf(i) < 0; });
-    },
     removeFromArray: function (array, element) {
         var i = array.indexOf(element);
         if (i === -1) {
@@ -30,24 +23,6 @@ exports.Util = {
             return true;
         }
     },
-    copy: function (obj) {
-        if (typeof obj !== 'object') {
-            return obj;
-        }
-        var copy = obj.constructor();
-        for (var attr in obj) {
-            if (obj.hasOwnProperty(attr)) {
-                copy[attr] = obj[attr];
-            }
-        }
-        return copy;
-    },
-    merge: function (obj1, obj2) {
-        for (var attr in obj2) {
-            obj1[attr] = obj2[attr];
-        }
-        return obj1;
-    },
     isInteger: function (value) {
         return value === parseInt(value, 10);
     },
@@ -57,33 +32,16 @@ exports.Util = {
     isString: function (value) {
         return typeof value === 'string';
     },
-    isRegex: function (value) {
-        return value instanceof RegExp;
+    isRegExp: function (value) {
+        return Object.prototype.toString.call(value) == '[object RegExp]';
     },
-    forEach: function (o, f) {
+    forEach: function (o, fn) {
         for (var k in o) {
-            var v = o[k];
             if (!o.hasOwnProperty(k)) {
                 continue;
             }
-            if (f(v, k) === exports.Util.BREAK) {
-                break;
-            }
-        }
-    },
-    reverseForIn: function (obj, f) {
-        var arr = [];
-        var _break = false;
-        for (var key in obj) {
-            arr.push(key);
-        }
-        var i = arr.length - 1;
-        while ((i >= 0) && !_break) {
-            var v = f.call(obj, arr[i], obj[arr[i]]);
-            if (v === exports.Util.BREAK) {
-                _break = true;
-            }
-            i--;
+            var v = o[k];
+            fn(v, k);
         }
     },
     endsWith: function (string, search) {
@@ -121,5 +79,25 @@ exports.Util = {
     },
     includes: function (a, b) {
         return a.indexOf(b) > -1;
+    },
+    equalsJSON: function (a, b) {
+        for (var k in a) {
+            var v1 = a[k];
+            var v2 = b[k];
+            if (typeof v1 === 'object') {
+                if (!exports.Util.equalsJSON(v1, v2)) {
+                    return false;
+                }
+            }
+            else {
+                if (v1 !== v2) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    },
+    copyJSON: function (o) {
+        return JSON.parse(JSON.stringify(o));
     }
 };

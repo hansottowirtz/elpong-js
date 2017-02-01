@@ -5,7 +5,7 @@ describe 'Element', ->
     beforeEach ->
       httpBackend = new HttpBackend()
 
-      @pre_scheme = window.__json__["test/fixtures/pulser/scheme"]
+      @pre_scheme = window.__json__["test/fixtures/pulser/scheme.json5"]
       @scheme = window.HTTPong.addScheme(@pre_scheme)
 
       @scheme.setApiUrl('/api/v1')
@@ -29,7 +29,7 @@ describe 'Element', ->
       httpBackend.flush()
 
     it 'embedded element should be added', (done) ->
-      pre_scheme = window.__json__["test/fixtures/stupid-farm/scheme"]
+      pre_scheme = window.__json__["test/fixtures/stupid-farm/scheme.json5"]
       scheme = window.HTTPong.addScheme(pre_scheme)
 
       scheme.setApiUrl('/api/v1')

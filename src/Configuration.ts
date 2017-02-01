@@ -1,6 +1,7 @@
 import { ElpongError } from './Errors'
 
-if (typeof DEBUG !== 'undefined' && !DEBUG) {
+declare var DEBUG: boolean;
+if (typeof DEBUG === 'undefined') {
   var DEBUG = true;
 }
 
@@ -26,7 +27,7 @@ export class SchemeConfiguration {
 
       let collection_configuration: CollectionConfiguration = this.collections[collection_name] = {
         singular: collection_preconf.singular || collection_name.slice(0, -1)
-      };
+      } as CollectionConfiguration;
 
       let props = ['fields', 'relations', 'actions', 'collection_actions'];
       let relation_types = ['has_many', 'has_one', 'belongs_to'];
@@ -34,9 +35,10 @@ export class SchemeConfiguration {
       for (let prop of props) {
         collection_configuration[prop] = collection_preconf[prop] || {};
       }
-      if (collection_preconf.relations) {
+      let relations_conf;
+      if (relations_conf = collection_preconf.relations) {
         for (let relation_type of relation_types) {
-          collection_configuration.relations[relation_type] = collection_preconf.relations[relation_type] || {};
+          relations_conf[relation_type] = collection_preconf.relations[relation_type] || {};
         }
       }
     }
@@ -47,10 +49,10 @@ export interface CollectionConfigurationMap {
 }
 export interface CollectionConfiguration {
   readonly singular: string
-  readonly fields?: FieldConfigurationMap;
-  readonly relations?: RelationConfigurationMaps;
-  readonly actions?: ActionConfigurationMap;
-  readonly collection_actions?: CollectionActionConfigurationMap;
+  readonly fields: FieldConfigurationMap;
+  readonly relations: RelationConfigurationMaps;
+  readonly actions: ActionConfigurationMap;
+  readonly collection_actions: CollectionActionConfigurationMap;
 }
 export interface FieldConfigurationMap {
   readonly [name: string]: FieldConfiguration;
@@ -63,6 +65,7 @@ export interface FieldConfiguration {
   readonly no_send: boolean;
 }
 export interface EmbeddedElementFieldConfiguration extends FieldConfiguration {
+  readonly field: string;
   readonly collection: string;
 }
 export interface EmbeddedCollectionFieldConfiguration extends FieldConfiguration {

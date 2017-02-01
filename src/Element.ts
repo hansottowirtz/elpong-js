@@ -1,29 +1,52 @@
 import { Collection } from './Collection';
 import { PreElement } from './PreElement';
 import { Util } from './Util';
+import { AjaxPromise } from './Ajax';
+import { Snapshot } from './Snapshot';
 
 import { Fields } from './Helpers/Element/Fields';
 import { Relations } from './Helpers/Element/Relations';
-import { Actions } from './Helpers/Element/Actions';
+import { Actions, ActionOptions } from './Helpers/Element/Actions';
+import { Snapshots } from './Helpers/Element/Snapshots';
 
 import { ElpongError } from './Errors';
+import { FieldConfiguration, EmbeddedElementFieldConfiguration, EmbeddedCollectionFieldConfiguration } from './Configuration';
 
 export type SelectorValue = string|number;
 
-interface Fields {
-  [field_name: string]: any;
+export function isSelectorValue(v: any): v is SelectorValue {
+  return (!!v || v === 0 || v === '') && (typeof v === 'string' || typeof v === 'number');
 }
+
+interface Fields {
+  [field_key: string]: any;
+}
+
+type RelationFunction = () => Element|Element[]|null|undefined;
 
 interface Relations {
-  [relation_function_name: string]: Function;
+  [relation_function_name: string]: RelationFunction;
 }
 
+type ActionFunction = (action_options?: ActionOptions) => AjaxPromise;
+
 interface Actions {
-  get: Function;
-  post: Function;
-  put: Function;
-  delete: Function;
-  [action_name: string]: Function;
+  get: ActionFunction;
+  post: ActionFunction;
+  put: ActionFunction;
+  delete: ActionFunction;
+  [action_name: string]: ActionFunction;
+}
+
+interface Snapshots {
+  make: Function;
+  list: Snapshot[];
+  current_index: number;
+  undo: (identifier: number|string|RegExp) => Element;
+  lastPersisted: () => Snapshot|undefined;
+  lastWithTag: (tag: string|RegExp) => Snapshot|undefined;
+  last: () => Snapshot|undefined;
+  isPersisted: () => boolean;
 }
 
 export class Element {
@@ -31,7 +54,7 @@ export class Element {
   readonly fields: Fields = {} as Fields;
   readonly relations: Relations = {} as Relations;
   readonly actions: Actions = {} as Actions;
-  private last_snapshot_time: number;
+  readonly snapshots: Snapshots = {} as Snapshots;
 
   constructor(collection: Collection, pre_element: PreElement) {
     this._collection = collection;
@@ -41,12 +64,9 @@ export class Element {
     Fields.setup(this, collection_config.fields, pre_element);
     Relations.setup(this, collection_config.relations);
     Actions.setup(this, collection_config.actions);
-    // Helpers.ElementHelper.setupSnapshots(epe);
+    Snapshots.setup(this);
 
-    this.last_snapshot_time = null;
-    // this.snapshots.make('creation');
-
-    // TODO: snapshots
+    this.snapshots.make('creation');
   }
 
   collection() {
@@ -58,15 +78,18 @@ export class Element {
   }
 
   remove() {
-    let element = this;
-    if (this.isNew()) {
-      Util.removeFromArray(this.collection().new_elements, this);
-      return {then(fn) { return fn(); }, catch() {}};
-    } else {
+    let selector_value: SelectorValue|undefined;
+    if (selector_value = this.selector()) {
       return this.actions.delete().then(() => {
         let elements = this.collection().elements;
-        return delete elements[this.selector()];
+        delete elements[selector_value as SelectorValue];
       });
+    } else {
+      Util.removeFromArray(this.collection().new_elements, this);
+      return {
+        then: function(fn: Function) { return fn(); },
+        catch: function() {}
+      };
     }
   }
 
@@ -94,59 +117,24 @@ export class Element {
     }
   }
 
-  // undo(n) {
-  //   if (n == null) { n = 0; }
-  //   if (Util.isInteger(n)) {
-  //     if (n > 1000000) {
-  //       if (this.snapshots.list[n]) {
-  //         this.merge(this.snapshots.list[n].data);
-  //         return this.last_snapshot_time = n;
-  //       } else {
-  //         throw new Error(`Diff at time ${n} does not exist`);
-  //       }
-  //     } else if (n < 0) {
-  //       throw new Error(`${n} is smaller than 0`);
-  //     } else {
-  //       let ds = SnapshotHelper.getSortedArray(this.snapshots.list);
-  //       let { length } = ds;
-  //       let index = ds.indexOf(this.snapshots.list[this.last_snapshot_time]);
-  //       // index = 0 if index < 0
-  //       let d = ds[index - n];
-  //       this.merge(d.data);
-  //       return this.last_snapshot_time = d.time;
-  //     }
-  //   } else if (HP.Util.isString(n)) {
-  //     let a = null;
-  //     for (let v of Array.from(HPP.Helpers.Snapshot.getSortedArray(this.snapshots.list))) {
-  //       if (v.tag === n) {
-  //         if (!a) { a = v; }
-  //       }
-  //     }
-  //     if (a) {
-  //       return this.merge(a.data);
-  //     } else {
-  //       throw new Error(`No snapshot found with tag ${n}`);
-  //     }
-  //   } else {
-  //     throw new TypeError(`Don't know what to do with ${n}`);
-  //   }
-  // }
-
-  merge(pre_element) {
-    let collection_settings = this.collection().configuration();
-    Util.forEach(collection_settings.fields, (field_settings, field_name) => {
+  merge(pre_element: PreElement) {
+    let collection_config = this.collection().configuration();
+    Util.forEach(collection_config.fields, (field_config: FieldConfiguration, field_key: string) => {
       let field_value;
-      if (field_value = pre_element[field_name]) {
-        if (field_settings.embedded_element) {
-          Fields.handleEmbeddedElement(this, pre_element, field_name, field_settings);
-        } else if (field_settings.embedded_collection) {
-          Fields.handleEmbeddedCollection(this, pre_element, field_name, field_settings);
+      if (field_value = pre_element[field_key]) {
+        if (field_config.embedded_element) {
+          Fields.handleEmbeddedElement(this, pre_element, field_key, field_config as EmbeddedElementFieldConfiguration);
+        } else if (field_config.embedded_collection) {
+          Fields.handleEmbeddedCollection(this, pre_element, field_key, field_config as EmbeddedCollectionFieldConfiguration);
         } else {
-          let sv_1 = this.fields[field_name];
-          if (field_settings.selector && (sv_1 !== field_value) && sv_1 && field_value) {
-            throw new Error(`Selector has changed from ${sv_1} to ${field_value}`);
+          let selector_key = this.collection().scheme().configuration().selector;
+          if (field_key === selector_key) {
+            let selector_value = this.fields[field_key];
+            if ((selector_value !== field_value) && isSelectorValue(selector_value) && isSelectorValue(field_value)) {
+              throw new ElpongError('elesch', `${selector_value} -> ${field_value}`);
+            }
           }
-          this.fields[field_name] = field_value;
+          this.fields[field_key] = field_value;
         }
       }
     });

@@ -66,8 +66,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	var Scheme_1 = __webpack_require__(2);
 	var Errors_1 = __webpack_require__(6);
-	var Util_1 = __webpack_require__(11);
-	var Ajax_1 = __webpack_require__(9);
+	var Util_1 = __webpack_require__(9);
+	var Ajax_1 = __webpack_require__(17);
 	var schemes = {};
 	var Elpong;
 	(function (Elpong) {
@@ -109,7 +109,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 	var Collection_1 = __webpack_require__(3);
-	var Configuration_1 = __webpack_require__(20);
+	var Configuration_1 = __webpack_require__(22);
 	var Errors_1 = __webpack_require__(6);
 	var Helpers_1 = __webpack_require__(4);
 	function isSchemeConfiguration(sc) {
@@ -127,7 +127,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._configuration = _sc;
 	        this.name = _sc.name;
 	        this._collections = {};
-	        this.api_url = null;
 	        // Create collections
 	        for (var collection_name in _sc.collections) {
 	            var collection_settings = _sc.collections[collection_name];
@@ -166,8 +165,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 	var Helpers_1 = __webpack_require__(4);
-	var Element_1 = __webpack_require__(10);
-	var Util_1 = __webpack_require__(11);
+	var Element_1 = __webpack_require__(8);
+	var Util_1 = __webpack_require__(9);
+	var Actions_1 = __webpack_require__(21);
 	var Collection = (function () {
 	    function Collection(scheme, name) {
 	        var _this = this;
@@ -190,15 +190,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        //     # HPP.http_function(new_options)
 	        this.actions = {
 	            getAll: function (user_options) {
-	                return Helpers_1.CollectionHelper.Actions.executeGetAll(this, user_options);
+	                return Actions_1.Actions.executeGetAll(_this, user_options);
 	            },
 	            getOne: function (selector_value, user_options) {
-	                return Helpers_1.CollectionHelper.Actions.executeGetOne(this, selector_value, user_options);
+	                return Actions_1.Actions.executeGetOne(_this, selector_value, user_options);
 	            }
 	        };
-	        Util_1.Util.forEach(config.collection_actions, function (action_settings, action_name) {
-	            _this.actions[Util_1.Util.camelize(action_name)] = function (user_options) {
-	                Helpers_1.CollectionHelper.Actions.executeCustom(_this, action_name, action_settings, user_options);
+	        Util_1.Util.forEach(config.collection_actions, function (action_config, action_name) {
+	            _this.actions[Util_1.Util.camelize(action_name)] = function (action_options) {
+	                Actions_1.Actions.executeCustom(_this, action_name, action_config, action_options);
 	            };
 	        });
 	    }
@@ -234,7 +234,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return arr.concat(Util_1.Util.values(this.elements));
 	    };
 	    Collection.prototype.find = function (selector_value) {
-	        return this.elements[selector_value];
+	        return this.elements[selector_value] || null;
 	    };
 	    Collection.prototype.findBy = function (fields_key_value_map, find_options) {
 	        if (!find_options) {
@@ -262,7 +262,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            }
 	        }
-	        return response_arr;
+	        if (find_options.multiple) {
+	            return response_arr;
+	        }
+	        else {
+	            return null;
+	        }
 	    };
 	    Collection.prototype.build = function (pre_element) {
 	        if (pre_element == null) {
@@ -311,14 +316,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Errors_1 = __webpack_require__(6);
 	var UrlHelper;
 	(function (UrlHelper) {
-	    // Creates the api url for an element
-	    //
-	    // @param {String} action_name           The action name, custom or 'GET', 'POST', 'PUT', 'DELETE'.
-	    // @param {HP.Element} element      The element.
-	    // @param {Object} user_options          The user_options, keys: suffix, path.
-	    //
-	    // @return undefined [Description]
-	    function createForElement(action_name, action_configuration, element, url_options) {
+	    function createForElement(action_name, action_configuration, element, url_options, no_selector) {
 	        var path, url;
 	        var collection = element.collection();
 	        var scheme = collection.scheme();
@@ -332,7 +330,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        else {
 	            url = api_url + "/" + collection.name;
-	            if (!action_configuration.no_selector && (action_name !== 'POST')) {
+	            if (!action_configuration.no_selector && !no_selector) {
 	                url = url + "/" + element.selector();
 	            }
 	        }
@@ -346,7 +344,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    UrlHelper.createForElement = createForElement;
 	    function createForCollection(action_name, collection, url_options) {
-	        var url = collection.scheme().getApiUrl() + "/" + collection.name; //HPP.Helpers.Url.createForCollection(, hpe, user_options) # (action_name, element, user_options = {}, suffix)
+	        var api_url = collection.scheme().getApiUrl();
+	        if (!api_url) {
+	            throw new Errors_1.ElpongError('apinur');
+	        }
+	        var url = api_url + "/" + collection.name; //HPP.Helpers.Url.createForCollection(, hpe, user_options) # (action_name, element, user_options = {}, suffix)
 	        if (url_options.suffix) {
 	            url = url + "/" + url_options.suffix;
 	        }
@@ -354,11 +356,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    UrlHelper.createForCollection = createForCollection;
 	    function trimSlashes(s) {
-	        return s.replace(/\/$/, '').replace(/^\//, '');
+	        return s.replace(/^\/|\/$/, '');
 	    }
 	    UrlHelper.trimSlashes = trimSlashes;
 	    function isFqdn(s) {
-	        return (/^https?:\/\//).test(s);
+	        return /^https?:\/\//.test(s);
 	    }
 	    UrlHelper.isFqdn = isFqdn;
 	})(UrlHelper = exports.UrlHelper || (exports.UrlHelper = {}));
@@ -374,10 +376,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	if (true) {
+	if (false) {
 	    var DEBUG = true;
 	}
-	if (DEBUG) {
+	if (false) {
 	    var error_text_map = {
 	        'schmnf': 'Scheme not found',
 	        'collnf': 'Collection not found',
@@ -389,14 +391,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        'elenew': 'Element is new',
 	        'elesna': 'Element has a selector value but is in new_elements array',
 	        'elense': 'Element has no selector value but is in elements object',
-	        'apinur': 'Api url has not yet been set'
+	        'apinur': 'Api url has not yet been set',
+	        'fldnsa': 'Field should be an array of selectors',
+	        'elesch': 'Element selector changed',
+	        'elesnf': 'Snapshot not found',
+	        'elesti': 'Invalid snapshot identifier: must be number <= list.length, string or RegExp'
 	    };
 	}
 	var ElpongError = (function (_super) {
 	    __extends(ElpongError, _super);
 	    function ElpongError(message, argument) {
 	        var _this = this;
-	        var actual_message = DEBUG ? error_text_map[message] : message;
+	        var actual_message =  false ? error_text_map[message] : message;
 	        if (argument) {
 	            _this = _super.call(this, actual_message + ": " + argument) || this;
 	        }
@@ -412,10 +418,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 7 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	"use strict";
-	var Actions_1 = __webpack_require__(8);
 	var CollectionHelper;
 	(function (CollectionHelper) {
 	    function getConfiguration(collection) {
@@ -436,7 +441,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 	    CollectionHelper.addElement = addElement;
-	    CollectionHelper.Actions = Actions_1.Actions;
 	})(CollectionHelper = exports.CollectionHelper || (exports.CollectionHelper = {}));
 
 
@@ -445,158 +449,29 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Ajax_1 = __webpack_require__(9);
-	var UrlHelper_1 = __webpack_require__(5);
-	var Actions;
-	(function (Actions) {
-	    function executeGetAll(collection, action_options) {
-	        if (!action_options) {
-	            action_options = {};
-	        }
-	        var data = action_options.data;
-	        var promise;
-	        promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection('GET', collection, action_options), 'GET', data, action_options.headers);
-	        promise.then(function (response) {
-	            response.data.map(function (pre_element) {
-	                collection.buildOrMerge(pre_element);
-	            });
-	        });
-	        return promise;
-	    }
-	    Actions.executeGetAll = executeGetAll;
-	    function executeGetOne(collection, selector_value, action_options) {
-	        if (action_options == null) {
-	            action_options = {};
-	        }
-	        var data = action_options.data;
-	        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection('GET', collection, { suffix: selector_value }), 'GET', data, action_options.headers);
-	        promise.then(function (response) {
-	            if (response.data) {
-	                return collection.buildOrMerge(response.data);
-	            }
-	        });
-	        return promise;
-	    }
-	    Actions.executeGetOne = executeGetOne;
-	    function executeCustom(collection, action_name, action_config, action_options) {
-	        if (action_options == null) {
-	            action_options = {};
-	        }
-	        var data = action_options.data;
-	        var method = action_config.method.toUpperCase();
-	        return Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection('GET', collection, { suffix: action_config.path || action_name }), method, data, action_options.headers);
-	    }
-	    Actions.executeCustom = executeCustom;
-	})(Actions = exports.Actions || (exports.Actions = {}));
-
-
-/***/ },
-/* 9 */
-/***/ function(module, exports) {
-
-	/// <reference path="../typings/index.d.ts"/>
-	"use strict";
-	var Ajax;
-	(function (Ajax) {
-	    var ajax_function;
-	    function executeRequest(url, method, data, headers) {
-	        if (headers == null) {
-	            headers = {};
-	        }
-	        headers['Accept'] = headers['Content-Type'] = 'application/json';
-	        var options = {
-	            method: method,
-	            url: method,
-	            data: JSON.stringify(data === undefined ? {} : data),
-	            headers: headers,
-	            dataType: 'json',
-	            responseType: 'json'
-	        };
-	        options['type'] = options.method;
-	        options['body'] = options.data;
-	        return ajax_function(options.url, options);
-	    }
-	    Ajax.executeRequest = executeRequest;
-	    // Set the http function used for requests
-	    // The function should accept one object with keys
-	    // method, url, params, headers
-	    // and return a promise-like object
-	    // with then and catch
-	    //
-	    // @note Like $http or jQuery.ajax
-	    // @param {Function} fn The function.
-	    // @param {string} type The function.
-	    function setAjaxFunction(fn, type) {
-	        if (typeof type === 'undefined') {
-	            if ((typeof jQuery !== 'undefined') && (fn === jQuery.ajax))
-	                var type = 'jquery';
-	            else if ((typeof fetch !== 'undefined') && (fn === fetch))
-	                var type = 'fetch';
-	        }
-	        switch (type) {
-	            case 'jquery':
-	                ajax_function = function (url, instruction) {
-	                    var deferred = jQuery.Deferred();
-	                    var ajax = fn(url, instruction);
-	                    ajax.then(function (data, status, jqxhr) { return deferred.resolve({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
-	                    ajax.catch(function (data, status, jqxhr) { return deferred.reject({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
-	                    return deferred.promise();
-	                };
-	                break;
-	            case 'fetch':
-	                ajax_function = function (url, instruction) {
-	                    return new Promise(function (resolve, reject) {
-	                        instruction['body'] = instruction.data;
-	                        var http_promise = fn(url, instruction);
-	                        http_promise.then(function (response) {
-	                            if (response.headers.get('content-type') !== 'application/json') {
-	                                resolve(response);
-	                            }
-	                            else {
-	                                var json_promise = response.json();
-	                                json_promise.then(function (json) {
-	                                    response['data'] = json; // typescript ignores square brackets
-	                                    resolve(response);
-	                                });
-	                                json_promise.catch(reject);
-	                            }
-	                        });
-	                        http_promise.catch(reject);
-	                    });
-	                };
-	                break;
-	            default:
-	                this.ajax_function = function (url, instruction) { return fn(instruction); };
-	        }
-	    }
-	    Ajax.setAjaxFunction = setAjaxFunction;
-	})(Ajax = exports.Ajax || (exports.Ajax = {}));
-
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var Util_1 = __webpack_require__(11);
-	var Fields_1 = __webpack_require__(12);
-	var Relations_1 = __webpack_require__(14);
-	var Actions_1 = __webpack_require__(18);
+	var Util_1 = __webpack_require__(9);
+	var Fields_1 = __webpack_require__(10);
+	var Relations_1 = __webpack_require__(12);
+	var Actions_1 = __webpack_require__(16);
+	var Snapshots_1 = __webpack_require__(19);
 	var Errors_1 = __webpack_require__(6);
+	function isSelectorValue(v) {
+	    return (!!v || v === 0 || v === '') && (typeof v === 'string' || typeof v === 'number');
+	}
+	exports.isSelectorValue = isSelectorValue;
 	var Element = (function () {
 	    function Element(collection, pre_element) {
 	        this.fields = {};
 	        this.relations = {};
 	        this.actions = {};
+	        this.snapshots = {};
 	        this._collection = collection;
 	        var collection_config = collection.configuration();
 	        Fields_1.Fields.setup(this, collection_config.fields, pre_element);
 	        Relations_1.Relations.setup(this, collection_config.relations);
 	        Actions_1.Actions.setup(this, collection_config.actions);
-	        // Helpers.ElementHelper.setupSnapshots(epe);
-	        this.last_snapshot_time = null;
-	        // this.snapshots.make('creation');
-	        // TODO: snapshots
+	        Snapshots_1.Snapshots.setup(this);
+	        this.snapshots.make('creation');
 	    }
 	    Element.prototype.collection = function () {
 	        return this._collection;
@@ -606,16 +481,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    Element.prototype.remove = function () {
 	        var _this = this;
-	        var element = this;
-	        if (this.isNew()) {
-	            Util_1.Util.removeFromArray(this.collection().new_elements, this);
-	            return { then: function (fn) { return fn(); }, catch: function () { } };
-	        }
-	        else {
+	        var selector_value;
+	        if (selector_value = this.selector()) {
 	            return this.actions.delete().then(function () {
 	                var elements = _this.collection().elements;
-	                return delete elements[_this.selector()];
+	                delete elements[selector_value];
 	            });
+	        }
+	        else {
+	            Util_1.Util.removeFromArray(this.collection().new_elements, this);
+	            return {
+	                then: function (fn) { return fn(); },
+	                catch: function () { }
+	            };
 	        }
 	    };
 	    Element.prototype.save = function () {
@@ -644,61 +522,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 	    };
-	    // undo(n) {
-	    //   if (n == null) { n = 0; }
-	    //   if (Util.isInteger(n)) {
-	    //     if (n > 1000000) {
-	    //       if (this.snapshots.list[n]) {
-	    //         this.merge(this.snapshots.list[n].data);
-	    //         return this.last_snapshot_time = n;
-	    //       } else {
-	    //         throw new Error(`Diff at time ${n} does not exist`);
-	    //       }
-	    //     } else if (n < 0) {
-	    //       throw new Error(`${n} is smaller than 0`);
-	    //     } else {
-	    //       let ds = SnapshotHelper.getSortedArray(this.snapshots.list);
-	    //       let { length } = ds;
-	    //       let index = ds.indexOf(this.snapshots.list[this.last_snapshot_time]);
-	    //       // index = 0 if index < 0
-	    //       let d = ds[index - n];
-	    //       this.merge(d.data);
-	    //       return this.last_snapshot_time = d.time;
-	    //     }
-	    //   } else if (HP.Util.isString(n)) {
-	    //     let a = null;
-	    //     for (let v of Array.from(HPP.Helpers.Snapshot.getSortedArray(this.snapshots.list))) {
-	    //       if (v.tag === n) {
-	    //         if (!a) { a = v; }
-	    //       }
-	    //     }
-	    //     if (a) {
-	    //       return this.merge(a.data);
-	    //     } else {
-	    //       throw new Error(`No snapshot found with tag ${n}`);
-	    //     }
-	    //   } else {
-	    //     throw new TypeError(`Don't know what to do with ${n}`);
-	    //   }
-	    // }
 	    Element.prototype.merge = function (pre_element) {
 	        var _this = this;
-	        var collection_settings = this.collection().configuration();
-	        Util_1.Util.forEach(collection_settings.fields, function (field_settings, field_name) {
+	        var collection_config = this.collection().configuration();
+	        Util_1.Util.forEach(collection_config.fields, function (field_config, field_key) {
 	            var field_value;
-	            if (field_value = pre_element[field_name]) {
-	                if (field_settings.embedded_element) {
-	                    Fields_1.Fields.handleEmbeddedElement(_this, pre_element, field_name, field_settings);
+	            if (field_value = pre_element[field_key]) {
+	                if (field_config.embedded_element) {
+	                    Fields_1.Fields.handleEmbeddedElement(_this, pre_element, field_key, field_config);
 	                }
-	                else if (field_settings.embedded_collection) {
-	                    Fields_1.Fields.handleEmbeddedCollection(_this, pre_element, field_name, field_settings);
+	                else if (field_config.embedded_collection) {
+	                    Fields_1.Fields.handleEmbeddedCollection(_this, pre_element, field_key, field_config);
 	                }
 	                else {
-	                    var sv_1 = _this.fields[field_name];
-	                    if (field_settings.selector && (sv_1 !== field_value) && sv_1 && field_value) {
-	                        throw new Error("Selector has changed from " + sv_1 + " to " + field_value);
+	                    var selector_key = _this.collection().scheme().configuration().selector;
+	                    if (field_key === selector_key) {
+	                        var selector_value = _this.fields[field_key];
+	                        if ((selector_value !== field_value) && isSelectorValue(selector_value) && isSelectorValue(field_value)) {
+	                            throw new Errors_1.ElpongError('elesch', selector_value + " -> " + field_value);
+	                        }
 	                    }
-	                    _this.fields[field_name] = field_value;
+	                    _this.fields[field_key] = field_value;
 	                }
 	            }
 	        });
@@ -710,15 +554,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 11 */
+/* 9 */
 /***/ function(module, exports) {
 
 	"use strict";
 	exports.Util = {
-	    BREAK: new Object(),
-	    kebab: function (string) {
-	        return string.toLowerCase().replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '').replace(/(é|ë)/g, 'e').split(' ').join('-');
-	    },
+	    // BREAK: new Object(),
+	    // kebab: (string: string): string => {
+	    //   return string.toLowerCase().replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '').replace(/(é|ë)/g, 'e').split(' ').join('-');
+	    // },
 	    capitalize: function (string) {
 	        return string.charAt(0).toUpperCase() + string.slice(1);
 	    },
@@ -732,9 +576,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }).replace(/\s+/g, '');
 	    },
-	    arrayDiff: function (array1, array2) {
-	        return array1.filter(function (i) { return array2.indexOf(i) < 0; });
-	    },
+	    // arrayDiff: (array1: any[], array2: any[]): any[] => {
+	    //   return array1.filter(i => array2.indexOf(i) < 0);
+	    // },
 	    removeFromArray: function (array, element) {
 	        var i = array.indexOf(element);
 	        if (i === -1) {
@@ -745,24 +589,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return true;
 	        }
 	    },
-	    copy: function (obj) {
-	        if (typeof obj !== 'object') {
-	            return obj;
-	        }
-	        var copy = obj.constructor();
-	        for (var attr in obj) {
-	            if (obj.hasOwnProperty(attr)) {
-	                copy[attr] = obj[attr];
-	            }
-	        }
-	        return copy;
-	    },
-	    merge: function (obj1, obj2) {
-	        for (var attr in obj2) {
-	            obj1[attr] = obj2[attr];
-	        }
-	        return obj1;
-	    },
+	    // copy: (obj: Object) => {
+	    //   if (typeof obj !== 'object') {
+	    //     return obj;
+	    //   }
+	    //   let copy = obj.constructor();
+	    //   for (let attr in obj) {
+	    //     if (obj.hasOwnProperty(attr)) {
+	    //       copy[attr] = obj[attr];
+	    //     }
+	    //   }
+	    //   return copy;
+	    // },
+	    // merge: (obj1: Object, obj2: Object): Object => {
+	    //   for (let attr in obj2) {
+	    //     obj1[attr] = obj2[attr];
+	    //   }
+	    //   return obj1;
+	    // },
 	    isInteger: function (value) {
 	        return value === parseInt(value, 10);
 	    },
@@ -772,36 +616,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	    isString: function (value) {
 	        return typeof value === 'string';
 	    },
-	    isRegex: function (value) {
-	        return value instanceof RegExp;
+	    isRegExp: function (value) {
+	        return Object.prototype.toString.call(value) == '[object RegExp]';
 	    },
-	    forEach: function (o, f) {
+	    forEach: function (o, fn) {
 	        for (var k in o) {
-	            var v = o[k];
 	            if (!o.hasOwnProperty(k)) {
 	                continue;
 	            }
-	            if (f(v, k) === exports.Util.BREAK) {
-	                break;
-	            }
+	            var v = o[k];
+	            fn(v, k);
 	        }
 	    },
-	    reverseForIn: function (obj, f) {
-	        var arr = [];
-	        var _break = false;
-	        for (var key in obj) {
-	            // add hasOwnPropertyCheck if needed
-	            arr.push(key);
-	        }
-	        var i = arr.length - 1;
-	        while ((i >= 0) && !_break) {
-	            var v = f.call(obj, arr[i], obj[arr[i]]);
-	            if (v === exports.Util.BREAK) {
-	                _break = true;
-	            }
-	            i--;
-	        }
-	    },
+	    // reverseForEach: (obj: Object, f: (k: string, v: any) => void): void => {
+	    //   let arr: string[] = [];
+	    //   let _break = false;
+	    //   for (let key in obj) {
+	    //     // add hasOwnPropertyCheck if needed
+	    //     arr.push(key);
+	    //   }
+	    //   let i = arr.length - 1;
+	    //   while ((i >= 0) && !_break) {
+	    //     let v = f.call(obj, arr[i], obj[arr[i]]);
+	    //     if (v === Util.BREAK) { _break = true; }
+	    //     i--;
+	    //   }
+	    // },
 	    endsWith: function (string, search) {
 	        if (string.endsWith) {
 	            return string.endsWith(search);
@@ -837,66 +677,94 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    includes: function (a, b) {
 	        return a.indexOf(b) > -1;
+	    },
+	    equalsJSON: function (a, b) {
+	        for (var k in a) {
+	            var v1 = a[k];
+	            var v2 = b[k];
+	            if (typeof v1 === 'object') {
+	                if (!exports.Util.equalsJSON(v1, v2)) {
+	                    return false;
+	                }
+	            }
+	            else {
+	                if (v1 !== v2) {
+	                    return false;
+	                }
+	            }
+	        }
+	        return true;
+	    },
+	    copyJSON: function (o) {
+	        return JSON.parse(JSON.stringify(o));
 	    }
 	};
 
 
 /***/ },
-/* 12 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Element_1 = __webpack_require__(10);
-	var Util_1 = __webpack_require__(11);
-	var SchemeHelper_1 = __webpack_require__(13);
+	var Element_1 = __webpack_require__(8);
+	var Util_1 = __webpack_require__(9);
+	var SchemeHelper_1 = __webpack_require__(11);
 	var CollectionHelper_1 = __webpack_require__(7);
 	var Fields;
 	(function (Fields) {
 	    function setup(element, fields_config_map, pre_element) {
-	        Util_1.Util.forEach(fields_config_map, function (field_config, field_name) {
+	        Util_1.Util.forEach(fields_config_map, function (field_config, field_key) {
 	            if (field_config.embedded_element) {
-	                return handleEmbeddedElement(element, pre_element, field_name, field_config);
+	                handleEmbeddedElement(element, pre_element, field_key, field_config);
 	            }
 	            else if (field_config.embedded_collection) {
-	                return handleEmbeddedCollection(element, pre_element, field_name, field_config);
+	                handleEmbeddedCollection(element, pre_element, field_key, field_config);
 	            }
 	            else {
-	                var field_value = pre_element[field_name];
-	                return element.fields[field_name] = field_value;
+	                if (!pre_element.hasOwnProperty(field_key)) {
+	                    return;
+	                }
+	                var field_value = pre_element[field_key];
+	                element.fields[field_key] = field_value;
 	            }
 	        });
 	    }
 	    Fields.setup = setup;
-	    function handleEmbeddedElement(hpe, pre_element, field_name, field_config) {
+	    function handleEmbeddedElement(element, pre_element, field_key, field_config) {
 	        var embedded_element_collection;
-	        var embedded_pre_element = pre_element[field_name];
+	        var embedded_pre_element = pre_element[field_key];
 	        if (!embedded_pre_element) {
 	            return;
 	        }
-	        var collection = hpe.collection();
+	        var collection = element.collection();
 	        var scheme = collection.scheme();
 	        if (field_config.collection) {
 	            embedded_element_collection = scheme.select(field_config.collection);
 	        }
 	        else {
-	            embedded_element_collection = SchemeHelper_1.SchemeHelper.getCollectionBySingularName(scheme, field_name);
+	            embedded_element_collection = SchemeHelper_1.SchemeHelper.getCollectionBySingularName(scheme, field_key);
 	        }
 	        var embedded_element = embedded_element_collection.buildOrMerge(embedded_pre_element);
-	        var associated_field_name = field_name + "_" + scheme.configuration().selector;
-	        return hpe.fields[associated_field_name] = embedded_element.selector();
+	        var associated_field_key = field_config.field || field_key + "_" + scheme.configuration().selector;
+	        console.log('setting up embedded element', element, embedded_element);
+	        element.fields[associated_field_key] = embedded_element.selector();
+	        console.log("The field " + associated_field_key + " of element with id " + element.selector() + " of collection " + element.collection().name + " should be " + embedded_element.selector() + " and is " + element.fields[associated_field_key]);
+	        setTimeout(function () {
+	            console.log("The field " + associated_field_key + " of element with id " + element.selector() + " of collection " + element.collection().name + " should be " + embedded_element.selector() + " and is " + element.fields[associated_field_key]);
+	        }, 10);
 	    }
 	    Fields.handleEmbeddedElement = handleEmbeddedElement;
-	    function handleEmbeddedCollection(hpe, pre_element, field_name, field_configuration) {
+	    function handleEmbeddedCollection(element, pre_element, field_key, field_config) {
 	        var embedded_pre_collection;
-	        if (!(embedded_pre_collection = pre_element[field_name])) {
+	        if (!(embedded_pre_collection = pre_element[field_key])) {
 	            return;
 	        }
-	        var collection = hpe.collection();
+	        var collection = element.collection();
 	        var scheme = collection.scheme();
-	        var embedded_element_collection = scheme.select(field_name || field_configuration.collection);
-	        return Util_1.Util.forEach(embedded_pre_collection, function (embedded_pre_element) {
+	        var embedded_element_collection = scheme.select(field_key || field_config.collection);
+	        Util_1.Util.forEach(embedded_pre_collection, function (embedded_pre_element) {
 	            var embedded_element = new Element_1.Element(embedded_element_collection, embedded_pre_element);
-	            return CollectionHelper_1.CollectionHelper.addElement(embedded_element_collection, embedded_element);
+	            CollectionHelper_1.CollectionHelper.addElement(embedded_element_collection, embedded_element);
 	        });
 	    }
 	    Fields.handleEmbeddedCollection = handleEmbeddedCollection;
@@ -904,7 +772,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 13 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -926,14 +794,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 14 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Util_1 = __webpack_require__(11);
-	var HasMany_1 = __webpack_require__(15);
-	var HasOne_1 = __webpack_require__(16);
-	var BelongsTo_1 = __webpack_require__(17);
+	var Util_1 = __webpack_require__(9);
+	var HasMany_1 = __webpack_require__(13);
+	var HasOne_1 = __webpack_require__(14);
+	var BelongsTo_1 = __webpack_require__(15);
 	var Relations;
 	(function (Relations) {
 	    function setup(element, relations_config_maps) {
@@ -952,24 +820,25 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var CollectionHelper_1 = __webpack_require__(7);
-	var Util_1 = __webpack_require__(11);
+	var Util_1 = __webpack_require__(9);
+	var Errors_1 = __webpack_require__(6);
 	var HasMany;
 	(function (HasMany) {
 	    function setup(element, relation_collection_name, relation_settings) {
 	        var collection = element.collection();
 	        var collection_config = collection.configuration();
 	        var relation_collection = collection.scheme().select(relation_settings.collection || relation_collection_name);
-	        var references_field_name = relation_settings.references_field || relation_collection_name + "_" + collection.scheme().configuration().selector + "s"; // dogs_ids, unless specified otherwise
+	        var references_field_key = relation_settings.references_field || relation_collection_name + "_" + collection.scheme().configuration().selector + "s"; // dogs_ids, unless specified otherwise
 	        var relation_field_settings;
-	        if (relation_field_settings = collection_config.fields[references_field_name]) {
-	            // throw new Error("Field #{field_name} of collection #{collection.getName()} are not references") if !relation_field_settings.references
+	        if (relation_field_settings = collection_config.fields[references_field_key]) {
+	            // throw new Error("Field #{field_key} of collection #{collection.getName()} are not references") if !relation_field_settings.references
 	            return element.relations[Util_1.Util.camelize(relation_collection_name)] = function () {
-	                return getHasManyRelationArrayThroughReferencesField(element, relation_collection, references_field_name);
+	                return getHasManyRelationArrayThroughReferencesField(element, relation_collection, references_field_key);
 	            };
 	        }
 	        else {
@@ -978,78 +847,84 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 	    HasMany.setup = setup;
-	    function getHasManyRelationFunction(element, collection, relation_config, relation_collection) {
-	        var has_many_field_name;
+	    function getHasManyRelationFunction(element, collection, relation_config, relation_collection, limit_to_one) {
+	        var has_many_field_key;
 	        var collection_singular_name = CollectionHelper_1.CollectionHelper.getSingularName(collection);
 	        var relation_collection_settings = relation_collection.configuration();
 	        var selector_key = collection.scheme().configuration().selector;
 	        if (relation_config.polymorphic) {
-	            has_many_field_name = relation_config.as + "_" + selector_key;
-	            var has_many_collection_field_name_1 = relation_config.as + "_collection";
-	            return function () { return getPolymorphicHasManyRelationArray(element, relation_collection, has_many_field_name, has_many_collection_field_name_1); };
+	            has_many_field_key = relation_config.as + "_" + selector_key;
+	            var has_many_collection_field_key_1 = relation_config.as + "_collection";
+	            return function () { return getPolymorphicHasManyRelationArray(element, relation_collection, has_many_field_key, has_many_collection_field_key_1, limit_to_one); };
 	        }
 	        else {
 	            if (relation_config.field) {
-	                has_many_field_name = relation_config.field;
+	                has_many_field_key = relation_config.field;
 	            }
 	            else if (relation_config.as) {
-	                has_many_field_name = relation_config.as + "_" + selector_key;
+	                has_many_field_key = relation_config.as + "_" + selector_key;
 	            }
 	            else {
-	                has_many_field_name = collection_singular_name + "_" + selector_key;
+	                has_many_field_key = collection_singular_name + "_" + selector_key;
 	            }
-	            return function () { return getHasManyRelationArray(element, relation_collection, has_many_field_name); };
+	            return function () { return getHasManyRelationArray(element, relation_collection, has_many_field_key, limit_to_one); };
 	        }
 	    }
 	    HasMany.getHasManyRelationFunction = getHasManyRelationFunction;
-	    function getHasManyRelationArray(element, relation_collection, has_many_field_name) {
+	    function getHasManyRelationArray(element, relation_collection, has_many_field_key, limit_to_one) {
 	        var element2_arr = [];
 	        var selector_value = element.selector();
 	        for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
 	            var element2 = _a[_i];
-	            if (selector_value === element.fields[has_many_field_name]) {
+	            if (selector_value === element2.fields[has_many_field_key]) {
 	                element2_arr.push(element2);
+	                if (limit_to_one) {
+	                    return element2_arr;
+	                }
 	            }
 	        }
 	        return element2_arr;
 	    }
-	    function getPolymorphicHasManyRelationArray(element, relation_collection, has_many_field_name, has_many_collection_field_name) {
+	    function getPolymorphicHasManyRelationArray(element, relation_collection, has_many_field_key, has_many_collection_field_key, limit_to_one) {
 	        var element2_arr = [];
 	        var selector_value = element.selector();
 	        var collection_name = element.collection().name;
 	        for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
 	            var element2 = _a[_i];
-	            if (selector_value === element2.fields[has_many_field_name] && collection_name === element2.fields[has_many_collection_field_name]) {
+	            if (selector_value === element2.fields[has_many_field_key] && collection_name === element2.fields[has_many_collection_field_key]) {
+	                element2_arr.push(element2);
+	                if (limit_to_one) {
+	                    return element2_arr;
+	                }
+	            }
+	        }
+	        return element2_arr;
+	    }
+	    function getHasManyRelationArrayThroughReferencesField(element, relation_collection, field_key) {
+	        var selector_value_arr = element.fields[field_key];
+	        if (!Array.isArray(selector_value_arr)) {
+	            throw new Errors_1.ElpongError('fldnrf', field_key);
+	        }
+	        var element2_arr = [];
+	        for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
+	            var element2 = _a[_i];
+	            if (Util_1.Util.includes(selector_value_arr, element.selector())) {
 	                element2_arr.push(element2);
 	            }
 	        }
 	        return element2_arr;
 	    }
-	    function getHasManyRelationArrayThroughReferencesField(element, relation_collection, field_name) {
-	        var selector_value_arr = element.fields[field_name];
-	        if (!Array.isArray(selector_value_arr)) {
-	            throw new Error("Field " + field_name + " is not an array, but it should be an array of references to " + relation_collection.name);
-	        }
-	        var hpe2_arr = [];
-	        for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
-	            var hpe2 = _a[_i];
-	            if (Util_1.Util.includes(selector_value_arr, element.selector())) {
-	                hpe2_arr.push(hpe2);
-	            }
-	        }
-	        return hpe2_arr;
-	    }
 	})(HasMany = exports.HasMany || (exports.HasMany = {}));
 
 
 /***/ },
-/* 16 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var HasMany_1 = __webpack_require__(15);
-	var SchemeHelper_1 = __webpack_require__(13);
-	var Util_1 = __webpack_require__(11);
+	var HasMany_1 = __webpack_require__(13);
+	var SchemeHelper_1 = __webpack_require__(11);
+	var Util_1 = __webpack_require__(9);
 	var HasOne;
 	(function (HasOne) {
 	    function setup(element, relation_collection_singular_name, relation_config) {
@@ -1064,7 +939,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            relation_collection = SchemeHelper_1.SchemeHelper.getCollectionBySingularName(scheme, relation_collection_singular_name);
 	        }
 	        return element.relations[Util_1.Util.camelize(relation_collection_singular_name)] = function () {
-	            HasMany_1.HasMany.getHasManyRelationFunction(element, collection, relation_config, relation_collection)()[0];
+	            return HasMany_1.HasMany.getHasManyRelationFunction(element, collection, relation_config, relation_collection, true)()[0];
 	        };
 	    }
 	    HasOne.setup = setup;
@@ -1072,69 +947,83 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 17 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Util_1 = __webpack_require__(11);
+	var Element_1 = __webpack_require__(8);
+	var Util_1 = __webpack_require__(9);
+	var SchemeHelper_1 = __webpack_require__(11);
 	var BelongsTo;
 	(function (BelongsTo) {
 	    function setup(element, relation_collection_singular_name, relation_config) {
-	        var field_name, relation_collection;
+	        var field_key;
+	        var relation_collection;
 	        var collection = element.collection();
 	        // TODO should be reference
 	        if (relation_config.polymorphic) {
-	            var collection_field_name_1 = relation_config.collection_field || relation_collection_singular_name + "_collection";
-	            field_name = relation_config.field;
+	            var collection_field_key_1 = relation_config.collection_field || relation_collection_singular_name + "_collection";
+	            field_key = relation_config.field;
 	            element.relations[Util_1.Util.camelize(relation_collection_singular_name)] = function () {
-	                return getPolymorphicBelongsToElement(element, field_name, collection_field_name_1, relation_collection_singular_name);
+	                return getPolymorphicBelongsToElement(element, field_key, collection_field_key_1, relation_collection_singular_name);
 	            };
 	        }
 	        else {
-	            relation_collection = collection.scheme().select(relation_config.collection || relation_collection_singular_name);
-	            field_name = relation_config.field || relation_collection_singular_name + "_" + relation_collection.selector_name;
+	            var scheme = collection.scheme();
+	            if (relation_config.collection) {
+	                relation_collection = collection.scheme().select(relation_config.collection);
+	            }
+	            else {
+	                relation_collection = SchemeHelper_1.SchemeHelper.getCollectionBySingularName(scheme, relation_collection_singular_name);
+	            }
+	            field_key = relation_config.field || relation_collection_singular_name + "_" + scheme.configuration().selector;
 	            element.relations[Util_1.Util.camelize(relation_collection_singular_name)] = function () {
-	                return getBelongsToElement(element, relation_collection, field_name);
+	                return getBelongsToElement(element, relation_collection, field_key);
 	            };
 	        }
 	    }
 	    BelongsTo.setup = setup;
-	    var getBelongsToElement = function (element, relation_collection, field_name) {
-	        var selector_value = element.fields[field_name];
-	        return relation_collection.find(selector_value) || null;
+	    var getBelongsToElement = function (element, relation_collection, field_key) {
+	        var selector_value = element.fields[field_key];
+	        if (Element_1.isSelectorValue(selector_value)) {
+	            return relation_collection.find(selector_value) || null;
+	        }
+	        else {
+	            return undefined;
+	        }
 	    };
 	    // Gets the polymorphic belongs_to element
 	    //
 	    // @param {Element} hpe              The element to which the other element belongs
-	    // @param {string} field_name                The foreign key, e.g. parent_id.
-	    // @param {string} collection_field_name     The field name of the other collection, required, e.g. parent_collection.
-	    // @param {string} collection_selector_field The selector name of the other collection, if it was specified, e.g. id. (Will not be looked at if field_name is present)
+	    // @param {string} field_key                The foreign key, e.g. parent_id.
+	    // @param {string} collection_field_key     The field name of the other collection, required, e.g. parent_collection.
+	    // @param {string} collection_selector_field The selector name of the other collection, if it was specified, e.g. id. (Will not be looked at if field_key is present)
 	    // @param {string} collection_singular_name  e.g. parent
 	    //
 	    // @return {Element|null}            The related element.
-	    var getPolymorphicBelongsToElement = function (element, field_name, collection_field_name, collection_singular_name) {
-	        // console.log hpe, collection_field_name, collection_selector_field
-	        var relation_collection_name = element.fields[collection_field_name];
+	    var getPolymorphicBelongsToElement = function (element, field_key, collection_field_key, collection_singular_name) {
+	        // console.log hpe, collection_field_key, collection_selector_field
+	        var relation_collection_name = element.fields[collection_field_key];
 	        var relation_collection = element.collection().scheme().select(relation_collection_name);
-	        if (!field_name) {
+	        if (!field_key) {
 	            var selector_key = element.collection().scheme().configuration().selector;
-	            field_name = collection_singular_name + "_" + selector_key;
+	            field_key = collection_singular_name + "_" + selector_key;
 	        }
-	        var selector_value = element.fields[field_name];
+	        var selector_value = element.fields[field_key];
 	        return relation_collection.find(selector_value) || null;
 	    };
 	})(BelongsTo = exports.BelongsTo || (exports.BelongsTo = {}));
 
 
 /***/ },
-/* 18 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Ajax_1 = __webpack_require__(9);
-	var Util_1 = __webpack_require__(11);
+	var Ajax_1 = __webpack_require__(17);
+	var Util_1 = __webpack_require__(9);
 	var Errors_1 = __webpack_require__(6);
-	var ElementHelper_1 = __webpack_require__(19);
+	var ElementHelper_1 = __webpack_require__(18);
 	var UrlHelper_1 = __webpack_require__(5);
 	var Actions;
 	(function (Actions) {
@@ -1149,11 +1038,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _loop_1(method);
 	        }
 	        Util_1.Util.forEach(actions_config, function (action_config, action_name) {
-	            element.actions[Util_1.Util.camelize(action_name)] = function (user_options) {
+	            element.actions[Util_1.Util.camelize(action_name)] = function (action_options) {
 	                if (element.isNew() && !action_config.no_selector) {
 	                    throw new Errors_1.ElpongError('elenew');
 	                }
-	                return executeCustom(element, action_name, action_config, user_options);
+	                return executeCustom(element, action_name, action_config, action_options);
 	            };
 	        });
 	    }
@@ -1162,10 +1051,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (!action_options) {
 	            action_options = {};
 	        }
+	        element.snapshots.make("before_" + method.toLowerCase());
 	        var data;
-	        // element.snapshots.make(`before_${method.toLowerCase()}`);
-	        if (action_options.data) {
-	            data = action_options;
+	        if (data = action_options.data) {
+	            data = action_options.data;
 	        }
 	        else if (method !== 'GET') {
 	            data = ElementHelper_1.ElementHelper.toData(element);
@@ -1180,47 +1069,47 @@ return /******/ (function(modules) { // webpackBootstrap
 	                throw new Error('Element is new');
 	            }
 	        }
-	        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForElement(method, {}, element, action_options), method, data, action_options.headers);
+	        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForElement(method, {}, element, action_options, method === 'POST'), method, data, action_options.headers);
 	        promise.then(function (response) {
 	            if (response.data) {
 	                element.merge(response.data);
 	            }
-	            // TODO element.snapshots.make(`after_${method.toLowerCase()}`);
+	            element.snapshots.make("after_" + method.toLowerCase());
 	            var collection = element.collection();
 	            if (Util_1.Util.includes(collection.new_elements, element)) {
 	                Util_1.Util.removeFromArray(collection.new_elements, element);
-	                return collection.elements[element.selector()] = element;
+	                collection.elements[element.selector()] = element;
 	            }
 	        });
 	        return promise;
 	    }
 	    Actions.execute = execute;
-	    function executeCustom(hpe, action_name, action_settings, user_options) {
-	        if (user_options == null) {
-	            user_options = {};
+	    function executeCustom(element, action_name, action_config, action_options) {
+	        if (!action_options) {
+	            action_options = {};
 	        }
-	        var method = action_settings.method.toUpperCase();
-	        hpe.snapshots.make("before_" + method.toLowerCase());
+	        var method = action_config.method.toUpperCase();
+	        element.snapshots.make("before_" + action_name);
 	        var data;
-	        if (user_options.data) {
-	            data = user_options.data;
+	        if (action_options.data) {
+	            data = action_options.data;
 	        }
-	        else if (!action_settings.without_data) {
-	            data = ElementHelper_1.ElementHelper.toData(hpe);
+	        else if (!action_config.no_data) {
+	            data = ElementHelper_1.ElementHelper.toData(element);
 	        }
-	        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForElement(action_name, action_settings, hpe, user_options), method, data, user_options.headers);
+	        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForElement(action_name, action_config, element, action_options), method, data, action_options.headers);
 	        promise.then(function (response) {
 	            var selector_value;
-	            if (!action_settings.returns_other) {
+	            if (!action_config.returns_other) {
 	                if (response.data) {
-	                    hpe.mergeWith(response.data);
+	                    element.merge(response.data);
 	                }
-	                hpe.snapshots.make("after_" + method.toLowerCase());
+	                element.snapshots.make("after_" + method.toLowerCase());
 	            }
-	            var collection = hpe.getCollection();
-	            if ((selector_value = hpe.getSelectorValue()) && Util_1.Util.includes(collection.new_elements, hpe)) {
-	                Util_1.Util.removeFromArray(collection.new_elements, hpe);
-	                return collection.elements[selector_value] = hpe;
+	            var collection = element.collection();
+	            if ((selector_value = element.selector()) && Util_1.Util.includes(collection.new_elements, element)) {
+	                Util_1.Util.removeFromArray(collection.new_elements, element);
+	                return collection.elements[selector_value] = element;
 	            }
 	        });
 	        return promise;
@@ -1231,24 +1120,113 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 19 */
+/* 17 */
 /***/ function(module, exports) {
 
+	/// <reference path="../typings/index.d.ts"/>
 	"use strict";
+	var Ajax;
+	(function (Ajax) {
+	    var ajax_function;
+	    function executeRequest(url, method, data, headers) {
+	        if (!headers) {
+	            headers = {};
+	        }
+	        headers['Accept'] = headers['Content-Type'] = 'application/json';
+	        var options = {
+	            method: method,
+	            url: url,
+	            data: JSON.stringify(data === undefined ? {} : data),
+	            headers: headers,
+	            dataType: 'json',
+	            responseType: 'json'
+	        };
+	        options.type = options.method;
+	        options.body = options.data;
+	        return ajax_function(options.url, options);
+	    }
+	    Ajax.executeRequest = executeRequest;
+	    // Set the http function used for requests
+	    // The function should accept one object with keys
+	    // method, url, params, headers
+	    // and return a promise-like object
+	    // with then and catch
+	    //
+	    // @note Like $http or jQuery.ajax
+	    // @param {Function} fn The function.
+	    // @param {string} type The function.
+	    function setAjaxFunction(fn, type) {
+	        if (typeof type === 'undefined') {
+	            if ((typeof jQuery !== 'undefined') && (fn === jQuery.ajax))
+	                type = 'jquery';
+	            else if ((typeof fetch !== 'undefined') && (fn === fetch))
+	                type = 'fetch';
+	        }
+	        switch (type) {
+	            case 'jquery':
+	                ajax_function = function (url, instruction) {
+	                    var deferred = jQuery.Deferred();
+	                    var ajax = fn(url, instruction);
+	                    ajax.then(function (data, status, jqxhr) { return deferred.resolve({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
+	                    ajax.catch(function (data, status, jqxhr) { return deferred.reject({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
+	                    return deferred.promise();
+	                };
+	                break;
+	            case 'fetch':
+	                ajax_function = function (url, instruction) {
+	                    return new Promise(function (resolve, reject) {
+	                        instruction['body'] = instruction.data;
+	                        var http_promise = fn(url, instruction);
+	                        http_promise.then(function (response) {
+	                            if (response.headers.get('content-type') !== 'application/json') {
+	                                resolve(response);
+	                            }
+	                            else {
+	                                var json_promise = response.json();
+	                                json_promise.then(function (json) {
+	                                    response['data'] = json; // typescript ignores square brackets
+	                                    resolve(response);
+	                                });
+	                                json_promise.catch(reject);
+	                            }
+	                        });
+	                        http_promise.catch(reject);
+	                    });
+	                };
+	                break;
+	            default:
+	                ajax_function = function (url, instruction) { return fn(instruction); };
+	        }
+	    }
+	    Ajax.setAjaxFunction = setAjaxFunction;
+	})(Ajax = exports.Ajax || (exports.Ajax = {}));
+
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var Util_1 = __webpack_require__(9);
 	var ElementHelper;
 	(function (ElementHelper) {
-	    function toData(element) {
+	    function toData(element, full_duplicate) {
 	        var collection = element.collection();
 	        var scheme = collection.scheme();
 	        var o = {};
 	        var object = scheme.configuration().collections[collection.name].fields;
-	        for (var field_name in object) {
-	            var field_settings = object[field_name];
+	        for (var field_key in object) {
+	            var field_settings = object[field_key];
 	            if (field_settings.no_send || field_settings.embedded_collection || field_settings.embedded_element) {
 	                continue;
 	            }
-	            var field_value = element.fields[field_name];
-	            o[field_name] = field_value;
+	            var field_value = element.fields[field_key];
+	            if (full_duplicate && (typeof field_value === 'object')) {
+	                o[field_key] = Util_1.Util.copyJSON(field_value);
+	            }
+	            else {
+	                o[field_key] = field_value;
+	            }
 	        }
 	        return o;
 	    }
@@ -1257,22 +1235,268 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var Util_1 = __webpack_require__(9);
+	var Snapshot_1 = __webpack_require__(20);
+	var Errors_1 = __webpack_require__(6);
+	var Snapshots;
+	(function (Snapshots) {
+	    function setup(element) {
+	        var snapshots = element.snapshots;
+	        snapshots.list = [];
+	        snapshots.make = function (tag) {
+	            return new Snapshot_1.Snapshot(element, tag);
+	        };
+	        snapshots.lastPersisted = function () {
+	            if (element.isNew()) {
+	                return;
+	            }
+	            for (var i = snapshots.list.length - 1; i >= 0; i--) {
+	                var snapshot = snapshots.list[i];
+	                if (Util_1.Util.includes(['after_post', 'after_put', 'after_get', 'creation'], snapshot.tag)) {
+	                    return snapshot;
+	                }
+	            }
+	            // Util.reverseForEach(element.snapshots.list, function(k: string, v: Snapshot) {
+	            //   if ((v.tag === 'after_post') || (v.tag === 'after_put') || (v.tag === 'after_get') || (v.tag === 'creation')) {
+	            //     last_persisted_snapshot = v;
+	            //     return Util.BREAK;
+	            //   }
+	            // });
+	            // return last_persisted_snapshot;
+	        };
+	        snapshots.lastWithTag = function (tag) {
+	            var last_snapshot_with_tag;
+	            var list = element.snapshots.list;
+	            if (Util_1.Util.isRegExp(tag)) {
+	                for (var i = list.length - 1; i >= 0; i--) {
+	                    var snapshot = list[i];
+	                    if (snapshot.tag) {
+	                        if (tag.test(snapshot.tag)) {
+	                            return snapshot;
+	                        }
+	                    }
+	                }
+	            }
+	            else {
+	                for (var i = list.length - 1; i >= 0; i--) {
+	                    var snapshot = list[i];
+	                    if (tag === snapshot.tag) {
+	                        return snapshot;
+	                    }
+	                }
+	            }
+	            return last_snapshot_with_tag;
+	        };
+	        snapshots.last = function () {
+	            var list = element.snapshots.list;
+	            return list[list.length - 1];
+	        };
+	        snapshots.undo = function (id) {
+	            if (id == null) {
+	                id = 0;
+	            }
+	            if (Util_1.Util.isInteger(id)) {
+	                var list = element.snapshots.list;
+	                if (id < 0 || id > list.length) {
+	                    throw new Errors_1.ElpongError('elesti', "" + id);
+	                }
+	                else {
+	                    var snapshot = list[element.snapshots.current_index - id];
+	                    snapshot.revert();
+	                }
+	            }
+	            else {
+	                var snapshot = void 0;
+	                if (snapshot = snapshots.lastWithTag(id)) {
+	                    snapshot.revert();
+	                }
+	                else {
+	                    throw new Errors_1.ElpongError('elesnf', "" + id);
+	                }
+	            }
+	            return element;
+	        };
+	        snapshots.isPersisted = function () {
+	            var snapshot = snapshots.lastPersisted();
+	            if (!snapshot) {
+	                return false;
+	            }
+	            return Util_1.Util.equalsJSON(element.fields, snapshot.data);
+	        };
+	    }
+	    Snapshots.setup = setup;
+	})(Snapshots = exports.Snapshots || (exports.Snapshots = {}));
+	// import Element from '../../Element';
+	//
+	// const setupSnapshots = (element: Element) => {
+	//   element.snapshots = {
+	//     getLastPersisted() {
+	//       if (element.isNew()) { return null; }
+	//       let last_persisted_snapshot = null;
+	//       Util.reverseForEach(hpe.snapshots.list, function(k, v) {
+	//         if ((v.tag === 'after_post') || (v.tag === 'after_put') || (v.tag === 'after_get') || (v.tag === 'creation')) {
+	//           last_persisted_snapshot = v;
+	//           return Util.BREAK;
+	//         }
+	//       });
+	//
+	//       return last_persisted_snapshot;
+	//     },
+	//
+	//     getLastWithTag(tag) {
+	//       let last_snapshot_with_tag = null;
+	//       if (HP.Util.isRegex(tag)) {
+	//         HP.Util.reverseForEach(hpe.snapshots.list, function(k, v) {
+	//           if (tag.test(v.tag)) {
+	//             last_snapshot_with_tag = v;
+	//             return HP.Util.BREAK;
+	//           }
+	//         });
+	//       } else {
+	//         HP.Util.reverseForEach(hpe.snapshots.list, function(k, v) {
+	//           if (v.tag === tag) {
+	//             last_snapshot_with_tag = v;
+	//             return HP.Util.BREAK;
+	//           }
+	//         });
+	//       }
+	//       return last_snapshot_with_tag;
+	//     },
+	//
+	//     getLast() {
+	//       let last_snapshot = null;
+	//       HP.Util.reverseForEach(hpe.snapshots.list, function(k, v) {
+	//         last_snapshot = v;
+	//         return HP.Util.BREAK;
+	//       });
+	//       return last_snapshot;
+	//     },
+	//
+	//     make(tag) {
+	//       let date = Date.now();
+	//       let list = hpe.snapshots.list =
+	//         HPP.Helpers.Snapshot.removeAfter(hpe.last_snapshot_time, hpe.snapshots.list);
+	//       if (list[date]) {
+	//         return hpe.snapshots.make(tag); // loop until 1ms has passed
+	//       }
+	//       let s = list[date] = {
+	//         tag,
+	//         time: date,
+	//         data: HPP.Helpers.Element.getFields(hpe),
+	//         revert() {
+	//           return hpe.undo(date);
+	//         }
+	//       };
+	//       hpe.last_snapshot_time = date;
+	//       return s;
+	//     },
+	//
+	//     list: {}
+	//   };
+	// }
+
+
+/***/ },
 /* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
+	var ElementHelper_1 = __webpack_require__(18);
+	var Snapshot = (function () {
+	    function Snapshot(element, tag) {
+	        this.element = element;
+	        this.tag = tag;
+	        this.data = ElementHelper_1.ElementHelper.toData(element, true);
+	        this.undone = false;
+	        this.time = Date.now();
+	        this.index = element.snapshots.list.length;
+	        element.snapshots.list.push(this);
+	        element.snapshots.current_index = this.index;
+	    }
+	    Snapshot.prototype.revert = function () {
+	        var list = this.element.snapshots.list;
+	        this.element.merge(this.data);
+	        this.element.snapshots.current_index = this.index;
+	        this.undone = false;
+	        for (var i = this.index + 1, l = list.length; i < l; i++) {
+	            list[i].undone = true;
+	        }
+	    };
+	    return Snapshot;
+	}());
+	exports.Snapshot = Snapshot;
+
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var Ajax_1 = __webpack_require__(17);
+	var UrlHelper_1 = __webpack_require__(5);
+	var Actions;
+	(function (Actions) {
+	    function executeGetAll(collection, action_options) {
+	        if (!action_options) {
+	            action_options = {};
+	        }
+	        var data = action_options.data;
+	        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection('GET', collection, action_options), 'GET', data, action_options.headers);
+	        promise.then(function (response) {
+	            response.data.map(function (pre_element) {
+	                collection.buildOrMerge(pre_element);
+	            });
+	        });
+	        return promise;
+	    }
+	    Actions.executeGetAll = executeGetAll;
+	    function executeGetOne(collection, selector_value, action_options) {
+	        if (action_options == null) {
+	            action_options = {};
+	        }
+	        var data = action_options.data;
+	        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection('GET', collection, { suffix: selector_value }), 'GET', data, action_options.headers);
+	        promise.then(function (response) {
+	            if (response.data) {
+	                return collection.buildOrMerge(response.data);
+	            }
+	        });
+	        return promise;
+	    }
+	    Actions.executeGetOne = executeGetOne;
+	    function executeCustom(collection, action_name, action_config, action_options) {
+	        if (action_options == null) {
+	            action_options = {};
+	        }
+	        var data = action_options.data;
+	        var method = action_config.method.toUpperCase();
+	        return Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection('GET', collection, { suffix: action_config.path || action_name }), method, data, action_options.headers);
+	    }
+	    Actions.executeCustom = executeCustom;
+	})(Actions = exports.Actions || (exports.Actions = {}));
+
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
 	var Errors_1 = __webpack_require__(6);
-	if (true) {
+	if (false) {
 	    var DEBUG = true;
 	}
 	var SchemeConfiguration = (function () {
 	    function SchemeConfiguration(preconf) {
 	        this.name = preconf.name;
-	        if (DEBUG && !this.name) {
+	        if (false) {
 	            throw new Errors_1.ElpongError('confnn');
 	        }
 	        this.selector = preconf.selector;
-	        if (DEBUG && !this.selector) {
+	        if (false) {
 	            throw new Errors_1.ElpongError('confns', preconf.name);
 	        }
 	        this.collections = {};
@@ -1287,10 +1511,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var prop = props_1[_i];
 	                collection_configuration[prop] = collection_preconf[prop] || {};
 	            }
-	            if (collection_preconf.relations) {
+	            var relations_conf = void 0;
+	            if (relations_conf = collection_preconf.relations) {
 	                for (var _a = 0, relation_types_1 = relation_types; _a < relation_types_1.length; _a++) {
 	                    var relation_type = relation_types_1[_a];
-	                    collection_configuration.relations[relation_type] = collection_preconf.relations[relation_type] || {};
+	                    relations_conf[relation_type] = collection_preconf.relations[relation_type] || {};
 	                }
 	            }
 	        }

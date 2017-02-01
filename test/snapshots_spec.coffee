@@ -5,8 +5,7 @@ describe 'Element', ->
     beforeEach ->
       httpBackend = new HttpBackend()
 
-      @pre_scheme = window.__json__['test/fixtures/animal-farm/scheme']
-      @scheme = window.HTTPong.addScheme(@pre_scheme)
+      @scheme = Elpong.add(require('./fixtures/animal-farm/scheme.json5'))
       @scheme.setApiUrl('/api/v1')
 
       httpBackend.reply 'POST', '/api/v1/humans', {id: 1, name: 'Bob'}

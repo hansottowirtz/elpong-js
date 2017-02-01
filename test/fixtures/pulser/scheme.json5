@@ -1,27 +1,23 @@
 {
   "name": "pulser",
+  "selector": "id",
   "collections": {
     "users": {
       "fields": {
         "id": {
-          "selector": true,
-          "type": "Integer"
+          "selector": true
         },
-        "email": {
-          "type": "String"
-        },
-        "password": {
-          "type": "String"
-        }
+        "email": {},
+        "password": {}
       },
       "actions": {
         "login": {
           "method": "POST",
-          "without_selector": true
+          "no_selector": true
         },
         "register": {
           "method": "POST",
-          "without_selector": true
+          "no_selector": true
         }
       },
       "collection_actions": {

@@ -1,3 +1,5 @@
+Elpong = require('../src/Elpong').Elpong
+
 FRAMEWORK = (window.__env__['FRAMEWORK'] || 'angular').toLowerCase()
 
 afterEach ->
@@ -50,7 +52,7 @@ do ->
         reply: (method, url, data, status = 200, fn) ->
           Elpong.setAjax(window.jQuery.ajax, 'jquery')
           json = JSON.stringify(data)
-          console.log("Will respond to #{method} #{url} with #{json}")
+          # console.log("Will respond to #{method} #{url} with #{json}")
           response_data = if status isnt 204 then json else ''
           response_headers = if status isnt 204 then {'Content-Type': 'application/json'} else {}
           $.mockjax({
@@ -83,3 +85,5 @@ do ->
         expect: -> @reply.apply(@, arguments)
         flush: (->)
         done: (fn) -> fn()
+
+  exports.HttpBackend = HttpBackend

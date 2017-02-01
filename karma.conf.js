@@ -1,3 +1,5 @@
+var webpack = require('webpack');
+
 module.exports = function(config) {
   var customLaunchers = {
     'SL_Chrome_26': {
@@ -52,30 +54,26 @@ module.exports = function(config) {
     },
     customLaunchers: customLaunchers,
     basePath: '',
-    frameworks: ['source-map-support', 'jasmine'],
+    frameworks: ['jasmine'],
     files: [
-      'spec/fixtures/**/*.json',
       'src/**/*.ts',
-      // 'spec/**/spec_helper.coffee',
-      // 'spec/**/util_spec.coffee',
-      'spec/**/util_spec.ts'
+      'test/**/*.coffee',
+      'test/**/*.ts'
     ],
     exclude: [],
     preprocessors: {
-      '**/*.json': ['json_fixtures'],
-      '**/*.ts': ['webpack'],
-      '**/*.coffee': ['webpack'],
-      '**/*.js': ['env']
+      '**/*.ts': ['webpack', 'sourcemap'],
+      '**/*.coffee': ['webpack', 'sourcemap'],
+      '**/*.js': ['env', 'sourcemap']
     },
     plugins: [
       'karma-env-preprocessor',
-      'karma-json-fixtures-preprocessor',
       'karma-jasmine',
       'karma-chrome-launcher',
       'karma-safari-launcher',
       'karma-phantomjs-launcher',
       'karma-sauce-launcher',
-      'karma-source-map-support',
+      'karma-sourcemap-loader',
       'karma-webpack'
     ],
     reporters: ['progress'],
@@ -89,19 +87,24 @@ module.exports = function(config) {
     envPreprocessor: [
      'FRAMEWORK'
     ],
-    jsonFixturesPreprocessor: {
-      variableName: '__json__'
-    },
     webpack: {
+      devtool: 'inline-source-map',
       resolve: {
-        extensions: ['.ts', '.coffee', '.js']
+        extensions: ['.ts', '.coffee', '.js', '.json']
       },
       module: {
         loaders: [
           { test: /\.coffee$/, loader: 'coffee-loader' },
-          { test: /\.ts$/, loader: 'awesome-typescript-loader' }
+          { test: /\.ts$/, loader: 'awesome-typescript-loader' },
+          { test: /\.json5$/,  loader: 'json5-loader' }
         ]
-      }
+      },
+      plugins: [
+        new webpack.SourceMapDevToolPlugin({
+          filename: null, // inline sourcemap
+          test: /\.(ts|js|coffee)($|\?)/
+        })
+      ]
     }
   })
   switch (process.env.FRAMEWORK) {

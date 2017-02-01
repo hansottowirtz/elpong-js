@@ -1,25 +1,19 @@
 {
   "name": "stupid-farm",
+  "selector": "id",
   "collections": {
     "geese": {
       "singular": "goose",
       "fields": {
-        "id": {
-          "selector": true,
-          "type": "Integer"
-        },
+        "id": {},
         "name": {
-          "type": "String",
           "default": "Bob"
         }
       }
     },
     "dogs": {
       "fields": {
-        "id": {
-          "selector": true,
-          "type": "Integer"
-        },
+        "id": {},
         "boss_id": {
           "reference": true
         }
@@ -33,10 +27,7 @@
     "bosses": {
       "singular": "boss",
       "fields": {
-        "id": {
-          "selector": true,
-          "type": "Integer"
-        }
+        "id": {}
       },
       "relations": {
         "has_many": {
@@ -46,13 +37,8 @@
     },
     "apples": {
       "fields": {
-        "id": {
-          "selector": true,
-          "type": "Integer"
-        },
-        "kind": {
-          "type": "String"
-        },
+        "id": {},
+        "kind": {},
         "stem": {
           "embedded_element": true,
           "collection": "apple_stems"
@@ -73,13 +59,8 @@
     },
     "apple_stems": {
       "fields": {
-        "id": {
-          "selector": true,
-          "type": "Integer"
-        },
-        "color": {
-          "type": "String"
-        }
+        "id": {},
+        "color": {}
       },
       "relations": {
         "has_one": {

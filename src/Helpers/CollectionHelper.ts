@@ -1,7 +1,6 @@
 import { Element } from '../Element';
 import { Collection } from '../Collection';
 import { CollectionConfiguration } from '../Configuration';
-import { Actions as _Actions } from './Collection/Actions';
 
 export namespace CollectionHelper {
   export function getConfiguration(collection: Collection): CollectionConfiguration {
@@ -18,5 +17,4 @@ export namespace CollectionHelper {
       collection.new_elements.push(element);
     }
   }
-  export const Actions = _Actions
 }

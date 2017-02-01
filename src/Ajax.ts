@@ -2,8 +2,12 @@
 
 // export interface AjaxPromise extends Promise<any> {
 // }
+
+type AjaxPromiseThenOnResolveFunction = (response: AjaxResponse) => void;
+type AjaxPromiseThenFunction = (resolve_fn: AjaxPromiseThenOnResolveFunction) => void;
+
 export interface AjaxPromise {
-  then: Function
+  then: AjaxPromiseThenFunction;
 } //Promise<any> //|JQueryPromise<{}>;
 
 export interface AjaxResponse extends Response {
@@ -23,22 +27,41 @@ export interface AjaxInstruction {
   [prop: string]: any;
 }
 
+export interface AjaxData {
+  [key: string]: any;
+}
+
+export interface AjaxHeaders {
+  [name: string]: string;
+}
+
 export namespace Ajax {
   let ajax_function: AjaxFunction;
 
-  export function executeRequest(url: string, method: string, data: Object, headers: Object) {
-    if (headers == null) { headers = {}; }
+  interface AjaxFunctionOptions {
+    method: string;
+    type: string;
+    url: string;
+    data: string;
+    body: string;
+    headers: AjaxHeaders;
+    dataType: 'json';
+    responseType: 'json';
+  }
+
+  export function executeRequest(url: string, method: string, data?: AjaxData, headers?: AjaxHeaders) {
+    if (!headers) { headers = {}; }
     headers['Accept'] = headers['Content-Type'] = 'application/json';
-    let options = {
+    let options: AjaxFunctionOptions = {
       method: method,
-      url: method,
+      url: url,
       data: JSON.stringify(data === undefined ? {} : data),
       headers: headers,
       dataType: 'json',
       responseType: 'json'
-    };
-    options['type'] = options.method;
-    options['body'] = options.data;
+    } as AjaxFunctionOptions;
+    options.type = options.method;
+    options.body = options.data;
     return ajax_function(options.url, options);
   }
 
@@ -54,9 +77,9 @@ export namespace Ajax {
   export function setAjaxFunction(fn: Function, type?: string) {
     if (typeof type === 'undefined') {
       if ((typeof jQuery !== 'undefined') && (fn === jQuery.ajax))
-        var type = 'jquery';
+        type = 'jquery';
       else if ((typeof fetch !== 'undefined') && (fn === fetch))
-        var type = 'fetch';
+        type = 'fetch';
     }
 
     switch (type) {
@@ -91,7 +114,7 @@ export namespace Ajax {
         }
         break;
       default:
-        this.ajax_function = (url: string, instruction: AjaxInstruction) => fn(instruction);
+        ajax_function = (url: string, instruction: AjaxInstruction) => fn(instruction);
     }
   }
 }

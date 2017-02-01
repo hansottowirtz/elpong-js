@@ -18,8 +18,7 @@ export namespace HasOne {
       relation_collection = SchemeHelper.getCollectionBySingularName(scheme, relation_collection_singular_name);
     }
 
-    return element.relations[Util.camelize(relation_collection_singular_name)] = () => {
-      HasMany.getHasManyRelationFunction(element, collection, relation_config, relation_collection)()[0];
-    }
+    return element.relations[Util.camelize(relation_collection_singular_name)] = () =>
+      HasMany.getHasManyRelationFunction(element, collection, relation_config, relation_collection, true)()[0];
   }
 }
