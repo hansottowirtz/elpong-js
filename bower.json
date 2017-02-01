@@ -15,9 +15,9 @@
   "license": "MIT",
   "ignore": [
     "*",
+    "!LICENSE"
     "!README.md"
-    "!dist/*",
-    "!src/*"
+    "!dist/*"
   ],
   "dependencies": {},
   "version": "1.0.0"

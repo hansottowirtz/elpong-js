@@ -70,11 +70,10 @@ gulp.task('test:frameworks', (done) => {
     testWithFramework(frameworks[i], partlyDone);
   };
   testWithFramework(frameworks[0], partlyDone);
-})
+});
 
 gulp.task('test:karma:debug', (done) => {
-  gulp.watch('src/**/*', ['build']);
-  gulp.watch('test/**/*', ['build']);
+  process.env.FRAMEWORK = process.env.FRAMEWORK || 'fetch'
   new karma({
     configFile: __dirname + '/karma.conf.js',
     singleRun: false,
