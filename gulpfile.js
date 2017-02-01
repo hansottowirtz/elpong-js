@@ -2,6 +2,7 @@ const gulp = require('gulp');
 const uglify = require('gulp-uglify');
 const rename = require('gulp-rename');
 const size = require('gulp-size');
+const tslint = require('gulp-tslint');
 const webpack = require('webpack-stream');
 const karma = require('karma').Server;
 
@@ -27,9 +28,11 @@ gulp.task('build:uglify', () => {
 gulp.task('build', gulp.series('build:webpack', 'build:uglify'));
 
 gulp.task('lint', () => {
-  return gulp.src('./src/*.coffee')
-    .pipe(coffeelint())
-    .pipe(coffeelint.reporter('coffeelint-stylish'));
+  return gulp.src('src/**/*.ts')
+    .pipe(tslint({
+      formatter: 'verbose'
+    }))
+    .pipe(tslint.report())
 });
 
 testWithFramework = (framework, done) => {

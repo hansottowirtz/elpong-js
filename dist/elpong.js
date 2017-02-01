@@ -882,7 +882,7 @@ var Collection = (function () {
         }
     };
     Collection.prototype.build = function (pre_element) {
-        if (pre_element == null) {
+        if (!pre_element) {
             pre_element = this.default_pre_element;
         }
         var el = new Element_1.Element(this, pre_element);

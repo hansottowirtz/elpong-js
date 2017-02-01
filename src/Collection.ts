@@ -87,8 +87,8 @@ export class Collection {
       document.querySelectorAll(`meta[name=elpong-collection][collection='${this.name}'][scheme='${this.scheme().name}']`) as NodeListOf<HTMLMetaElement>;
     let element_tags: NodeListOf<HTMLMetaElement> =
       document.querySelectorAll(`meta[name=elpong-element][collection='${this.name}'][scheme='${this.scheme().name}']`) as NodeListOf<HTMLMetaElement>;
-    for (let collection_tag of Util.arrayFromHTML(collection_tags) as Array<HTMLMetaElement>) {
-      for (let pre_element of JSON.parse(collection_tag.content) as Array<PreElement>) {
+    for (let collection_tag of Util.arrayFromHTML(collection_tags) as HTMLMetaElement[]) {
+      for (let pre_element of JSON.parse(collection_tag.content) as PreElement[]) {
         this.buildOrMerge(pre_element);
       }
     }
@@ -132,22 +132,20 @@ export class Collection {
       if (is_correct) {
         if (find_options.multiple) {
           response_arr.push(element);
-        }
-        else {
+        } else {
           return element;
         }
       }
     }
     if (find_options.multiple) {
       return response_arr;
-    }
-    else {
+    } else {
       return null;
     }
   }
 
   build(pre_element: PreElement) {
-    if (pre_element == null) { pre_element = this.default_pre_element; }
+    if (!pre_element) { pre_element = this.default_pre_element; }
     let el = new Element(this, pre_element);
     CollectionHelper.addElement(this, el);
     return el;
