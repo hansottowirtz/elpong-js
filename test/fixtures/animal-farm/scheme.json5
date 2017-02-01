@@ -1,0 +1,38 @@
+{
+  name: 'animal-farm',
+  selector: 'id',
+  collections: {
+    pigs: {
+      fields: {
+        id: {},
+        name: {},
+        boss_id: { reference: true }
+      },
+      relations: {
+        belongs_to: {
+          boss: {
+            collection: 'humans'
+          }
+        }
+      },
+      actions: {
+        oink: {
+          method: 'PUT'
+        }
+      }
+    },
+    humans: {
+      fields: {
+        id: {},
+        name: {}
+      },
+      relations: {
+        has_many: {
+          pigs: {
+            field: 'boss_id'
+          }
+        }
+      }
+    }
+  }
+}

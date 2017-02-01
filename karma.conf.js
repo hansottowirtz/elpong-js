@@ -1,3 +1,5 @@
+var webpack = require('webpack');
+
 module.exports = function(config) {
   var customLaunchers = {
     'SL_Chrome_26': {
@@ -46,38 +48,32 @@ module.exports = function(config) {
 
   config.set({
     sauceLabs: {
-      testName: 'HTTPong Karma Test',
+      testName: 'Elpong Karma Test',
       startConnect: false,
       recordScreenshots: true
     },
     customLaunchers: customLaunchers,
     basePath: '',
-    frameworks: ['source-map-support', 'jasmine'],
+    frameworks: ['jasmine'],
     files: [
-      'test/fixtures/**/*.json',
-      'dist/httpong.js',
-      'test/spec_helper.coffee',
-      'test/**/*_spec.coffee'
+      'src/**/*.ts',
+      'test/**/*.coffee',
+      'test/**/*.ts'
     ],
     exclude: [],
     preprocessors: {
-      '**/*.json': ['json_fixtures'],
-      '**/*.coffee': ['coffee'],
-      '**/*.js': ['env']
-    },
-    jsonFixturesPreprocessor: {
-      variableName: '__json__'
+      '**/*.ts': ['webpack', 'sourcemap'],
+      '**/*.coffee': ['webpack', 'sourcemap'],
+      '**/*.js': ['sourcemap']
     },
     plugins: [
-      'karma-env-preprocessor',
-      'karma-json-fixtures-preprocessor',
       'karma-jasmine',
-      'karma-coffee-preprocessor',
       'karma-chrome-launcher',
       'karma-safari-launcher',
       'karma-phantomjs-launcher',
       'karma-sauce-launcher',
-      'karma-source-map-support'
+      'karma-sourcemap-loader',
+      'karma-webpack'
     ],
     reporters: ['progress'],
     port: 9876,
@@ -87,24 +83,36 @@ module.exports = function(config) {
     browsers: Object.keys(customLaunchers), // overridden by certain gulp tasks
     singleRun: true,
     concurrency: Infinity,
-    envPreprocessor: [
-     'FRAMEWORK'
-   ],
-    coffeePreprocessor: {
-      options: {
-        sourceMap: true
-      }
+    webpack: {
+      resolve: {
+        extensions: ['.ts', '.coffee', '.js', '.json']
+      },
+      module: {
+        loaders: [
+          { test: /\.coffee$/, loader: 'coffee-loader' },
+          { test: /\.ts$/, loader: 'awesome-typescript-loader' },
+          { test: /\.json5$/,  loader: 'json5-loader' }
+        ]
+      },
+      plugins: [
+        new webpack.SourceMapDevToolPlugin({
+          filename: null, // inline sourcemap
+          test: /\.(ts|js|coffee)$/
+        }),
+        new webpack.EnvironmentPlugin(['FRAMEWORK'])
+      ],
+      devtool: 'inline-source-map'
     }
   })
   switch (process.env.FRAMEWORK) {
     case 'jquery':
       config.files.unshift('node_modules/jquery/dist/jquery.js', 'node_modules/jquery-mockjax/dist/jquery.mockjax.js');
       break;
-    case 'fetch':
-      config.files.unshift('node_modules/promise-polyfill/promise.js', 'node_modules/whatwg-fetch/fetch.js', 'node_modules/fetch-mock/es5/client-browserified.js');
-      break;
-    default:
+    case 'angular':
       config.files.unshift('node_modules/angular/angular.js', 'node_modules/angular-mocks/angular-mocks.js');
+      break;
+    default: // fetch
+      config.files.unshift('node_modules/promise-polyfill/promise.js', 'node_modules/whatwg-fetch/fetch.js', 'node_modules/fetch-mock/es5/client-browserified.js');
   }
   if (process.env.TRAVIS) {
     config.reporters.push('saucelabs')

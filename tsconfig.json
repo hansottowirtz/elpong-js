@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "outDir": "built",
+    "target": "es5",
+    "noFallthroughCasesInSwitch": true,
+    "module": "commonjs",
+    "strictNullChecks": true
+  },
+  "include": [
+    "src/**/*.ts"
+  ]
+}

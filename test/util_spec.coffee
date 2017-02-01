@@ -1,36 +1,28 @@
+Util = require('../src/Util').Util
+
 describe 'Util', ->
-  it 'should camelize right', ->
-    o =
-      'get me': 'getMe'
-      get_me: 'getMe'
-      'get_me_too': 'getMeToo'
+  it 'camelizes strings', ->
+    o = {
+      'say oink': 'sayOink'
+      say_oink: 'sayOink'
+      'say_oink again': 'sayOinkAgain'
+    }
 
     for k, v of o
-      expect(HTTPong.Util.camelize(k)).toBe(v)
+      expect(Util.camelize(k)).toBe(v)
 
-  it 'should upperCamelize right', ->
-    o =
-      'get me': 'GetMe'
-      get_me: 'GetMe'
-      'get_me_too': 'GetMeToo'
-
-    for k, v of o
-      expect(HTTPong.Util.upperCamelize(k)).toBe(v)
-
-  it 'should loop right', ->
+  it 'does for each loops', ->
     last = null
-    HTTPong.Util.forEach [1, 2, 3, 4], (v) ->
+    Util.forEach [1, 2, 3, 4], (v) ->
       last = v
-      return HTTPong.Util.BREAK
-    expect(last).toBe(1)
-
-  it 'should reverse loop right', ->
-    last = null
-    HTTPong.Util.reverseForIn {'1': 1, '2': 2, '3': 3, '4': 4}, (k, v) ->
-      last = v
-      return HTTPong.Util.BREAK
     expect(last).toBe(4)
-    last = null
-    HTTPong.Util.reverseForIn {'1': 1, '2': 2, '3': 3, '4': 4}, (k, v) ->
-      last = v
-    expect(last).toBe(1)
+
+  it 'checks if objects are equal, limited to JSON data types', ->
+    expect(Util.equalsJSON(
+      {a: 1, b: {c: 'd', e: 'f'}},
+      {b: {e: 'f', c: 'd'}, a: 1}
+    )).toBe(true)
+    expect(Util.equalsJSON(
+      {a: 1, b: {c: 'd', e: 'f'}},
+      {b: {e: 'g', c: 'd'}, a: 1}
+    )).toBe(false)

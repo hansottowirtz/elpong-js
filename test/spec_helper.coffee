@@ -1,7 +1,11 @@
-FRAMEWORK = (window.__env__['FRAMEWORK'] || 'angular').toLowerCase()
+Elpong = require('../src/Elpong').Elpong
+
+FRAMEWORK = process.env.FRAMEWORK || 'fetch'
+
+console.log('Testing ' + FRAMEWORK)
 
 afterEach ->
-  HTTPong.private.schemes = {}
+  Elpong._schemes = {}
 
 HttpBackend = null
 
@@ -14,7 +18,7 @@ do ->
       beforeEach inject ($injector) ->
         $httpBackend = $injector.get('$httpBackend')
         $http = $injector.get('$http')
-        HTTPong.setHttpFunction($http, 'angular')
+        Elpong.setAjax($http, 'angular')
 
       afterEach ->
         $httpBackend.verifyNoOutstandingExpectation()
@@ -48,9 +52,9 @@ do ->
 
       class HttpBackend
         reply: (method, url, data, status = 200, fn) ->
-          HTTPong.setHttpFunction(window.jQuery.ajax, 'jquery')
+          Elpong.setAjax(window.jQuery.ajax, 'jquery')
           json = JSON.stringify(data)
-          console.log("Will respond to #{method} #{url} with #{json}")
+          # console.log("Will respond to #{method} #{url} with #{json}")
           response_data = if status isnt 204 then json else ''
           response_headers = if status isnt 204 then {'Content-Type': 'application/json'} else {}
           $.mockjax({
@@ -68,7 +72,7 @@ do ->
 
     when 'fetch'
       fetchMock._mock() # set window.fetch to mock
-      HTTPong.setHttpFunction(fetch, 'fetch')
+      Elpong.setAjax(fetch, 'fetch')
 
       afterEach ->
         fetchMock.restore()
@@ -83,3 +87,5 @@ do ->
         expect: -> @reply.apply(@, arguments)
         flush: (->)
         done: (fn) -> fn()
+
+  exports.HttpBackend = HttpBackend

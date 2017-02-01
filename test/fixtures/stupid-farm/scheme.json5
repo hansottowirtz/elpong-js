@@ -1,0 +1,74 @@
+{
+  "name": "stupid-farm",
+  "selector": "id",
+  "collections": {
+    "geese": {
+      "singular": "goose",
+      "fields": {
+        "id": {},
+        "name": {
+          "default": "Bob"
+        }
+      }
+    },
+    "dogs": {
+      "fields": {
+        "id": {},
+        "boss_id": {
+          "reference": true
+        }
+      },
+      "relations": {
+        "belongs_to": {
+          "boss": {}
+        }
+      }
+    },
+    "bosses": {
+      "singular": "boss",
+      "fields": {
+        "id": {}
+      },
+      "relations": {
+        "has_many": {
+          "dogs": {}
+        }
+      }
+    },
+    "apples": {
+      "fields": {
+        "id": {},
+        "kind": {},
+        "stem": {
+          "embedded_element": true,
+          "collection": "apple_stems"
+        },
+        "stem_id": {
+          "type": "Integer",
+          "only_send": true,
+          "reference": true
+        }
+      },
+      "relations": {
+        "belongs_to": {
+          "stem": {
+            "collection": "apple_stems"
+          }
+        }
+      }
+    },
+    "apple_stems": {
+      "fields": {
+        "id": {},
+        "color": {}
+      },
+      "relations": {
+        "has_one": {
+          "apple": {
+            "field": "stem_id"
+          }
+        }
+      }
+    }
+  }
+}

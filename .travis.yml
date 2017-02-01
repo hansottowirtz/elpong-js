@@ -4,7 +4,7 @@ node_js:
 install:
 - npm install -g gulp-cli coffee-script
 - npm install
-script: gulp travis-test
+script: gulp test:travis
 addons:
   sauce_connect:
     username: hansottowirtz

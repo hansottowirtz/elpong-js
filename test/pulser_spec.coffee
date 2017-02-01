@@ -1,35 +1,38 @@
+Elpong = require('../src/Elpong').Elpong
+HttpBackend = require('./spec_helper').HttpBackend
+
 describe 'Pulser', ->
   beforeEach ->
-    @pre_scheme = window.__json__["test/fixtures/pulser/scheme"] # loads the scheme
-    @scheme = window.HTTPong.addScheme(@pre_scheme) # adds the scheme
+    @scheme = Elpong.add(require('./fixtures/pulser/scheme.json5'))
 
     @users = @scheme.select('users')
 
   describe 'user', ->
     beforeEach ->
-      @otto = @users.makeNewElement {email: 'hansottowirtz@gmail.com'}
-      @example = @users.makeNewElement {email: 'example@example.com'}
+      @otto = @users.build {email: 'hansottowirtz@gmail.com'}
+      @example = @users.build {email: 'example@example.com'}
 
     describe 'actions', ->
-      a = it
       httpBackend = null
 
       beforeEach ->
         httpBackend = new HttpBackend()
         @scheme.setApiUrl('/api')
 
-      a 'user should be able to register', (done) ->
-        httpBackend.expect 'POST', '/api/users/register', {id: 1, email: 'hansottowirtz@gmail.com'}, 200, (data) ->
-          expect(data).toEqual({email: 'hansottowirtz@gmail.com', password: 'abcdefgh'})
-        httpBackend.expect 'GET', '/api/users/me', {id: 1, email: 'wirtzhansotto@gmail.com'}, 200, (data) ->
-          expect(data).toEqual({})
+      describe 'user', ->
 
-        @otto.setField('password', 'abcdefgh')
-        @otto.actions.doRegister().then =>
-          expect(@otto.getField('id')).toBe(1)
-          @users.actions.doGetMe().then (response) =>
-            expect(response.data.email).toBe('wirtzhansotto@gmail.com')
-            @otto.mergeWith(response.data)
-            expect(@otto.getField('email')).toBe('wirtzhansotto@gmail.com')
-            httpBackend.done(done)
-        httpBackend.flush()
+        it 'can register', (done) ->
+          httpBackend.expect 'POST', '/api/users/register', {id: 1, email: 'hansottowirtz@gmail.com'}, 200, (data) ->
+            expect(data).toEqual({email: 'hansottowirtz@gmail.com', password: 'abcdefgh'})
+          httpBackend.expect 'GET', '/api/users/me', {id: 1, email: 'wirtzhansotto@gmail.com'}, 200, (data) ->
+            expect(data).toEqual({})
+
+          @otto.fields.password = 'abcdefgh'
+          @otto.actions.register().then =>
+            expect(@otto.fields.id).toBe(1)
+            @users.actions.getMe().then (response) =>
+              expect(response.data.email).toBe('wirtzhansotto@gmail.com')
+              @otto.merge(response.data)
+              expect(@otto.fields.email).toBe('wirtzhansotto@gmail.com')
+              httpBackend.done(done)
+          httpBackend.flush()

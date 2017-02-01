@@ -1,31 +1,32 @@
+Elpong = require('../src/Elpong').Elpong
+HttpBackend = require('./spec_helper').HttpBackend
+
 describe 'Element', ->
   describe 'actions', ->
-    describe 'of pulser', ->
-      httpBackend = null
+    httpBackend = null
 
-      beforeEach ->
-        @pre_scheme = window.__json__["test/fixtures/pulser/scheme"]
-        @scheme = window.HTTPong.addScheme(@pre_scheme)
+    beforeEach ->
+      @scheme = Elpong.add(require('./fixtures/pulser/scheme.json5'))
 
-        httpBackend = new HttpBackend()
+      httpBackend = new HttpBackend()
 
-        @scheme.setApiUrl('/api')
-        @controls = @scheme.select('controls')
-        @devices = @scheme.select('devices')
-        @plugs = @scheme.select('plugs')
+      @scheme.setApiUrl('/api')
+      @controls = @scheme.select('controls')
+      @devices = @scheme.select('devices')
+      @plugs = @scheme.select('plugs')
 
-      it 'should GET properly', (done) ->
-        httpBackend.reply 'GET', '/api/controls/1', {id: 1, name: 'Button', plugs: [{id: 5, block_id: 1, block_collection: 'controls'}, {id: 6, block_id: 1, block_collection: 'controls'}]}
+    it 'should GET properly', (done) ->
+      httpBackend.reply 'GET', '/api/controls/1', {id: 1, name: 'Button', plugs: [{id: 5, block_id: 1, block_collection: 'controls'}, {id: 6, block_id: 1, block_collection: 'controls'}]}
 
-        @controls.actions.doGetOne(1).then (response) =>
-          control = @controls.find(1)
-          expect(control.getField('name')).toBe('Button')
+      @controls.actions.getOne(1).then (response) =>
+        control = @controls.find(1)
+        expect(control.fields.name).toBe('Button')
 
-          expect(control.relations.getPlugs()[0].getField('id')).toBe(5)
-          expect(control.relations.getPlugs()[1].getField('id')).toBe(6)
+        expect(control.relations.plugs()[0].fields.id).toBe(5)
+        expect(control.relations.plugs()[1].fields.id).toBe(6)
 
-          httpBackend.done(done)
+        httpBackend.done(done)
 
-        httpBackend.flush()
+      httpBackend.flush()
 
-      it 'should PUT properly', ->
+    it 'should PUT properly', ->

@@ -1,9 +1,9 @@
-describe 'Stupid Farm', ->
-  a = an = it
+Elpong = require('../src/Elpong').Elpong
+HttpBackend = require('./spec_helper').HttpBackend
 
+describe 'Stupid Farm', ->
   beforeEach ->
-    pre_scheme = window.__json__["test/fixtures/stupid-farm/scheme"] # loads the scheme
-    @scheme = window.HTTPong.addScheme(pre_scheme) # adds the scheme
+    @scheme = Elpong.add(require('./fixtures/stupid-farm/scheme.json5'))
 
     @apples = @scheme.select('apples')
     @apple_stems = @scheme.select('apple_stems')
@@ -20,24 +20,25 @@ describe 'Stupid Farm', ->
       httpBackend = new HttpBackend()
       @scheme.setApiUrl('/api')
 
-    it 'apple should have a stem', (done) ->
-      httpBackend.reply('GET', '/api/apples',
-        [
-          {
-            "id": 5,
-            "kind": "Granny Smith",
-            "stem": {
-              "id": 3
+    describe 'apples', ->
+      it 'have a stem', (done) ->
+        httpBackend.reply('GET', '/api/apples',
+          [
+            {
+              id: 5,
+              kind: 'Granny Smith',
+              stem: {
+                id: 3
+              }
             }
-          }
-        ]
-      )
+          ]
+        )
 
-      @apples.actions.doGetAll().then =>
-        apple = @apples.find(5)
-        stem = apple.relations.getStem()
-        expect(stem.getField('id')).toBe(3)
-        expect(stem.relations.getApple()).toBe(apple)
-        httpBackend.done(done)
+        @apples.actions.getAll().then =>
+          apple = @apples.find(5)
+          stem = apple.relations.stem()
+          expect(stem.selector()).toBe(3)
+          expect(stem.relations.apple()).toBe(apple)
+          httpBackend.done(done)
 
-      httpBackend.flush()
+        httpBackend.flush()

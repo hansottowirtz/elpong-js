@@ -1,44 +1,46 @@
-describe 'Animal Farm', ->
-  a = it
+Elpong = require('../src/Elpong').Elpong
+HttpBackend = require('./spec_helper').HttpBackend
 
+describe 'Animal Farm', ->
   beforeEach ->
-    @pre_scheme = window.__json__["test/fixtures/animal-farm/scheme"] # loads the scheme
-    @scheme = window.HTTPong.addScheme(@pre_scheme) # adds the scheme
+    @scheme = Elpong.add(require('./fixtures/animal-farm/scheme.json5'))
 
     @pigs = @scheme.select('pigs')
     @humans = @scheme.select('humans')
 
   describe 'relations', ->
     beforeEach ->
-      @napoleon = @pigs.makeNewElement {id: 1, name: 'Napoleon', boss_id: null}
-      @snowball = @pigs.makeNewElement {id: 2, name: 'Snowball', boss_id: 9}
+      @napoleon = @pigs.build {id: 1, name: 'Napoleon', boss_id: null}
+      @snowball = @pigs.build {id: 2, name: 'Snowball', boss_id: 9}
 
-      @jones = @humans.makeNewElement {id: 9, name: 'Mr. Jones'}
+      @jones = @humans.build {id: 9, name: 'Mr. Jones'}
 
-    a 'pig should sometimes have a boss', ->
-      expect(@napoleon.relations.getBoss()).toBe(null)
-      expect(@snowball.relations.getBoss()).toBe(@jones)
+    describe 'pigs', ->
+      it 'should sometimes have a boss', ->
+        expect(@napoleon.relations.boss()).not.toBeDefined()
+        @napoleon.fields.boss_id = 1337
+        expect(@napoleon.relations.boss()).toBe(null)
+        expect(@snowball.relations.boss()).toBe(@jones)
 
-    a 'human should have his pigs', ->
-      pigs = @jones.relations.getPigs()
-      expect(pigs[0]).toBe(@snowball)
-      expect(pigs[1]).not.toBeDefined()
+    describe 'humans', ->
+      it 'should have his pigs', ->
+        pigs = @jones.relations.pigs()
+        expect(pigs[0]).toBe(@snowball)
+        expect(pigs[1]).not.toBeDefined()
 
-  describe 'actions', ->
+  describe 'pigs', ->
     httpBackend = new HttpBackend()
 
     beforeEach ->
       @scheme.setApiUrl('/api')
 
-      @napoleon = @pigs.makeNewElement {id: 1, name: 'Napoleon', boss_id: null}
+      @napoleon = @pigs.build {id: 1, name: 'Napoleon', boss_id: null}
 
-    a 'pig should be able to oink', (done) ->
+    it 'should be able to oink', (done) ->
       httpBackend.reply 'PUT', '/api/pigs/1/oink', undefined, 204
 
-      @napoleon.actions.doOink().then (response) =>
-        debugger
-        console.log response
-        expect(@napoleon.getField('name')).toBe('Napoleon')
+      @napoleon.actions.oink().then (response) =>
+        expect(@napoleon.fields.name).toBe('Napoleon')
         httpBackend.done(done)
 
       httpBackend.flush()

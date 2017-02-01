@@ -1,0 +1,48 @@
+{
+  "name": "clothes",
+  "selector": "id",
+  "collections": {
+    "workers": {
+      "fields": {
+        "id": {},
+        "name": {}
+      },
+      "relations": {
+        "has_many": {
+          "created_tshirts": {
+            "collection": "tshirts",
+            "as": "person"
+          }
+        }
+      }
+    },
+    "tshirts": {
+      "fields": {
+        "id": {},
+        "color": {},
+        "person_id": {},
+        "brand_id": {}
+      },
+      "relations": {
+        "belongs_to": {
+          "creator": {
+            "collection": "workers",
+            "as": "person"
+          },
+          "brand": {}
+        }
+      }
+    },
+    "brands": {
+      "fields": {
+        "id": {},
+        "name": {}
+      },
+      "relations": {
+        "has_many": {
+          "tshirts": {}
+        }
+      }
+    }
+  }
+}

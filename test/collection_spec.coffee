@@ -1,32 +1,23 @@
+Elpong = require('../src/Elpong').Elpong
+
 describe 'Collection', ->
   describe 'pulser', ->
     beforeEach ->
-      pre_scheme = window.__json__["test/fixtures/pulser/scheme"]
-      @scheme = window.HTTPong.addScheme(pre_scheme)
+      @scheme = Elpong.add(require('./fixtures/pulser/scheme.json5'))
       @users = @scheme.select('users')
       @plugs = @scheme.select('plugs')
 
     it 'should have the right name', ->
-      expect(@users.getName()).toBe('users')
-      expect(@plugs.getName()).toBe('plugs')
-      expect(@users.getPluralName()).toBe('users')
-      expect(@plugs.getPluralName()).toBe('plugs')
-
-    it 'should have the right singular name', ->
-      expect(@users.getSingularName()).toBe('user')
-      expect(@plugs.getSingularName()).toBe('plug')
+      expect(@users.name).toBe('users')
+      expect(@plugs.name).toBe('plugs')
 
   describe 'stupid farm', ->
     beforeEach ->
-      pre_scheme = window.__json__["test/fixtures/stupid-farm/scheme"]
-      @scheme = window.HTTPong.addScheme(pre_scheme)
-      @geese = @scheme.getCollection('geese')
+      @scheme = Elpong.add(require('./fixtures/stupid-farm/scheme.json5'))
+      @geese = @scheme.select('geese')
 
     it 'should have the right name', ->
-      expect(@geese.getName()).toBe('geese')
-
-    it 'should have the right singular name', ->
-      expect(@geese.getSingularName()).toBe('goose')
+      expect(@geese.name).toBe('geese')
 
     it 'should have the right default element', ->
       expect(@geese.default_pre_element).toEqual({name: 'Bob'})
