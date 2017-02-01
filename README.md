@@ -81,7 +81,7 @@ just use `array()` or `array({without_new: true})` for that.
 
 #### Collection actions
 
-You can do collection actions with the `actions` key.<br/>
+You can execute collection actions with the `actions` key.<br/>
 The built in ones are `getOne` and `getAll`.
 
 ## Elements
@@ -97,7 +97,7 @@ pig.fields.name;
 
 #### Actions
 
-You can do actions on the `actions` key. There are four built in ones:
+You can execute actions on the `actions` key. There are four built in ones:
 
 `get`: Sends a GET and updates the fields, overwriting the original fields.
 
@@ -139,8 +139,8 @@ pig.relations.boss();
 
 #### Other functions
 
-`remove`: Triggers a `delete` on the element and removes it from the collection if it is saved. If it is new, it is just removed from
-the collection on the client side.
+`remove`: Triggers a `delete` on the element and removes it from the collection if it is saved.
+If it is new, it is just removed from the collection on the client side.
 In both cases, it returns a promise.
 
 `isNew`: Checks if the element has a selector value.
@@ -151,33 +151,39 @@ Can be accessed through their relations.
 
 #### Snapshots
 
-`snapshots.make(tag)`: Makes a snapshot of the fields and returns a snapshot object,
+Under the `snapshots` key:
+
+`make(tag)`: Makes a snapshot of the fields and returns a snapshot object,
 with a `tag`, `time`, `data` and `revert` key.
 If you call `revert`, the element fields will revert themselves to that snapshot.
 
-`undo(time_or_tag_or_number)`:
+`undo(tag_or_steps)`:
 - When passed in a tag, will revert itself to the
 last snapshot with that tag. The snapshot with tag `creation` is made after
-`makeNewElement`. Snapshots with tags `before_{action}` and `after_{action}`
+`build`. Snapshots with tags <code>before_<i>action</i></code> and <code>after_<i>action</i></code>
 are made after those actions, like `before_get` and `after_put`.
-- When passed in a time, it will revert itself to a snapshot of that time.
-- When passed in a number, it will revert itself n steps.
+- When passed in a number, it will revert itself *n* steps. No argument equals 0 steps, which
+reverts itself to the last snapshot.
 
-`isPersisted()`: Compares fields with the `getLastPersisted()`.
+`isPersisted()`: Compares fields with the `lastPersisted()`.
 Note: when one of the fields is an object, it will
 return `true` when changing the keys of that object, because the object reference
 is the same. The fields are compared with `===`. Returns `false` if the element
 is new.
 
-`getLastPersisted()`: Gets last snapshot where the tag is `after_get`, `after_post`
+`lastPersisted()`: Gets last snapshot where the tag is `after_get`, `after_post`
 ,`after_put` or `creation`.
 
-`getLast()`: Gets last snapshot
+`last()`: Gets last snapshot
 
-`getLastWithTag(tag)`: Gets last snapshot where the tag matches the tag string
+`lastWithTag(tag)`: Gets last snapshot where the tag matches the tag string
 or regex.
 
-You can loop through snapshots with the `snapshots.list` key.
+You can loop through snapshots with the `list` key.
+
+```javascript
+element.lastPersisted().revert() // reverts the fields to the last persisted snapshot
+```
 
 #### Merging
 
@@ -187,11 +193,11 @@ the other data using `merge`.
 ### Examples
 
 ###### Animal Farm
-[Scheme](../master/test/fixtures/animal-farm/scheme.json)
+[Scheme](../master/test/fixtures/animal-farm/scheme.json5)
 [Usage](../master/test/animal_farm_spec.coffee)
 
 ###### Pulser
-[Scheme](../master/test/fixtures/pulser/scheme.json)
+[Scheme](../master/test/fixtures/pulser/scheme.json5)
 [Usage](../master/test/pulser_spec.coffee)
 
 ### Setting an ajax function
@@ -202,11 +208,13 @@ It should return a Promise-like object that catches when the response status is
 not between 200 and 299, and on other network errors.<br/>
 The `then` and `catch` functions should return a response object with a
 `data` key, that holds the parsed JSON object.<br/>
-`$http` and `jQuery.ajax` support this out of the box.<br/>
+`$http` and `jQuery.ajax` are supported out of the box.<br/>
 If you don't work with Angular or jQuery, you can use [window.fetch](fetch).
 
 ```javascript
-Elpong.setAjax(window.fetch)
+Elpong.setAjax(fetch)
+Elpong.setAjax($http)
+Elpong.setAjax($.ajax)
 ```
 
 ### Frameworks

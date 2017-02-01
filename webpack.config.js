@@ -14,9 +14,6 @@ module.exports = {
   module: {
     loaders: [
       { test: /\.ts$/, loader: 'awesome-typescript-loader' }
-    ],
-    preLoaders: [
-      { test: /\.js$/, loader: 'source-map-loader' }
     ]
   }
 };

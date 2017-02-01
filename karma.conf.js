@@ -84,7 +84,6 @@ module.exports = function(config) {
     singleRun: true,
     concurrency: Infinity,
     webpack: {
-      devtool: 'inline-source-map',
       resolve: {
         extensions: ['.ts', '.coffee', '.js', '.json']
       },
@@ -98,10 +97,11 @@ module.exports = function(config) {
       plugins: [
         new webpack.SourceMapDevToolPlugin({
           filename: null, // inline sourcemap
-          test: /\.(ts|js|coffee)($|\?)/
+          test: /\.(ts|js|coffee)$/
         }),
         new webpack.EnvironmentPlugin(['FRAMEWORK'])
-      ]
+      ],
+      devtool: 'inline-source-map'
     }
   })
   switch (process.env.FRAMEWORK) {
