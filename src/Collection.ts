@@ -5,15 +5,19 @@ import { Element, SelectorValue } from './Element';
 import { Util } from './Util';
 import { ActionConfiguration } from './Configuration';
 import { Actions, CollectionActionOptions } from './Helpers/Collection/Actions';
+import { AjaxPromise } from './Ajax';
 
 interface ElementMap {
   [key: string]: Element;
 }
 
+type CollectionActionFunction = (action_options?: CollectionActionOptions) => AjaxPromise;
+type GetOneCollectionActionFunction = (selector_value: SelectorValue, action_options?: CollectionActionOptions) => AjaxPromise;
+
 interface CollectionActions {
-  getAll: Function;
-  getOne: Function;
-  [action_name: string]: Function;
+  getAll: CollectionActionFunction;
+  getOne: GetOneCollectionActionFunction;
+  [action_name: string]: CollectionActionFunction;
 }
 
 interface CollectionArrayOptions {
@@ -60,18 +64,17 @@ export class Collection {
     //     # HPP.http_function(new_options)
 
     this.actions = {
-      getAll: (user_options: CollectionActionOptions) => {
-        return Actions.executeGetAll(this, user_options);
+      getAll: (action_options?: CollectionActionOptions) => {
+        return Actions.executeGetAll(this, action_options);
       },
-      getOne: (selector_value: SelectorValue, user_options: CollectionActionOptions) => {
-        return Actions.executeGetOne(this, selector_value, user_options);
+      getOne: (selector_value: SelectorValue, action_options?: CollectionActionOptions) => {
+        return Actions.executeGetOne(this, selector_value, action_options);
       }
     };
 
     Util.forEach(config.collection_actions, (action_config: ActionConfiguration, action_name: string) => {
-      this.actions[Util.camelize(action_name)] = (action_options: CollectionActionOptions) => {
+      this.actions[Util.camelize(action_name)] = (action_options: CollectionActionOptions) =>
         Actions.executeCustom(this, action_name, action_config, action_options);
-      }
     });
   }
 

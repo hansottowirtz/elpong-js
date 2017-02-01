@@ -1,4 +1,3 @@
-Element = require('../src/Element').Element
 Elpong = require('../src/Elpong').Elpong
 HttpBackend = require('./spec_helper').HttpBackend
 
@@ -29,7 +28,7 @@ describe 'Element', ->
 
     it 'should have working embedded elements', ->
       apples = @scheme.select('apples')
-      apple = new Element apples, {id: 5, kind: 'Granny Smith', stem: {id: 3, color: 'brown'}}
+      apple = apples.build {id: 5, kind: 'Granny Smith', stem: {id: 3, color: 'brown'}}
       expect(apple.relations.stem().fields.id).toBe(3)
 
   describe 'pulser', ->

@@ -44,7 +44,7 @@ export namespace UrlHelper {
   }
 
   export function trimSlashes(s: string): string {
-    return s.replace(/^\/|\/$/, '');
+    return s.replace(/^\/|\/$/g, '');
   }
 
   export function isFqdn(s: string): boolean {

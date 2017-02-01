@@ -1,18 +1,20 @@
+Elpong = require('../src/Elpong').Elpong
+
 describe 'Scheme', ->
   describe 'pulser', ->
     beforeAll ->
       @scheme = Elpong.add(require('./fixtures/pulser/scheme.json5'))
 
     it 'should be existing', ->
-      expect(HTTPong.getScheme('pulser')).toBeDefined()
+      expect(Elpong.get('pulser')).toBeDefined()
 
     it 'should have a data attribute, equal to the creation argument', ->
       expect(@scheme.data).toBe(@pre_scheme)
 
     it 'should have the right collections', ->
-      expect(@scheme.getCollection('controls')).toBeDefined()
-      expect(@scheme.getCollection('plugs')).toBeDefined()
-      expect(@scheme.getCollection('users')).toBeDefined()
+      expect(@scheme.select('controls')).toBeDefined()
+      expect(@scheme.select('plugs')).toBeDefined()
+      expect(@scheme.select('users')).toBeDefined()
       # expect(@scheme.getCollection('cats')).not.toBeDefined()
 
     it 'should have the right api url', ->

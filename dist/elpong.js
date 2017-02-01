@@ -189,16 +189,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        //     # new_options = HP.Util.merge(HP.Util.merge({method: 'GET'}, {meth}), options)
 	        //     # HPP.http_function(new_options)
 	        this.actions = {
-	            getAll: function (user_options) {
-	                return Actions_1.Actions.executeGetAll(_this, user_options);
+	            getAll: function (action_options) {
+	                return Actions_1.Actions.executeGetAll(_this, action_options);
 	            },
-	            getOne: function (selector_value, user_options) {
-	                return Actions_1.Actions.executeGetOne(_this, selector_value, user_options);
+	            getOne: function (selector_value, action_options) {
+	                return Actions_1.Actions.executeGetOne(_this, selector_value, action_options);
 	            }
 	        };
 	        Util_1.Util.forEach(config.collection_actions, function (action_config, action_name) {
 	            _this.actions[Util_1.Util.camelize(action_name)] = function (action_options) {
-	                Actions_1.Actions.executeCustom(_this, action_name, action_config, action_options);
+	                return Actions_1.Actions.executeCustom(_this, action_name, action_config, action_options);
 	            };
 	        });
 	    }
@@ -356,7 +356,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    UrlHelper.createForCollection = createForCollection;
 	    function trimSlashes(s) {
-	        return s.replace(/^\/|\/$/, '');
+	        return s.replace(/^\/|\/$/g, '');
 	    }
 	    UrlHelper.trimSlashes = trimSlashes;
 	    function isFqdn(s) {
@@ -1455,7 +1455,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    Actions.executeGetAll = executeGetAll;
 	    function executeGetOne(collection, selector_value, action_options) {
-	        if (action_options == null) {
+	        if (!action_options) {
 	            action_options = {};
 	        }
 	        var data = action_options.data;
@@ -1469,7 +1469,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    Actions.executeGetOne = executeGetOne;
 	    function executeCustom(collection, action_name, action_config, action_options) {
-	        if (action_options == null) {
+	        if (!action_options) {
 	            action_options = {};
 	        }
 	        var data = action_options.data;
