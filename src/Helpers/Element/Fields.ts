@@ -38,12 +38,7 @@ export namespace Fields {
     let embedded_element = embedded_element_collection.buildOrMerge(embedded_pre_element);
 
     let associated_field_key = field_config.field || `${field_key}_${scheme.configuration().selector}`;
-    console.log('setting up embedded element', element, embedded_element);
     element.fields[associated_field_key] = embedded_element.selector();
-    console.log(`The field ${associated_field_key} of element with id ${element.selector()} of collection ${element.collection().name} should be ${embedded_element.selector()} and is ${element.fields[associated_field_key]}`)
-    setTimeout(() => {
-      console.log(`The field ${associated_field_key} of element with id ${element.selector()} of collection ${element.collection().name} should be ${embedded_element.selector()} and is ${element.fields[associated_field_key]}`)
-    }, 10)
   }
 
   export function handleEmbeddedCollection(element: Element, pre_element: PreElement, field_key: string, field_config: EmbeddedCollectionFieldConfiguration): void {

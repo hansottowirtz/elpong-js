@@ -746,12 +746,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        var embedded_element = embedded_element_collection.buildOrMerge(embedded_pre_element);
 	        var associated_field_key = field_config.field || field_key + "_" + scheme.configuration().selector;
-	        console.log('setting up embedded element', element, embedded_element);
 	        element.fields[associated_field_key] = embedded_element.selector();
-	        console.log("The field " + associated_field_key + " of element with id " + element.selector() + " of collection " + element.collection().name + " should be " + embedded_element.selector() + " and is " + element.fields[associated_field_key]);
-	        setTimeout(function () {
-	            console.log("The field " + associated_field_key + " of element with id " + element.selector() + " of collection " + element.collection().name + " should be " + embedded_element.selector() + " and is " + element.fields[associated_field_key]);
-	        }, 10);
 	    }
 	    Fields.handleEmbeddedElement = handleEmbeddedElement;
 	    function handleEmbeddedCollection(element, pre_element, field_key, field_config) {
@@ -1002,7 +997,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    //
 	    // @return {Element|null}            The related element.
 	    var getPolymorphicBelongsToElement = function (element, field_key, collection_field_key, collection_singular_name) {
-	        // console.log hpe, collection_field_key, collection_selector_field
 	        var relation_collection_name = element.fields[collection_field_key];
 	        var relation_collection = element.collection().scheme().select(relation_collection_name);
 	        if (!field_key) {

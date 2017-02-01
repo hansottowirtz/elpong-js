@@ -48,7 +48,6 @@ export namespace BelongsTo {
   //
   // @return {Element|null}            The related element.
   let getPolymorphicBelongsToElement = (element: Element, field_key: string, collection_field_key: string, collection_singular_name: string) => {
-    // console.log hpe, collection_field_key, collection_selector_field
     let relation_collection_name = element.fields[collection_field_key];
     let relation_collection = element.collection().scheme().select(relation_collection_name);
     if (!field_key) {

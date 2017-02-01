@@ -40,7 +40,6 @@ describe 'Animal Farm', ->
       httpBackend.reply 'PUT', '/api/pigs/1/oink', undefined, 204
 
       @napoleon.actions.oink().then (response) =>
-        console.log response
         expect(@napoleon.fields.name).toBe('Napoleon')
         httpBackend.done(done)
 

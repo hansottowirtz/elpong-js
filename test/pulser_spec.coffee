@@ -19,7 +19,7 @@ describe 'Pulser', ->
         httpBackend = new HttpBackend()
         @scheme.setApiUrl('/api')
 
-      describe 'users', ->
+      describe 'user', ->
 
         it 'can register', (done) ->
           httpBackend.expect 'POST', '/api/users/register', {id: 1, email: 'hansottowirtz@gmail.com'}, 200, (data) ->

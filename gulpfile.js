@@ -1,7 +1,6 @@
 const gulp = require('gulp');
 const uglify = require('gulp-uglify');
 const rename = require('gulp-rename');
-const cson = require('gulp-cson');
 const size = require('gulp-size');
 const webpack = require('webpack-stream');
 const karmaServer = require('karma').Server;
@@ -33,12 +32,6 @@ gulp.task('build:uglify', () => {
     .pipe(gulp.dest('dist/'));
 });
 
-gulp.task('test:build:schemes', () => {
-  return gulp.src('./test/fixtures/*/scheme.cson')
-    .pipe(cson())
-    .pipe(gulp.dest('./test/fixtures'));
-});
-
 gulp.task('lint', () => {
   return gulp.src('./src/*.coffee')
     .pipe(coffeelint())
@@ -47,7 +40,7 @@ gulp.task('lint', () => {
 
 gulp.task('test', ['test:karma']);
 
-gulp.task('test:build', ['test:build:schemes', 'build']);
+gulp.task('test:build', ['build']);
 
 testWithFramework = (framework, done) => {
   process.env.FRAMEWORK = framework;
@@ -59,10 +52,11 @@ testWithFramework = (framework, done) => {
 }
 
 gulp.task('test:karma', ['test:build'], (done) => {
-  return testWithFramework('angular', done);
+  return testWithFramework(process.env.FRAMEWORK || 'fetch', done);
 });
 
 gulp.task('test:saucelabs', ['test:build'], (done) => {
+  process.env.FRAMEWORK = 'fetch'
   return new karmaServer({
     configFile: __dirname + '/karma.conf.js'
   }, done).start();

@@ -1,6 +1,8 @@
 Elpong = require('../src/Elpong').Elpong
 
-FRAMEWORK = (window.__env__['FRAMEWORK'] || 'angular').toLowerCase()
+FRAMEWORK = process.env.FRAMEWORK || 'fetch'
+
+console.log('Testing ' + FRAMEWORK)
 
 afterEach ->
   Elpong._schemes = {}
