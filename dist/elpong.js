@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 22);
+/******/ 	return __webpack_require__(__webpack_require__.s = 24);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -255,7 +255,9 @@ if (DEBUG) {
         'fldnsa': 'Field should be an array of selectors',
         'elesch': 'Element selector changed',
         'elesnf': 'Snapshot not found',
-        'elesti': 'Invalid snapshot identifier: must be number <= list.length, string or RegExp'
+        'elesti': 'Invalid snapshot identifier: must be number <= list.length, string or RegExp',
+        'eleafw': 'Pre element has an associated field that does not match the embedded element selector',
+        'elesnm': 'Selector is not matching get one request selector'
     };
 }
 var ElpongError = (function (_super) {
@@ -396,10 +398,12 @@ var Ajax;
 "use strict";
 
 var Util_1 = __webpack_require__(0);
-var Fields_1 = __webpack_require__(15);
-var Relations_1 = __webpack_require__(16);
-var Actions_1 = __webpack_require__(14);
-var Snapshots_1 = __webpack_require__(19);
+var Fields_1 = __webpack_require__(17);
+var Relations_1 = __webpack_require__(18);
+var Actions_1 = __webpack_require__(16);
+var Snapshots_1 = __webpack_require__(21);
+var EmbeddedElement_1 = __webpack_require__(9);
+var EmbeddedCollection_1 = __webpack_require__(8);
 var Errors_1 = __webpack_require__(1);
 function isSelectorValue(v) {
     return (!!v || v === 0 || v === '') && (typeof v === 'string' || typeof v === 'number');
@@ -471,23 +475,24 @@ var Element = (function () {
     Element.prototype.merge = function (pre_element) {
         var _this = this;
         var collection_config = this.collection().configuration();
+        var selector_key = this.collection().scheme().configuration().selector;
         Util_1.Util.forEach(collection_config.fields, function (field_config, field_key) {
             var field_value;
             if (field_value = pre_element[field_key]) {
                 if (field_config.embedded_element) {
-                    Fields_1.Fields.handleEmbeddedElement(_this, pre_element, field_key, field_config);
+                    EmbeddedElement_1.EmbeddedElement.handle(_this, pre_element, field_key, field_config);
                 }
                 else if (field_config.embedded_collection) {
-                    Fields_1.Fields.handleEmbeddedCollection(_this, pre_element, field_key, field_config);
+                    EmbeddedCollection_1.EmbeddedCollection.handle(_this, pre_element, field_key, field_config);
+                }
+                else if (field_key === selector_key) {
+                    var selector_value = _this.fields[field_key];
+                    if ((selector_value !== field_value) && isSelectorValue(selector_value) && isSelectorValue(field_value)) {
+                        throw new Errors_1.ElpongError('elesch', selector_value + " -> " + field_value);
+                    }
+                    _this.fields[field_key] = field_value;
                 }
                 else {
-                    var selector_key = _this.collection().scheme().configuration().selector;
-                    if (field_key === selector_key) {
-                        var selector_value = _this.fields[field_key];
-                        if ((selector_value !== field_value) && isSelectorValue(selector_value) && isSelectorValue(field_value)) {
-                            throw new Errors_1.ElpongError('elesch', selector_value + " -> " + field_value);
-                        }
-                    }
                     _this.fields[field_key] = field_value;
                 }
             }
@@ -599,6 +604,71 @@ exports.CollectionHelper = CollectionHelper_1.CollectionHelper;
 
 "use strict";
 
+var Element_1 = __webpack_require__(4);
+var Util_1 = __webpack_require__(0);
+var CollectionHelper_1 = __webpack_require__(2);
+var EmbeddedCollection;
+(function (EmbeddedCollection) {
+    function handle(element, pre_element, field_key, field_config) {
+        var embedded_pre_collection;
+        if (!(embedded_pre_collection = pre_element[field_key])) {
+            return;
+        }
+        var collection = element.collection();
+        var scheme = collection.scheme();
+        var embedded_element_collection = scheme.select(field_key || field_config.collection);
+        Util_1.Util.forEach(embedded_pre_collection, function (embedded_pre_element) {
+            var embedded_element = new Element_1.Element(embedded_element_collection, embedded_pre_element);
+            CollectionHelper_1.CollectionHelper.addElement(embedded_element_collection, embedded_element);
+        });
+    }
+    EmbeddedCollection.handle = handle;
+})(EmbeddedCollection = exports.EmbeddedCollection || (exports.EmbeddedCollection = {}));
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var SchemeHelper_1 = __webpack_require__(5);
+var Errors_1 = __webpack_require__(1);
+var EmbeddedElement;
+(function (EmbeddedElement) {
+    function handle(element, pre_element, field_key, field_config) {
+        var embedded_element_collection;
+        var embedded_pre_element = pre_element[field_key];
+        if (!embedded_pre_element) {
+            return;
+        }
+        var collection = element.collection();
+        var scheme = collection.scheme();
+        if (field_config.collection) {
+            embedded_element_collection = scheme.select(field_config.collection);
+        }
+        else {
+            embedded_element_collection = SchemeHelper_1.SchemeHelper.getCollectionBySingularName(scheme, field_key);
+        }
+        var embedded_element = embedded_element_collection.buildOrMerge(embedded_pre_element);
+        var associated_field_key = field_config.field || field_key + "_" + scheme.configuration().selector;
+        var selector_value = embedded_element.selector();
+        var associated_field_value = pre_element[associated_field_key];
+        if (associated_field_value && (associated_field_value != selector_value)) {
+            throw new Errors_1.ElpongError('eleafw', associated_field_value + " != " + selector_value);
+        }
+        element.fields[associated_field_key] = selector_value;
+    }
+    EmbeddedElement.handle = handle;
+})(EmbeddedElement = exports.EmbeddedElement || (exports.EmbeddedElement = {}));
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 var CollectionHelper_1 = __webpack_require__(2);
 var Util_1 = __webpack_require__(0);
 var Errors_1 = __webpack_require__(1);
@@ -693,7 +763,7 @@ var HasMany;
 
 
 /***/ }),
-/* 9 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -726,12 +796,12 @@ var ElementHelper;
 
 
 /***/ }),
-/* 10 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var Scheme_1 = __webpack_require__(20);
+var Scheme_1 = __webpack_require__(22);
 var Errors_1 = __webpack_require__(1);
 var Util_1 = __webpack_require__(0);
 var Ajax_1 = __webpack_require__(3);
@@ -771,7 +841,7 @@ var Elpong;
 
 
 /***/ }),
-/* 11 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -779,7 +849,7 @@ var Elpong;
 var Helpers_1 = __webpack_require__(7);
 var Element_1 = __webpack_require__(4);
 var Util_1 = __webpack_require__(0);
-var Actions_1 = __webpack_require__(13);
+var Actions_1 = __webpack_require__(15);
 var Collection = (function () {
     function Collection(scheme, name) {
         var _this = this;
@@ -910,7 +980,7 @@ exports.Collection = Collection;
 
 
 /***/ }),
-/* 12 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -956,13 +1026,14 @@ exports.SchemeConfiguration = SchemeConfiguration;
 
 
 /***/ }),
-/* 13 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var Ajax_1 = __webpack_require__(3);
 var UrlHelper_1 = __webpack_require__(6);
+var Errors_1 = __webpack_require__(1);
 var Actions;
 (function (Actions) {
     function executeGetAll(collection, action_options) {
@@ -987,7 +1058,11 @@ var Actions;
         var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection('GET', collection, { suffix: selector_value }), 'GET', data, action_options.headers);
         promise.then(function (response) {
             if (response.data) {
-                return collection.buildOrMerge(response.data);
+                var selector_key = collection.scheme().configuration().selector;
+                if (response.data[selector_key] !== selector_value) {
+                    throw new Errors_1.ElpongError('elesnm', response.data[selector_key] + " != " + selector_value);
+                }
+                collection.buildOrMerge(response.data);
             }
         });
         return promise;
@@ -1006,7 +1081,7 @@ var Actions;
 
 
 /***/ }),
-/* 14 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1014,7 +1089,7 @@ var Actions;
 var Ajax_1 = __webpack_require__(3);
 var Util_1 = __webpack_require__(0);
 var Errors_1 = __webpack_require__(1);
-var ElementHelper_1 = __webpack_require__(9);
+var ElementHelper_1 = __webpack_require__(11);
 var UrlHelper_1 = __webpack_require__(6);
 var Actions;
 (function (Actions) {
@@ -1111,24 +1186,25 @@ var Actions;
 
 
 /***/ }),
-/* 15 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var Element_1 = __webpack_require__(4);
 var Util_1 = __webpack_require__(0);
-var SchemeHelper_1 = __webpack_require__(5);
-var CollectionHelper_1 = __webpack_require__(2);
+// import { Scheme } from '../../Scheme';
+// import { ElpongError } from '../../Errors';
+var EmbeddedElement_1 = __webpack_require__(9);
+var EmbeddedCollection_1 = __webpack_require__(8);
 var Fields;
 (function (Fields) {
     function setup(element, fields_config_map, pre_element) {
         Util_1.Util.forEach(fields_config_map, function (field_config, field_key) {
             if (field_config.embedded_element) {
-                handleEmbeddedElement(element, pre_element, field_key, field_config);
+                EmbeddedElement_1.EmbeddedElement.handle(element, pre_element, field_key, field_config);
             }
             else if (field_config.embedded_collection) {
-                handleEmbeddedCollection(element, pre_element, field_key, field_config);
+                EmbeddedCollection_1.EmbeddedCollection.handle(element, pre_element, field_key, field_config);
             }
             else {
                 if (!pre_element.hasOwnProperty(field_key)) {
@@ -1140,52 +1216,19 @@ var Fields;
         });
     }
     Fields.setup = setup;
-    function handleEmbeddedElement(element, pre_element, field_key, field_config) {
-        var embedded_element_collection;
-        var embedded_pre_element = pre_element[field_key];
-        if (!embedded_pre_element) {
-            return;
-        }
-        var collection = element.collection();
-        var scheme = collection.scheme();
-        if (field_config.collection) {
-            embedded_element_collection = scheme.select(field_config.collection);
-        }
-        else {
-            embedded_element_collection = SchemeHelper_1.SchemeHelper.getCollectionBySingularName(scheme, field_key);
-        }
-        var embedded_element = embedded_element_collection.buildOrMerge(embedded_pre_element);
-        var associated_field_key = field_config.field || field_key + "_" + scheme.configuration().selector;
-        element.fields[associated_field_key] = embedded_element.selector();
-    }
-    Fields.handleEmbeddedElement = handleEmbeddedElement;
-    function handleEmbeddedCollection(element, pre_element, field_key, field_config) {
-        var embedded_pre_collection;
-        if (!(embedded_pre_collection = pre_element[field_key])) {
-            return;
-        }
-        var collection = element.collection();
-        var scheme = collection.scheme();
-        var embedded_element_collection = scheme.select(field_key || field_config.collection);
-        Util_1.Util.forEach(embedded_pre_collection, function (embedded_pre_element) {
-            var embedded_element = new Element_1.Element(embedded_element_collection, embedded_pre_element);
-            CollectionHelper_1.CollectionHelper.addElement(embedded_element_collection, embedded_element);
-        });
-    }
-    Fields.handleEmbeddedCollection = handleEmbeddedCollection;
 })(Fields = exports.Fields || (exports.Fields = {}));
 
 
 /***/ }),
-/* 16 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var Util_1 = __webpack_require__(0);
-var HasMany_1 = __webpack_require__(8);
-var HasOne_1 = __webpack_require__(18);
-var BelongsTo_1 = __webpack_require__(17);
+var HasMany_1 = __webpack_require__(10);
+var HasOne_1 = __webpack_require__(20);
+var BelongsTo_1 = __webpack_require__(19);
 var Relations;
 (function (Relations) {
     function setup(element, relations_config_maps) {
@@ -1204,7 +1247,7 @@ var Relations;
 
 
 /***/ }),
-/* 17 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1273,12 +1316,12 @@ var BelongsTo;
 
 
 /***/ }),
-/* 18 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var HasMany_1 = __webpack_require__(8);
+var HasMany_1 = __webpack_require__(10);
 var SchemeHelper_1 = __webpack_require__(5);
 var Util_1 = __webpack_require__(0);
 var HasOne;
@@ -1303,13 +1346,13 @@ var HasOne;
 
 
 /***/ }),
-/* 19 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var Util_1 = __webpack_require__(0);
-var Snapshot_1 = __webpack_require__(21);
+var Snapshot_1 = __webpack_require__(23);
 var Errors_1 = __webpack_require__(1);
 var Snapshots;
 (function (Snapshots) {
@@ -1470,13 +1513,13 @@ var Snapshots;
 
 
 /***/ }),
-/* 20 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var Collection_1 = __webpack_require__(11);
-var Configuration_1 = __webpack_require__(12);
+var Collection_1 = __webpack_require__(13);
+var Configuration_1 = __webpack_require__(14);
 var Errors_1 = __webpack_require__(1);
 var Helpers_1 = __webpack_require__(7);
 function isSchemeConfiguration(sc) {
@@ -1527,12 +1570,12 @@ exports.Scheme = Scheme;
 
 
 /***/ }),
-/* 21 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var ElementHelper_1 = __webpack_require__(9);
+var ElementHelper_1 = __webpack_require__(11);
 var Snapshot = (function () {
     function Snapshot(element, tag) {
         this.element = element;
@@ -1559,12 +1602,12 @@ exports.Snapshot = Snapshot;
 
 
 /***/ }),
-/* 22 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var Elpong_1 = __webpack_require__(10);
+var Elpong_1 = __webpack_require__(12);
 module.exports = Elpong_1.Elpong;
 
 

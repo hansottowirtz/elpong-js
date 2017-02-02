@@ -4,6 +4,7 @@ import { UrlHelper, UrlOptions } from '../UrlHelper';
 import { SelectorValue } from '../../Element';
 import { CollectionActionConfiguration } from '../../Configuration';
 import { PreElement } from '../../PreElement';
+import { ElpongError } from '../../Errors';
 
 export interface CollectionActionOptions {
   data?: AjaxData;
@@ -39,8 +40,14 @@ export namespace Actions {
       data,
       action_options.headers
     );
-    promise.then(function(response: AjaxResponse) {
-      if (response.data) { return collection.buildOrMerge(response.data); }
+    promise.then((response: AjaxResponse) => {
+      if (response.data) {
+        let selector_key = collection.scheme().configuration().selector;
+        if (response.data[selector_key] !== selector_value) {
+          throw new ElpongError('elesnm', `${response.data[selector_key]} != ${selector_value}`)
+        }
+        collection.buildOrMerge(response.data);
+      }
     });
     return promise;
   }

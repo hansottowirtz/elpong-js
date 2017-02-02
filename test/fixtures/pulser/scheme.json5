@@ -1,116 +1,93 @@
 {
-  "name": "pulser",
-  "selector": "id",
-  "collections": {
-    "users": {
-      "fields": {
-        "id": {
-          "selector": true
-        },
-        "email": {},
-        "password": {}
+  name: 'pulser',
+  selector: 'id',
+  collections: {
+    users: {
+      fields: {
+        id: {},
+        email: {},
+        password: {}
       },
-      "actions": {
-        "login": {
-          "method": "POST",
-          "no_selector": true
+      actions: {
+        login: {
+          method: 'POST',
+          no_selector: true
         },
-        "register": {
-          "method": "POST",
-          "no_selector": true
+        register: {
+          method: 'POST',
+          no_selector: true
         }
       },
-      "collection_actions": {
-        "get_me": {
-          "method": "GET",
-          "path": "me"
+      collection_actions: {
+        get_me: {
+          method: 'GET',
+          path: 'me'
         },
-        "logout": {
-          "method": "DELETE"
+        logout: {
+          method: 'DELETE'
         }
       }
     },
-    "controls": {
-      "fields": {
-        "id": {
-          "selector": true,
-          "type": "Integer"
-        },
-        "name": {
-          "type": "String"
-        },
-        "plugs": {
-          "embedded_collection": true
+    controls: {
+      fields: {
+        id: {},
+        name: {},
+        plugs: {
+          embedded_collection: true
         }
       },
-      "relations": {
-        "has_many": {
-          "plugs": {
-            "polymorphic": true,
-            "as": "block"
+      relations: {
+        has_many: {
+          plugs: {
+            polymorphic: true,
+            as: 'block'
           }
         }
       }
     },
-    "devices": {
-      "fields": {
-        "id": {
-          "selector": true,
-          "type": "Integer"
-        },
-        "name": {
-          "type": "String"
-        },
-        "plugs": {
-          "embedded_collection": true
+    devices: {
+      fields: {
+        id: {},
+        name: {},
+        plugs: {
+          embedded_collection: true
         }
       },
-      "relations": {
-        "has_many": {
-          "plugs": {
-            "polymorphic": true,
-            "as": "block"
+      relations: {
+        has_many: {
+          plugs: {
+            polymorphic: true,
+            as: 'block'
           }
         }
       }
     },
-    "plugs": {
-      "fields": {
-        "id": {
-          "selector": true,
-          "type": "Integer"
-        },
-        "block_id": {
-          "reference": true,
-          "type": "Integer"
-        },
-        "block_collection": {
-          "type": "String"
-        },
-        "endplug_id": {
-          "reference": true,
-          "type": "Integer"
-        }
+    plugs: {
+      fields: {
+        id: {},
+        block_id: { reference: true },
+        block_collection: {},
+        endplug_id: { reference: true }
       },
-      "relations": {
-        "belongs_to": {
-          "block": {
-            "polymorphic": true
+      relations: {
+        belongs_to: {
+          block: {
+            polymorphic: true
           },
-          "endplug": {
-            "collection": "plugs"
+          endplug: {
+            collection: 'plugs'
           }
         }
       },
-      "actions": {
-        "wire": {
-          "method": "PUT"
+      actions: {
+        wire: {
+          method: 'PUT'
         },
-        "unwire": {
-          "method": "PUT"
+        unwire: {
+          method: 'PUT'
         },
-        "pulse": {
-          "method": "PUT"
+        pulse: {
+          method: 'PUT'
         }
       }
     }

@@ -9,6 +9,9 @@ import { Relations } from './Helpers/Element/Relations';
 import { Actions, ActionOptions } from './Helpers/Element/Actions';
 import { Snapshots } from './Helpers/Element/Snapshots';
 
+import { EmbeddedElement } from './Helpers/Element/Fields/EmbeddedElement';
+import { EmbeddedCollection } from './Helpers/Element/Fields/EmbeddedCollection';
+
 import { ElpongError } from './Errors';
 import { FieldConfiguration, EmbeddedElementFieldConfiguration, EmbeddedCollectionFieldConfiguration } from './Configuration';
 
@@ -119,21 +122,21 @@ export class Element {
 
   merge(pre_element: PreElement) {
     let collection_config = this.collection().configuration();
+    let selector_key = this.collection().scheme().configuration().selector;
     Util.forEach(collection_config.fields, (field_config: FieldConfiguration, field_key: string) => {
       let field_value;
       if (field_value = pre_element[field_key]) {
         if (field_config.embedded_element) {
-          Fields.handleEmbeddedElement(this, pre_element, field_key, field_config as EmbeddedElementFieldConfiguration);
+          EmbeddedElement.handle(this, pre_element, field_key, field_config as EmbeddedElementFieldConfiguration);
         } else if (field_config.embedded_collection) {
-          Fields.handleEmbeddedCollection(this, pre_element, field_key, field_config as EmbeddedCollectionFieldConfiguration);
-        } else {
-          let selector_key = this.collection().scheme().configuration().selector;
-          if (field_key === selector_key) {
-            let selector_value = this.fields[field_key];
-            if ((selector_value !== field_value) && isSelectorValue(selector_value) && isSelectorValue(field_value)) {
-              throw new ElpongError('elesch', `${selector_value} -> ${field_value}`);
-            }
+          EmbeddedCollection.handle(this, pre_element, field_key, field_config as EmbeddedCollectionFieldConfiguration);
+        } else if (field_key === selector_key) {
+          let selector_value = this.fields[field_key];
+          if ((selector_value !== field_value) && isSelectorValue(selector_value) && isSelectorValue(field_value)) {
+            throw new ElpongError('elesch', `${selector_value} -> ${field_value}`);
           }
+          this.fields[field_key] = field_value;
+        } else {
           this.fields[field_key] = field_value;
         }
       }

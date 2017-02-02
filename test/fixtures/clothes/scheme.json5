@@ -1,46 +1,46 @@
 {
-  "name": "clothes",
-  "selector": "id",
-  "collections": {
-    "workers": {
-      "fields": {
-        "id": {},
-        "name": {}
+  name: 'clothes',
+  selector: 'id',
+  collections: {
+    workers: {
+      fields: {
+        id: {},
+        name: {}
       },
-      "relations": {
-        "has_many": {
-          "created_tshirts": {
-            "collection": "tshirts",
-            "as": "person"
+      relations: {
+        has_many: {
+          created_tshirts: {
+            collection: 'tshirts',
+            as: 'person'
           }
         }
       }
     },
-    "tshirts": {
-      "fields": {
-        "id": {},
-        "color": {},
-        "person_id": {},
-        "brand_id": {}
+    tshirts: {
+      fields: {
+        id: {},
+        color: {},
+        person_id: {},
+        brand_id: {}
       },
-      "relations": {
-        "belongs_to": {
-          "creator": {
-            "collection": "workers",
-            "as": "person"
+      relations: {
+        belongs_to: {
+          creator: {
+            collection: 'workers',
+            as: 'person'
           },
-          "brand": {}
+          brand: {}
         }
       }
     },
-    "brands": {
-      "fields": {
-        "id": {},
-        "name": {}
+    brands: {
+      fields: {
+        id: {},
+        name: {}
       },
-      "relations": {
-        "has_many": {
-          "tshirts": {}
+      relations: {
+        has_many: {
+          tshirts: {}
         }
       }
     }

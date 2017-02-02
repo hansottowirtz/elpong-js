@@ -21,12 +21,12 @@ describe 'Stupid Farm', ->
       @scheme.setApiUrl('/api')
 
     describe 'apples', ->
-      it 'have a stem', (done) ->
+      it 'has a stem', (done) ->
         httpBackend.reply('GET', '/api/apples',
           [
             {
-              id: 5,
-              kind: 'Granny Smith',
+              id: 5
+              kind: 'Granny Smith'
               stem: {
                 id: 3
               }
