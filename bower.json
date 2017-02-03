@@ -11,13 +11,13 @@
     "restful",
     "json",
     "api",
-    "elpong",
+    "elpong"
   ],
   "license": "MIT",
   "ignore": [
     "*",
-    "!LICENSE"
-    "!README.md"
+    "!LICENSE",
+    "!README.md",
     "!dist/*"
   ],
   "dependencies": {}
