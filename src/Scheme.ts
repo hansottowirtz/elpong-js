@@ -2,6 +2,7 @@ import { Collection } from './Collection';
 import { SchemeConfiguration } from './Configuration';
 import { ElpongError } from './Errors';
 import { UrlHelper } from './Helpers';
+import { Elpong } from './Elpong';
 
 interface CollectionMap {
   [name: string]: Collection;
@@ -36,7 +37,10 @@ export class Scheme {
     // Create collections
     for (let collection_name in _sc.collections) {
       let collection_settings = _sc.collections[collection_name];
-      this._collections[collection_name] = new Collection(this, collection_name);
+      let collection = new Collection(this, collection_name);
+      this._collections[collection_name] = collection;
+      if (Elpong.isAutoload())
+        collection.load(true);
     }
   }
 
