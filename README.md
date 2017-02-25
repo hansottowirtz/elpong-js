@@ -200,9 +200,9 @@ To preload a single element, create a meta tag with
 `name=elpong-element`, <code>scheme=<i>scheme_name</i></code>, <code>content=<i>element</i></code> and <code>collection=<i>collection_name</i></code>.
 
 Then you can use `Elpong.load()` and `collection.load()` to load schemes and
-collections, respectively, or you can use `Elpong.autoload()` and it will take
+collections, respectively, or you can use `Elpong.enableAutoload()` and it will take
 care of it when it reads the scheme. Make sure to put the `meta` tags *above*
-the `script` tags when you do this. `Elpong.autoload()` might give some problems
+the `script` tags when you do this. `Elpong.enableAutoload()` might give some problems
 because it is synchronous.
 
 ### Examples
