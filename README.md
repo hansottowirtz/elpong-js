@@ -45,7 +45,7 @@ You can create a scheme in two ways:
 
 `new Elpong.add(scheme_config)`
 
-or by preloading it, see [Preloading](/#preloading)
+or by preloading it, see [Preloading](#preloading)
 
 A scheme can be retrieved with `Elpong.get(scheme_name)`
 
@@ -63,7 +63,7 @@ If you want to search for multiple elements with that name,
 use `collection.findBy({name: name}, {multiple: true})`.
 
 To load data into the collection, you can use `collection.actions.getAll()`,
-or `collection.actions.getOne(id)`. To preload it, see [Preloading](/#preloading)
+or `collection.actions.getOne(id)`. To preload it, see [Preloading](#preloading)
 
 If you are using Rails, check out [this library][rails].
 
@@ -196,9 +196,14 @@ To preload data, create a meta tag with
 `name=elpong-collection`, <code>scheme=<i>scheme_name</i></code>, <code>content=<i>elements</i></code> and <code>collection=<i>collection_name</i></code>.<br/>
 *elements* is the same JSON data the API would return.
 
-Then you can use `Elpong.load()` and `collection.load()` to load schemes and collections, respectively,
-or you can use `Elpong.autoload()` and it will take care of it when it reads the scheme. Make sure to put the `meta` tags *above*
-the `script` tags when you do this.
+To preload a single element, create a meta tag with
+`name=elpong-element`, <code>scheme=<i>scheme_name</i></code>, <code>content=<i>element</i></code> and <code>collection=<i>collection_name</i></code>.
+
+Then you can use `Elpong.load()` and `collection.load()` to load schemes and
+collections, respectively, or you can use `Elpong.autoload()` and it will take
+care of it when it reads the scheme. Make sure to put the `meta` tags *above*
+the `script` tags when you do this. `Elpong.autoload()` might give some problems
+because it is synchronous.
 
 ### Examples
 
