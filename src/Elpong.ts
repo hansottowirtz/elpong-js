@@ -16,6 +16,7 @@ interface CollectionMap {
 }
 
 let schemes: SchemeMap = {};
+let autoload: boolean = false;
 
 export namespace Elpong {
   export function add(scheme_config: SchemeConfiguration | Object): Scheme {
@@ -31,22 +32,36 @@ export namespace Elpong {
     throw new ElpongError('schmnf', name); // Scheme not found
   }
 
-  export function load(): void {
+  export function load(ignore_empty: boolean): void {
+    if (typeof document === 'undefined') return
+
     let scheme_tags: NodeListOf<HTMLMetaElement> =
       document.querySelectorAll('meta[name=elpong-scheme]') as NodeListOf<HTMLMetaElement>;
 
-    if (!scheme_tags.length && !Object.keys(schemes).length) {
+    if (!ignore_empty && !scheme_tags.length) {
       throw new ElpongError('elpgns');
     }
 
     for (let scheme_tag of Util.arrayFromHTML(scheme_tags) as HTMLMetaElement[]) {
-      Elpong.add(JSON.parse(scheme_tag.content));
+      let scheme = Elpong.add(JSON.parse(scheme_tag.content));
     }
-
-    // TODO: load preloaded elements
   }
 
   export function setAjax(fn: Function): void {
     Ajax.setAjaxFunction(fn);
+  }
+
+  export function enableAutoload(): void {
+    autoload = true
+    Elpong.load(true);
+  }
+
+  export function isAutoload(): boolean {
+    return autoload;
+  }
+
+  export function tearDown(): void {
+    autoload = false;
+    schemes = {};
   }
 }
