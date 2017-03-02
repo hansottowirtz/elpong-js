@@ -95,6 +95,9 @@ export interface HasManyRelationConfiguration extends RelationConfiguration {
   // Polymorphism
   readonly polymorphic: boolean;
   readonly as: string; // block
+  // Inline
+  readonly inline: boolean;
+  readonly inline_field: string;
 }
 export interface HasOneRelationConfiguration extends RelationConfiguration {
   readonly field: string;

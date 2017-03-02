@@ -1,0 +1,25 @@
+{
+  name: 'gallery',
+  selector: 'id',
+  collections: {
+    categories: {
+      fields: {
+        id: {},
+        name: {}
+      }
+    },
+    photos: {
+      fields: {
+        id: {},
+        categories_ids: {}
+      },
+      relations: {
+        has_many: {
+          categories: {
+            inline: true
+          }
+        }
+      }
+    }
+  }
+}

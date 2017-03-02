@@ -14,14 +14,19 @@ export namespace HasMany {
 
     let relation_collection = collection.scheme().select(relation_settings.collection || relation_collection_name);
 
-    let references_field_key = relation_settings.references_field || `${relation_collection_name}_${collection.scheme().configuration().selector}s`; // dogs_ids, unless specified otherwise
+    // let relation_field_settings: FieldConfiguration;
+    // if (relation_field_settings = collection_config.fields[references_field_key]) {
+    //   // throw new Error("Field #{field_key} of collection #{collection.getName()} are not references") if !relation_field_settings.references
+    //   return element.relations[Util.camelize(relation_collection_name)] = (): Element[] =>
+    //     getHasManyRelationArrayThroughReferencesField(element, relation_collection, references_field_key);
+    //
+    // }
 
-    let relation_field_settings: FieldConfiguration;
-    if (relation_field_settings = collection_config.fields[references_field_key]) {
-      // throw new Error("Field #{field_key} of collection #{collection.getName()} are not references") if !relation_field_settings.references
+    if (relation_settings.inline) {
+      let references_field_key = relation_settings.inline_field || `${relation_collection_name}_${collection.scheme().configuration().selector}s`; // dogs_ids, unless specified otherwise
+
       return element.relations[Util.camelize(relation_collection_name)] = (): Element[] =>
-        getHasManyRelationArrayThroughReferencesField(element, relation_collection, references_field_key);
-
+        getHasManyRelationArrayInline(element, relation_collection, references_field_key);
     } else { // normal has_many relationship
       return element.relations[Util.camelize(relation_collection_name)] =
         getHasManyRelationFunction(element, collection, relation_settings, relation_collection);
@@ -85,12 +90,12 @@ export namespace HasMany {
     return element2_arr;
   }
 
-  function getHasManyRelationArrayThroughReferencesField(element: Element, relation_collection: Collection, field_key: string): Element[] {
+  function getHasManyRelationArrayInline(element: Element, relation_collection: Collection, field_key: string): Element[] {
     let selector_value_arr = element.fields[field_key];
     if (!Array.isArray(selector_value_arr)) { throw new ElpongError('fldnrf', field_key); }
     let element2_arr: Element[] = [];
     for (let element2 of relation_collection.array()) {
-      if (Util.includes(selector_value_arr, element.selector())) { element2_arr.push(element2); }
+      if (Util.includes(selector_value_arr, element2.selector())) { element2_arr.push(element2); }
     }
     return element2_arr;
   }
