@@ -13,7 +13,7 @@ describe 'Elpong', ->
     Elpong.enableAutoload()
     expect(Elpong.isAutoload()).toBe(true)
 
-  fit 'autoloads schemes', ->
+  it 'autoloads schemes', ->
     return if !document?
 
     expect(-> Elpong.get('pulser')).toThrow()
