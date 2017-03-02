@@ -5,6 +5,8 @@ const size = require('gulp-size');
 const tslint = require('gulp-tslint');
 const webpack = require('webpack-stream');
 const karma = require('karma').Server;
+const fs = require('fs');
+const path = require('path');
 
 gulp.task('build:webpack', () => {
   return gulp.src('src/main.ts')
@@ -86,3 +88,22 @@ gulp.task('test:karma:debug', (done) => {
 });
 
 gulp.task('test:travis', gulp.parallel('test:frameworks', 'test:saucelabs'));
+
+gulp.task('ensure-built', (done) => {
+  let dir_files = (dir) => fs.readdirSync(dir).map((f) => path.join(dir, f));
+
+  let dist_files = dir_files('./dist');
+  let src_files = dir_files('./src');
+
+  let mtimes = (f) => fs.statSync(f).mtime;
+
+  let dist_mtime = Math.min.apply(null, dist_files.map(mtimes))
+  let src_mtime = Math.max.apply(null, src_files.map(mtimes))
+
+  console.log(dist_mtime, src_mtime);
+
+  if (dist_mtime < src_mtime - 100) {
+    throw new Error('Dist outdated, run `gulp build`');
+  }
+  done()
+});

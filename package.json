@@ -61,6 +61,6 @@
   ],
   "dependencies": {},
   "scripts": {
-    "prepublish": "gulp build"
+    "prepublish": "gulp ensure-built"
   }
 }
