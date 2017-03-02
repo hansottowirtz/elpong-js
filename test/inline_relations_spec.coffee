@@ -5,7 +5,7 @@ describe 'Relations', ->
     beforeEach ->
       @scheme = Elpong.add(require('./fixtures/gallery/scheme.json5'))
 
-    fit 'should have the right fields', ->
+    it 'should have the right fields', ->
       categories = @scheme.select('categories')
       photos = @scheme.select('photos')
 

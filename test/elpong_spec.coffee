@@ -13,20 +13,27 @@ describe 'Elpong', ->
     Elpong.enableAutoload()
     expect(Elpong.isAutoload()).toBe(true)
 
-  it 'autoloads schemes', ->
+  fit 'autoloads schemes', ->
     return if !document?
 
     expect(-> Elpong.get('pulser')).toThrow()
 
     head = document.getElementsByTagName('head')[0]
 
-    console.log('test shit')
-
     do ->
       meta = document.createElement('meta')
       meta.name = 'elpong-scheme'
       meta.scheme = 'pulser'
       meta.content = JSON.stringify(require('./fixtures/pulser/scheme.json5'))
+      head.appendChild meta
+      elements.push meta
+
+    do ->
+      meta = document.createElement('meta')
+      meta.name = 'elpong-collection'
+      meta.scheme = 'pulser'
+      meta.setAttribute('collection', 'devices')
+      meta.content = JSON.stringify(require('./fixtures/pulser/devices.json5'))
       head.appendChild meta
       elements.push meta
 
@@ -44,7 +51,13 @@ describe 'Elpong', ->
     scheme = null
 
     expect(-> scheme = Elpong.get('pulser')).not.toThrow()
-    expect(scheme.select('plugs').array().length).toBe(1)
+
+    device = scheme.select('devices').find(1)
+    plug2 = scheme.select('plugs').find(2)
+    plug3 = scheme.select('plugs').find(3)
+
+    expect(plug3.relations.endplug()).toBe(plug2)
+    expect(plug2.relations.block()).toBe(device)
 
   it 'throws if no scheme tags found', ->
     expect(-> Elpong.load()).toThrow()

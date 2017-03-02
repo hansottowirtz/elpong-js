@@ -39,8 +39,12 @@ export class Scheme {
       let collection_settings = _sc.collections[collection_name];
       let collection = new Collection(this, collection_name);
       this._collections[collection_name] = collection;
-      if (Elpong.isAutoload())
-        collection.load(true);
+    }
+
+    if (Elpong.isAutoload()) {
+      for (let collection_name in _sc.collections) {
+        this._collections[collection_name].load(true);
+      }
     }
   }
 

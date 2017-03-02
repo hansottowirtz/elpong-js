@@ -740,12 +740,17 @@ var HasMany;
         var collection = element.collection();
         var collection_config = collection.configuration();
         var relation_collection = collection.scheme().select(relation_settings.collection || relation_collection_name);
-        var references_field_key = relation_settings.references_field || relation_collection_name + "_" + collection.scheme().configuration().selector + "s"; // dogs_ids, unless specified otherwise
-        var relation_field_settings;
-        if (relation_field_settings = collection_config.fields[references_field_key]) {
-            // throw new Error("Field #{field_key} of collection #{collection.getName()} are not references") if !relation_field_settings.references
+        // let relation_field_settings: FieldConfiguration;
+        // if (relation_field_settings = collection_config.fields[references_field_key]) {
+        //   // throw new Error("Field #{field_key} of collection #{collection.getName()} are not references") if !relation_field_settings.references
+        //   return element.relations[Util.camelize(relation_collection_name)] = (): Element[] =>
+        //     getHasManyRelationArrayThroughReferencesField(element, relation_collection, references_field_key);
+        //
+        // }
+        if (relation_settings.inline) {
+            var references_field_key_1 = relation_settings.inline_field || relation_collection_name + "_" + collection.scheme().configuration().selector + "s"; // dogs_ids, unless specified otherwise
             return element.relations[Util_1.Util.camelize(relation_collection_name)] = function () {
-                return getHasManyRelationArrayThroughReferencesField(element, relation_collection, references_field_key);
+                return getHasManyRelationArrayInline(element, relation_collection, references_field_key_1);
             };
         }
         else {
@@ -807,7 +812,7 @@ var HasMany;
         }
         return element2_arr;
     }
-    function getHasManyRelationArrayThroughReferencesField(element, relation_collection, field_key) {
+    function getHasManyRelationArrayInline(element, relation_collection, field_key) {
         var selector_value_arr = element.fields[field_key];
         if (!Array.isArray(selector_value_arr)) {
             throw new Errors_1.ElpongError('fldnrf', field_key);
@@ -815,7 +820,7 @@ var HasMany;
         var element2_arr = [];
         for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
             var element2 = _a[_i];
-            if (Util_1.Util.includes(selector_value_arr, element.selector())) {
+            if (Util_1.Util.includes(selector_value_arr, element2.selector())) {
                 element2_arr.push(element2);
             }
         }
@@ -1566,8 +1571,11 @@ var Scheme = (function () {
             var collection_settings = _sc.collections[collection_name];
             var collection = new Collection_1.Collection(this, collection_name);
             this._collections[collection_name] = collection;
-            if (Elpong_1.Elpong.isAutoload())
-                collection.load(true);
+        }
+        if (Elpong_1.Elpong.isAutoload()) {
+            for (var collection_name in _sc.collections) {
+                this._collections[collection_name].load(true);
+            }
         }
     }
     Scheme.prototype.configuration = function () {
