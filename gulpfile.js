@@ -101,8 +101,8 @@ gulp.task('ensure-built', (done) => {
   let src_mtime = Math.max.apply(null, src_files.map(mtimes))
 
   console.log(dist_mtime, src_mtime);
-  
-  if (dist_mtime < src_mtime - 1) {
+
+  if (dist_mtime < src_mtime - 100) {
     throw new Error('Dist outdated, run `gulp build`');
   }
   done()
