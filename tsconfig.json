@@ -4,7 +4,9 @@
     "target": "es5",
     "noFallthroughCasesInSwitch": true,
     "module": "commonjs",
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "noImplicitAny" : true,
+    "suppressImplicitAnyIndexErrors": true
   },
   "include": [
     "src/**/*.ts"
