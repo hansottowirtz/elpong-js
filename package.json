@@ -41,7 +41,7 @@
     "whatwg-fetch": "^2.0.1"
   },
   "scripts": {
-    "test": "gulp test"
+    "prepublish": "gulp ensure-built"
   },
   "repository": {
     "type": "git",
@@ -59,8 +59,11 @@
     "typings",
     "README.md"
   ],
-  "dependencies": {},
-  "scripts": {
-    "prepublish": "gulp ensure-built"
+  "dependencies": {
+    "@types/angular": "^1.6.9",
+    "@types/es6-promise": "0.0.32",
+    "@types/isomorphic-fetch": "0.0.33",
+    "@types/jasmine": "^2.5.45",
+    "@types/jquery": "^2.0.41"
   }
 }

@@ -1,5 +1,3 @@
-/// <reference path="../typings/globals/jasmine/index.d.ts" />
-
 import { Util } from '../src/Util';
 
 describe('Util', () =>
