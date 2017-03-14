@@ -25,9 +25,11 @@ or download it [here](https://github.com/hansottowirtz/elpong-js/archive/master.
 
 ```javascript
 Elpong.setAjax($http); // or $.ajax, window.fetch, or something like that
-Elpong.initialize();
 
-var scheme = Elpong.add(scheme_config); // This is the animal-farm scheme, check the spec!
+Elpong.enableAutoload(); // when using preloading
+// or
+var scheme = Elpong.add(scheme_config); // if you have the scheme in javascript
+
 scheme.setApiUrl('/api');
 var pigs = scheme.select('pigs'); // select the pigs collection
 
@@ -227,7 +229,7 @@ The `then` and `catch` functions should return a response object with a
 If you don't work with Angular or jQuery, you can use [window.fetch](fetch).
 
 ```javascript
-Elpong.setAjax(fetch)
+Elpong.setAjax(window.fetch)
 Elpong.setAjax($http)
 Elpong.setAjax($.ajax)
 ```
@@ -248,15 +250,15 @@ Fork it, then do something like this:
 git clone https://github.com/<you>/elpong-js
 cd elpong-js
 git checkout -b add-a-feature
+npm install -g gulp-cli coffee-script typescript
 npm install
 gulp test
 ```
-Check the `gulpfile.js` for other tasks.
-Make pull requests when your feature should be merged.
+Check the `gulpfile.js` for other tasks.<br/>
+Make pull requests when you think your feature should be merged or
+when you want feedback. Issues are very welcome too!
 
 [spec]: https://github.com/hansottowirtz/elpong/blob/master/SPEC.md
-[js-localization]: https://github.com/hansottowirtz/elpong-js-localization
-[fetch]: https://github.com/hansottowirtz/elpong-fetch
 [angularjs]: https://github.com/hansottowirtz/elpong-angularjs
 [jquery]: https://github.com/hansottowirtz/elpong-jquery
 [rails]: https://github.com/hansottowirtz/elpong-rails
