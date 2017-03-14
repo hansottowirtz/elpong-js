@@ -82,11 +82,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 "use strict";
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
 if (typeof DEBUG === 'undefined') {
     var DEBUG = true;
 }
@@ -136,6 +142,7 @@ exports.ElpongError = ElpongError;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.Util = {
     // BREAK: new Object(),
     // kebab: (string: string): string => {
@@ -204,6 +211,9 @@ exports.Util = {
             }
             var v = o[k];
             fn(v, k);
+            // if (f(v, k) === Util.BREAK) {
+            //   break;
+            // }
         }
     },
     // reverseForEach: (obj: Object, f: (k: string, v: any) => void): void => {
@@ -285,6 +295,7 @@ exports.Util = {
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var CollectionHelper;
 (function (CollectionHelper) {
     function getConfiguration(collection) {
@@ -313,8 +324,10 @@ var CollectionHelper;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/// <reference path="../typings/index.d.ts"/>
+// export interface AjaxPromise extends Promise<any> {
+// }
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Ajax;
 (function (Ajax) {
     var ajax_function;
@@ -398,6 +411,7 @@ var Ajax;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Util_1 = __webpack_require__(1);
 var Fields_1 = __webpack_require__(17);
 var Relations_1 = __webpack_require__(18);
@@ -511,6 +525,7 @@ exports.Element = Element;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Errors_1 = __webpack_require__(0);
 var CollectionHelper_1 = __webpack_require__(2);
 var SchemeHelper;
@@ -534,6 +549,7 @@ var SchemeHelper;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Errors_1 = __webpack_require__(0);
 var UrlHelper;
 (function (UrlHelper) {
@@ -593,6 +609,7 @@ var UrlHelper;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Scheme_1 = __webpack_require__(22);
 var Errors_1 = __webpack_require__(0);
 var Util_1 = __webpack_require__(1);
@@ -654,6 +671,7 @@ var Elpong;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var UrlHelper_1 = __webpack_require__(6);
 exports.UrlHelper = UrlHelper_1.UrlHelper;
 var CollectionHelper_1 = __webpack_require__(2);
@@ -666,6 +684,7 @@ exports.CollectionHelper = CollectionHelper_1.CollectionHelper;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Element_1 = __webpack_require__(4);
 var Util_1 = __webpack_require__(1);
 var CollectionHelper_1 = __webpack_require__(2);
@@ -694,6 +713,7 @@ var EmbeddedCollection;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var SchemeHelper_1 = __webpack_require__(5);
 var Errors_1 = __webpack_require__(0);
 var EmbeddedElement;
@@ -731,6 +751,7 @@ var EmbeddedElement;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var CollectionHelper_1 = __webpack_require__(2);
 var Util_1 = __webpack_require__(1);
 var Errors_1 = __webpack_require__(0);
@@ -835,6 +856,7 @@ var HasMany;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Util_1 = __webpack_require__(1);
 var ElementHelper;
 (function (ElementHelper) {
@@ -868,6 +890,7 @@ var ElementHelper;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Helpers_1 = __webpack_require__(8);
 var Element_1 = __webpack_require__(4);
 var Util_1 = __webpack_require__(1);
@@ -1013,6 +1036,7 @@ exports.Collection = Collection;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Errors_1 = __webpack_require__(0);
 if (typeof DEBUG === 'undefined') {
     var DEBUG = true;
@@ -1059,6 +1083,7 @@ exports.SchemeConfiguration = SchemeConfiguration;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Ajax_1 = __webpack_require__(3);
 var UrlHelper_1 = __webpack_require__(6);
 var Errors_1 = __webpack_require__(0);
@@ -1114,6 +1139,7 @@ var Actions;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Ajax_1 = __webpack_require__(3);
 var Util_1 = __webpack_require__(1);
 var Errors_1 = __webpack_require__(0);
@@ -1219,6 +1245,7 @@ var Actions;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Util_1 = __webpack_require__(1);
 // import { Scheme } from '../../Scheme';
 // import { ElpongError } from '../../Errors';
@@ -1253,6 +1280,7 @@ var Fields;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Util_1 = __webpack_require__(1);
 var HasMany_1 = __webpack_require__(11);
 var HasOne_1 = __webpack_require__(20);
@@ -1280,6 +1308,7 @@ var Relations;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Element_1 = __webpack_require__(4);
 var Util_1 = __webpack_require__(1);
 var SchemeHelper_1 = __webpack_require__(5);
@@ -1349,6 +1378,7 @@ var BelongsTo;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var HasMany_1 = __webpack_require__(11);
 var SchemeHelper_1 = __webpack_require__(5);
 var Util_1 = __webpack_require__(1);
@@ -1379,6 +1409,7 @@ var HasOne;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Util_1 = __webpack_require__(1);
 var Snapshot_1 = __webpack_require__(23);
 var Errors_1 = __webpack_require__(0);
@@ -1546,6 +1577,7 @@ var Snapshots;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Collection_1 = __webpack_require__(13);
 var Configuration_1 = __webpack_require__(14);
 var Errors_1 = __webpack_require__(0);
@@ -1610,6 +1642,7 @@ exports.Scheme = Scheme;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var ElementHelper_1 = __webpack_require__(12);
 var Snapshot = (function () {
     function Snapshot(element, tag) {

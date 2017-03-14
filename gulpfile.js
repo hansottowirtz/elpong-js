@@ -41,7 +41,7 @@ testWithFramework = (framework, done) => {
   process.env.FRAMEWORK = framework;
   console.log('Testing ' + framework);
   new karma({
-    configFile: __dirname + '/karma.conf.js',
+    configFile: path.join(__dirname, 'karma.conf.js'),
     browsers: ['PhantomJS']
   }, done).start();
 }
@@ -57,7 +57,7 @@ gulp.task('default', gulp.series('test'));
 gulp.task('test:saucelabs', (done) => {
   process.env.FRAMEWORK = 'fetch'
   new karma({
-    configFile: __dirname + '/karma.conf.js'
+    configFile: path.join(__dirname, 'karma.conf.js')
   }, done).start();
 });
 
@@ -80,7 +80,7 @@ gulp.task('test:frameworks', (done) => {
 gulp.task('test:karma:debug', (done) => {
   process.env.FRAMEWORK = process.env.FRAMEWORK || 'fetch'
   new karma({
-    configFile: __dirname + '/karma.conf.js',
+    configFile: path.join(__dirname, 'karma.conf.js'),
     singleRun: false,
     autoWatch: true,
     browsers: ['Chrome']

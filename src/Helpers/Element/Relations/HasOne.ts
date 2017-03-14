@@ -1,4 +1,5 @@
 import { Element } from '../../../Element';
+import { Collection } from '../../../Collection';
 import { HasMany } from './HasMany';
 import { HasOneRelationConfiguration } from '../../../Configuration';
 import { SchemeHelper } from '../../SchemeHelper';
@@ -6,7 +7,7 @@ import { Util } from '../../../Util';
 
 export namespace HasOne {
   export function setup(element: Element, relation_collection_singular_name: string, relation_config: HasOneRelationConfiguration) {
-    let relation_collection;
+    let relation_collection: Collection;
     let collection = element.collection();
     let collection_config = element.collection().configuration();
 

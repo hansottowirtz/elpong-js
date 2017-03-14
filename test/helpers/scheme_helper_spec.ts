@@ -1,5 +1,3 @@
-/// <reference path="../../typings/globals/jasmine/index.d.ts" />
-
 import { SchemeHelper } from '../../src/Helpers/SchemeHelper';
 import { Elpong } from '../../src/Elpong';
 

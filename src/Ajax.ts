@@ -1,5 +1,3 @@
-/// <reference path="../typings/index.d.ts"/>
-
 // export interface AjaxPromise extends Promise<any> {
 // }
 
