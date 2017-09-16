@@ -1,6 +1,5 @@
-import { Element } from '../../../Element';
+import { Element, PreElement } from '../../../Element';
 import { EmbeddedCollectionFieldConfiguration } from '../../../Configuration';
-import { PreElement } from '../../../PreElement';
 import { ElpongError } from '../../../Errors';
 import { Collection } from '../../../Collection';
 import { Scheme } from '../../../Scheme';

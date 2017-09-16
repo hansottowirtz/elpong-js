@@ -1,9 +1,8 @@
 import { Collection } from '../../Collection';
 import { Ajax, AjaxResponse, AjaxData, AjaxHeaders, AjaxPromise } from '../../Ajax';
 import { UrlHelper, UrlOptions } from '../UrlHelper';
-import { SelectorValue } from '../../Element';
+import { SelectorValue, PreElement } from '../../Element';
 import { CollectionActionConfiguration } from '../../Configuration';
-import { PreElement } from '../../PreElement';
 import { ElpongError } from '../../Errors';
 
 export interface CollectionActionOptions {

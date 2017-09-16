@@ -1,6 +1,5 @@
 import { Scheme } from './Scheme';
-import { PreElement } from './PreElement';
-import { Element, SelectorValue } from './Element';
+import { Element, SelectorValue, PreElement } from './Element';
 import { CollectionConfiguration } from './Configuration';
 import { CollectionActionOptions } from './Helpers/Collection/Actions';
 import { AjaxPromise } from './Ajax';

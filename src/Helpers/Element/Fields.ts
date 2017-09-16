@@ -1,8 +1,7 @@
-import { Element } from '../../Element';
+import { Element, PreElement } from '../../Element';
 import { Util } from '../../Util';
 // import { SchemeHelper } from '../SchemeHelper';
 import { FieldConfigurationMap, FieldConfiguration, EmbeddedElementFieldConfiguration, EmbeddedCollectionFieldConfiguration } from '../../Configuration';
-import { PreElement } from '../../PreElement';
 // import { CollectionHelper } from '../CollectionHelper';
 import { Collection } from '../../Collection';
 // import { Scheme } from '../../Scheme';

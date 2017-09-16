@@ -1,5 +1,4 @@
 import { Collection } from './Collection';
-import { PreElement } from './PreElement';
 import { Util } from './Util';
 import { AjaxPromise } from './Ajax';
 import { Snapshot } from './Snapshot';
@@ -154,4 +153,8 @@ export class Element {
   //   }
   //   return true;
   // }
+}
+
+export interface PreElement {
+  [prop: string]: any;
 }

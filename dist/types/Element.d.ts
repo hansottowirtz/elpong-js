@@ -1,5 +1,4 @@
 import { Collection } from './Collection';
-import { PreElement } from './PreElement';
 import { AjaxPromise } from './Ajax';
 import { Snapshot } from './Snapshot';
 import { ActionOptions } from './Helpers/Element/Actions';
@@ -43,4 +42,7 @@ export declare class Element {
     save(): AjaxPromise;
     isNew(): boolean;
     merge(pre_element: PreElement): this;
+}
+export interface PreElement {
+    [prop: string]: any;
 }

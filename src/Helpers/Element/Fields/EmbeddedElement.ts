@@ -1,7 +1,6 @@
-import { Element } from '../../../Element';
+import { Element, PreElement } from '../../../Element';
 import { SchemeHelper } from '../../SchemeHelper';
 import { EmbeddedElementFieldConfiguration } from '../../../Configuration';
-import { PreElement } from '../../../PreElement';
 import { ElpongError } from '../../../Errors';
 
 export namespace EmbeddedElement {

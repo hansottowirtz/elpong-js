@@ -1,8 +1,7 @@
 import { Elpong } from './Elpong';
 import { Scheme } from './Scheme';
-import { PreElement } from './PreElement';
 import { CollectionHelper } from './Helpers';
-import { Element, SelectorValue } from './Element';
+import { Element, SelectorValue, PreElement } from './Element';
 import { Util } from './Util';
 import { ActionConfiguration, CollectionConfiguration } from './Configuration';
 import { Actions, CollectionActionOptions } from './Helpers/Collection/Actions';
