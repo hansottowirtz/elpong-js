@@ -232,7 +232,7 @@ If you don't work with Angular or jQuery, you can use [window.fetch](fetch).
 Elpong.setAjax(window.fetch, 'fetch')
 Elpong.setAjax($http, 'angular')
 Elpong.setAjax($.ajax, 'fetch')
-Elpong.setAjax(http.request, 'angular2') // http: instance of Http or HttpClient
+Elpong.setAjax(http, 'angular2') // http: instance of Http or HttpClient
 ```
 
 ### Frameworks

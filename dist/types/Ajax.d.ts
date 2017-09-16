@@ -6,6 +6,7 @@ export interface AjaxPromise {
 export interface AjaxResponse extends Response {
     data: any;
 }
+export declare type AjaxExternalFunction = Function | any;
 export declare type AjaxFunction = (url: string, instruction: AjaxInstruction) => AjaxPromise;
 export interface AjaxObject {
     data: Object;
@@ -24,5 +25,5 @@ export interface AjaxHeaders {
 }
 export declare namespace Ajax {
     function executeRequest(url: string, method: string, data?: AjaxData, headers?: AjaxHeaders): AjaxPromise;
-    function setAjaxFunction(fn: Function, type?: string): void;
+    function setAjaxFunction(fn: AjaxExternalFunction, type?: string): void;
 }

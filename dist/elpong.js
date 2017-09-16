@@ -330,7 +330,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var Errors_1 = __webpack_require__(0);
 var Ajax;
 (function (Ajax) {
-    var ajax_function;
+    var ajaxFunction;
     function executeRequest(url, method, data, headers) {
         if (!headers) {
             headers = {};
@@ -346,7 +346,7 @@ var Ajax;
         };
         options.type = options.method;
         options.body = options.data;
-        return ajax_function(options.url, options);
+        return ajaxFunction(options.url, options);
     }
     Ajax.executeRequest = executeRequest;
     // Set the http function used for requests
@@ -355,7 +355,7 @@ var Ajax;
     // and return a promise-like object
     // with then and catch
     //
-    // @note Like $http or jQuery.ajax
+    // @note Like $http or jQuery.ajax or http.request or fetch
     // @param {Function} fn The function.
     // @param {string} type The function.
     function setAjaxFunction(fn, type) {
@@ -367,7 +367,7 @@ var Ajax;
         }
         switch (type) {
             case 'jquery':
-                ajax_function = function (url, instruction) {
+                ajaxFunction = function (url, instruction) {
                     var deferred = jQuery.Deferred();
                     var ajax = fn(url, instruction);
                     ajax.then(function (data, status, jqxhr) { return deferred.resolve({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
@@ -376,7 +376,7 @@ var Ajax;
                 };
                 break;
             case 'fetch':
-                ajax_function = function (url, instruction) {
+                ajaxFunction = function (url, instruction) {
                     return new Promise(function (resolve, reject) {
                         // Request with GET/HEAD method cannot have body
                         instruction.body = (instruction.method === 'GET') ? undefined : instruction.data;
@@ -402,10 +402,10 @@ var Ajax;
                 };
                 break;
             case 'angular2':
-                ajax_function = function (instruction) {
+                ajaxFunction = function (url, instruction) {
                     return new Promise(function (resolve, reject) {
                         instruction.responseType = undefined;
-                        fn(instruction.url, instruction).subscribe(function (response) {
+                        fn.request.bind(fn)(url, instruction).subscribe(function (response) {
                             if (response.status === 204) {
                                 resolve(response);
                             }
@@ -421,7 +421,7 @@ var Ajax;
                 };
                 break;
             default:
-                ajax_function = function (url, instruction) { return fn(instruction); };
+                ajaxFunction = function (url, instruction) { return fn(instruction); };
         }
     }
     Ajax.setAjaxFunction = setAjaxFunction;
