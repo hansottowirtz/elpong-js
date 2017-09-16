@@ -5,7 +5,7 @@ import { Util } from '../../../Util';
 import { HasManyRelationConfiguration, HasOneRelationConfiguration, FieldConfiguration } from '../../../Configuration';
 import { ElpongError } from '../../../Errors';
 
-type HasManyRelationFunction = () => Element[];
+export type HasManyRelationFunction = () => Element[];
 
 export namespace HasMany {
   export function setup(element: Element, relation_collection_name: string, relation_settings: HasManyRelationConfiguration) {

@@ -1,11 +1,11 @@
 // export interface AjaxPromise extends Promise<any> {
 // }
 
-type AjaxPromiseThenOnResolveFunction = (response: AjaxResponse) => void;
-type AjaxPromiseThenFunction = (resolve_fn: AjaxPromiseThenOnResolveFunction) => void;
+export type AjaxPromiseThenOnResolveFunction = (response: AjaxResponse) => void;
+export type AjaxPromiseThenFunction = (resolve_fn: AjaxPromiseThenOnResolveFunction) => any;
 
 export interface AjaxPromise {
-  then: AjaxPromiseThenFunction;
+  then: Function;
 } //Promise<any> //|JQueryPromise<{}>;
 
 export interface AjaxResponse extends Response {

@@ -1,5 +1,5 @@
 import { Collection } from '../../Collection';
-import { Ajax, AjaxResponse, AjaxData, AjaxHeaders } from '../../Ajax';
+import { Ajax, AjaxResponse, AjaxData, AjaxHeaders, AjaxPromise } from '../../Ajax';
 import { UrlHelper, UrlOptions } from '../UrlHelper';
 import { SelectorValue } from '../../Element';
 import { CollectionActionConfiguration } from '../../Configuration';
@@ -12,12 +12,12 @@ export interface CollectionActionOptions {
 }
 
 export namespace Actions {
-  export function executeGetAll(collection: Collection, action_options?: CollectionActionOptions) {
+  export function executeGetAll(collection: Collection, action_options?: CollectionActionOptions): AjaxPromise {
     if (!action_options) { action_options = {}; }
     let data = action_options.data;
 
     let promise = Ajax.executeRequest(
-      UrlHelper.createForCollection('GET', collection, action_options as UrlOptions),
+      UrlHelper.createForCollection('GET', collection, {}),
       'GET',
       data,
       action_options.headers

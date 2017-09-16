@@ -6,6 +6,7 @@ const tslint = require('gulp-tslint');
 const webpack = require('webpack-stream');
 const karma = require('karma').Server;
 const fs = require('fs');
+const ts = require('gulp-typescript');
 const path = require('path');
 
 gulp.task('build:webpack', () => {
@@ -27,7 +28,13 @@ gulp.task('build:uglify', () => {
     .pipe(gulp.dest('dist/'));
 });
 
-gulp.task('build', gulp.series('build:webpack', 'build:uglify'));
+gulp.task('build:tsc', () => {
+  const tsProject = ts.createProject('tsconfig.json');
+  const tsResult = tsProject.src().pipe(tsProject());
+  return tsResult.js.pipe(gulp.dest('built'));
+});
+
+gulp.task('build', gulp.series('build:webpack', 'build:uglify', 'build:tsc'));
 
 gulp.task('lint', () => {
   return gulp.src('src/**/*.ts')

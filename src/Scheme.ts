@@ -4,7 +4,7 @@ import { ElpongError } from './Errors';
 import { UrlHelper } from './Helpers';
 import { Elpong } from './Elpong';
 
-interface CollectionMap {
+export interface CollectionMap {
   [name: string]: Collection;
 }
 
@@ -20,7 +20,7 @@ function isSchemeConfiguration(sc: SchemeConfiguration | Object): sc is SchemeCo
 export class Scheme {
   name: string;
   private _configuration: SchemeConfiguration;
-  _collections: CollectionMap;
+  private _collections: CollectionMap;
   private api_url: string;
 
   constructor(sc: SchemeConfiguration | Object) {
@@ -70,5 +70,9 @@ export class Scheme {
 
   getApiUrl() {
     return this.api_url;
+  }
+
+  getCollections() {
+    return this._collections;
   }
 }

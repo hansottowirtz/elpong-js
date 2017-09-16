@@ -9,20 +9,21 @@ import { Actions, CollectionActionOptions } from './Helpers/Collection/Actions';
 import { AjaxPromise } from './Ajax';
 import { ElpongError } from './Errors';
 
-interface ElementMap {
+export interface ElementMap {
   [key: string]: Element;
 }
 
-type CollectionActionFunction = (action_options?: CollectionActionOptions) => AjaxPromise;
-type GetOneCollectionActionFunction = (selector_value: SelectorValue, action_options?: CollectionActionOptions) => AjaxPromise;
+export type CollectionActionFunction = (action_options?: CollectionActionOptions) => AjaxPromise;
+export type GetOneCollectionActionFunction = (selector_value: SelectorValue, action_options?: CollectionActionOptions) => AjaxPromise;
 
-interface CollectionActions {
+export interface CollectionActions {
+  // only CollectionActionFunction gives an error https://github.com/Microsoft/TypeScript/issues/10042
+  [action_name: string]: CollectionActionFunction | GetOneCollectionActionFunction;
   getAll: CollectionActionFunction;
   getOne: GetOneCollectionActionFunction;
-  [action_name: string]: CollectionActionFunction;
 }
 
-interface CollectionArrayOptions {
+export interface CollectionArrayOptions {
   no_new?: boolean;
 }
 
@@ -30,7 +31,7 @@ export interface CollectionFindByOptions extends CollectionArrayOptions {
   multiple?: boolean;
 }
 
-interface FieldsKeyValueMap {
+export interface FieldsKeyValueMap {
   [key: string]: any;
 }
 

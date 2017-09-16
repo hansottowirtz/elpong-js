@@ -1,4 +1,4 @@
-import { Ajax, AjaxResponse, AjaxData, AjaxHeaders } from '../../Ajax';
+import { Ajax, AjaxResponse, AjaxData, AjaxHeaders, AjaxPromise } from '../../Ajax';
 import { ActionConfigurationMap, ActionConfiguration } from '../../Configuration';
 import { Element, SelectorValue } from '../../Element';
 import { Util } from '../../Util';
@@ -9,6 +9,7 @@ import { UrlHelper, UrlOptions } from '../UrlHelper';
 export interface ActionOptions {
   data?: AjaxData;
   headers?: AjaxHeaders;
+  url_options?: UrlOptions;
 }
 
 export namespace Actions {
@@ -27,7 +28,7 @@ export namespace Actions {
     });
   }
 
-  export function execute(element: Element, method: string, action_options?: ActionOptions) {
+  export function execute(element: Element, method: string, action_options?: ActionOptions): AjaxPromise {
     if (!action_options) { action_options = {}; }
 
     element.snapshots.make(`before_${method.toLowerCase()}`);
@@ -46,7 +47,7 @@ export namespace Actions {
     }
 
     let promise = Ajax.executeRequest(
-      UrlHelper.createForElement(method, {} as ActionConfiguration, element, action_options as UrlOptions, method === 'POST'),
+      UrlHelper.createForElement(method, {} as ActionConfiguration, element, action_options.url_options || {}, method === 'POST'),
       method,
       data,
       action_options.headers
@@ -68,7 +69,7 @@ export namespace Actions {
     return promise;
   }
 
-  export function executeCustom(element: Element, action_name: string, action_config: ActionConfiguration, action_options?: ActionOptions) {
+  export function executeCustom(element: Element, action_name: string, action_config: ActionConfiguration, action_options?: ActionOptions): AjaxPromise {
     if (!action_options) { action_options = {}; }
 
     let method = action_config.method.toUpperCase();
@@ -82,7 +83,7 @@ export namespace Actions {
     }
 
     let promise = Ajax.executeRequest(
-      UrlHelper.createForElement(action_name, action_config, element, action_options),
+      UrlHelper.createForElement(action_name, action_config, element, action_options.url_options || {}),
       method,
       data,
       action_options.headers

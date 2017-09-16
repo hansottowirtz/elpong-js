@@ -3,4 +3,6 @@ node_modules/
 .DS_Store
 yarn.lock
 built/
+dist/types/*.ts
+!dist/types/*.d.ts
 npm-debug.log

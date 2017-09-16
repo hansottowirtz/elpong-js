@@ -16,9 +16,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	function __webpack_require__(moduleId) {
 /******/
 /******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
+/******/ 		if(installedModules[moduleId]) {
 /******/ 			return installedModules[moduleId].exports;
-/******/
+/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			i: moduleId,
@@ -118,7 +118,7 @@ if (DEBUG) {
         'elesnm': 'Selector is not matching get one request selector'
     };
 }
-var ElpongError = (function (_super) {
+var ElpongError = /** @class */ (function (_super) {
     __extends(ElpongError, _super);
     function ElpongError(message, argument) {
         var _this = this;
@@ -324,9 +324,9 @@ var CollectionHelper;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+
 // export interface AjaxPromise extends Promise<any> {
 // }
-
 Object.defineProperty(exports, "__esModule", { value: true });
 var Ajax;
 (function (Ajax) {
@@ -424,7 +424,7 @@ function isSelectorValue(v) {
     return (!!v || v === 0 || v === '') && (typeof v === 'string' || typeof v === 'number');
 }
 exports.isSelectorValue = isSelectorValue;
-var Element = (function () {
+var Element = /** @class */ (function () {
     function Element(collection, pre_element) {
         this.fields = {};
         this.relations = {};
@@ -531,7 +531,7 @@ var CollectionHelper_1 = __webpack_require__(2);
 var SchemeHelper;
 (function (SchemeHelper) {
     function getCollectionBySingularName(scheme, singular_name) {
-        for (var collection_name in scheme._collections) {
+        for (var collection_name in scheme.getCollections()) {
             var collection = scheme.select(collection_name);
             if (CollectionHelper_1.CollectionHelper.getSingularName(collection) === singular_name) {
                 return collection;
@@ -896,7 +896,7 @@ var Element_1 = __webpack_require__(4);
 var Util_1 = __webpack_require__(1);
 var Actions_1 = __webpack_require__(15);
 var Errors_1 = __webpack_require__(0);
-var Collection = (function () {
+var Collection = /** @class */ (function () {
     function Collection(scheme, name) {
         var _this = this;
         this._scheme = scheme;
@@ -1041,7 +1041,7 @@ var Errors_1 = __webpack_require__(0);
 if (typeof DEBUG === 'undefined') {
     var DEBUG = true;
 }
-var SchemeConfiguration = (function () {
+var SchemeConfiguration = /** @class */ (function () {
     function SchemeConfiguration(preconf) {
         this.name = preconf.name;
         if (DEBUG && !this.name) {
@@ -1094,7 +1094,7 @@ var Actions;
             action_options = {};
         }
         var data = action_options.data;
-        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection('GET', collection, action_options), 'GET', data, action_options.headers);
+        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection('GET', collection, {}), 'GET', data, action_options.headers);
         promise.then(function (response) {
             response.data.map(function (pre_element) {
                 collection.buildOrMerge(pre_element);
@@ -1189,7 +1189,7 @@ var Actions;
                 throw new Error('Element is new');
             }
         }
-        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForElement(method, {}, element, action_options, method === 'POST'), method, data, action_options.headers);
+        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForElement(method, {}, element, action_options.url_options || {}, method === 'POST'), method, data, action_options.headers);
         promise.then(function (response) {
             if (response.data) {
                 element.merge(response.data);
@@ -1217,7 +1217,7 @@ var Actions;
         else if (!action_config.no_data) {
             data = ElementHelper_1.ElementHelper.toData(element);
         }
-        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForElement(action_name, action_config, element, action_options), method, data, action_options.headers);
+        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForElement(action_name, action_config, element, action_options.url_options || {}), method, data, action_options.headers);
         promise.then(function (response) {
             var selector_value;
             if (!action_config.returns_other) {
@@ -1586,7 +1586,7 @@ var Elpong_1 = __webpack_require__(7);
 function isSchemeConfiguration(sc) {
     return sc instanceof Configuration_1.SchemeConfiguration;
 }
-var Scheme = (function () {
+var Scheme = /** @class */ (function () {
     function Scheme(sc) {
         var _sc;
         if (!isSchemeConfiguration(sc)) {
@@ -1631,6 +1631,9 @@ var Scheme = (function () {
     Scheme.prototype.getApiUrl = function () {
         return this.api_url;
     };
+    Scheme.prototype.getCollections = function () {
+        return this._collections;
+    };
     return Scheme;
 }());
 exports.Scheme = Scheme;
@@ -1644,7 +1647,7 @@ exports.Scheme = Scheme;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var ElementHelper_1 = __webpack_require__(12);
-var Snapshot = (function () {
+var Snapshot = /** @class */ (function () {
     function Snapshot(element, tag) {
         this.element = element;
         this.tag = tag;

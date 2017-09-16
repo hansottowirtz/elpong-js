@@ -21,19 +21,19 @@ export function isSelectorValue(v: any): v is SelectorValue {
   return (!!v || v === 0 || v === '') && (typeof v === 'string' || typeof v === 'number');
 }
 
-interface Fields {
+export interface Fields {
   [field_key: string]: any;
 }
 
-type RelationFunction = () => Element|Element[]|null|undefined;
+export type RelationFunction = () => Element|Element[]|null|undefined;
 
-interface Relations {
+export interface Relations {
   [relation_function_name: string]: RelationFunction;
 }
 
-type ActionFunction = (action_options?: ActionOptions) => AjaxPromise;
+export type ActionFunction = (action_options?: ActionOptions) => AjaxPromise;
 
-interface Actions {
+export interface Actions {
   get: ActionFunction;
   post: ActionFunction;
   put: ActionFunction;
@@ -41,7 +41,7 @@ interface Actions {
   [action_name: string]: ActionFunction;
 }
 
-interface Snapshots {
+export interface Snapshots {
   make: Function;
   list: Snapshot[];
   current_index: number;

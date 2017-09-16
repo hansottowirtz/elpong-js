@@ -1,8 +1,9 @@
 {
   "name": "elpong",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0-beta.4",
   "description": "Elpong for Javascript",
-  "main": "dist/elpong.js",
+  "main": "./dist/elpong.js",
+  "types": "./dist/types/main.d.ts",
   "devDependencies": {
     "acorn-dynamic-import": "^2.0.1",
     "angular": "^1.6.1",
@@ -16,7 +17,7 @@
     "gulp-rename": "^1.2.2",
     "gulp-size": "^2.1.0",
     "gulp-tslint": "^7.0.1",
-    "gulp-typescript": "^3.1.4",
+    "gulp-typescript": "^3.2.2",
     "gulp-uglify": "^1.5.4",
     "gulp-umd": "^0.2.0",
     "jasmine-core": "^2.4.1",
@@ -41,7 +42,7 @@
     "whatwg-fetch": "^2.0.1"
   },
   "scripts": {
-    "prepublish": "gulp ensure-built"
+    "prepublishOnly": "gulp ensure-built"
   },
   "repository": {
     "type": "git",
@@ -62,7 +63,7 @@
   "dependencies": {
     "@types/angular": "^1.6.9",
     "@types/es6-promise": "0.0.32",
-    "@types/isomorphic-fetch": "0.0.33",
+    "@types/isomorphic-fetch": "0.0.34",
     "@types/jasmine": "^2.5.45",
     "@types/jquery": "^2.0.41"
   }

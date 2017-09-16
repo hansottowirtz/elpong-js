@@ -1,14 +1,16 @@
 {
   "compilerOptions": {
-    "outDir": "built",
+    "outDir": "./dist/types/",
     "target": "es5",
     "noFallthroughCasesInSwitch": true,
     "module": "commonjs",
     "strictNullChecks": true,
     "noImplicitAny" : true,
-    "suppressImplicitAnyIndexErrors": true
+    "suppressImplicitAnyIndexErrors": true,
+    "declaration": true
   },
   "include": [
     "src/**/*.ts"
-  ]
+  ],
+  "compileOnSave": false
 }
