@@ -1,0 +1,13 @@
+bower_components/
+node_modules/
+yarn.lock
+built/
+dist/types/*.ts
+!dist/types/*.d.ts
+test/
+gulpfile.js
+bower.json
+karma.conf.js
+tsconfig.json
+tslint.json
+webpack.config.js
