@@ -115,7 +115,8 @@ if (DEBUG) {
         'elesnf': 'Snapshot not found',
         'elesti': 'Invalid snapshot identifier: must be number <= list.length, string or RegExp',
         'eleafw': 'Pre element has an associated field that does not match the embedded element selector',
-        'elesnm': 'Selector is not matching get one request selector'
+        'elesnm': 'Selector is not matching get one request selector',
+        'ajahct': 'Content-Type header not set to application/json'
     };
 }
 var ElpongError = /** @class */ (function (_super) {
@@ -325,9 +326,8 @@ var CollectionHelper;
 
 "use strict";
 
-// export interface AjaxPromise extends Promise<any> {
-// }
 Object.defineProperty(exports, "__esModule", { value: true });
+var Errors_1 = __webpack_require__(0);
 var Ajax;
 (function (Ajax) {
     var ajax_function;
@@ -378,22 +378,45 @@ var Ajax;
             case 'fetch':
                 ajax_function = function (url, instruction) {
                     return new Promise(function (resolve, reject) {
-                        instruction['body'] = instruction.data;
+                        // Request with GET/HEAD method cannot have body
+                        instruction.body = (instruction.method === 'GET') ? undefined : instruction.data;
                         var http_promise = fn(url, instruction);
                         http_promise.then(function (response) {
-                            if (response.headers.get('content-type') !== 'application/json') {
+                            if (response.status === 204) {
                                 resolve(response);
                             }
                             else {
+                                var contentType = response.headers.get('content-type');
+                                if (!contentType || contentType.indexOf('json') < 0)
+                                    throw new Errors_1.ElpongError('ajahct');
                                 var json_promise = response.json();
                                 json_promise.then(function (json) {
-                                    response['data'] = json; // typescript ignores square brackets
+                                    response.data = json; // typescript ignores square brackets
                                     resolve(response);
                                 });
                                 json_promise.catch(reject);
                             }
                         });
                         http_promise.catch(reject);
+                    });
+                };
+                break;
+            case 'angular2':
+                ajax_function = function (instruction) {
+                    return new Promise(function (resolve, reject) {
+                        instruction.responseType = undefined;
+                        fn(instruction.url, instruction).subscribe(function (response) {
+                            if (response.status === 204) {
+                                resolve(response);
+                            }
+                            else {
+                                response.data = response.json();
+                                var contentType = response.headers.get('content-type');
+                                if (!contentType || contentType.indexOf('json') < 0)
+                                    throw new Error('ajahct');
+                                resolve(response);
+                            }
+                        });
                     });
                 };
                 break;
@@ -644,8 +667,8 @@ var Elpong;
         }
     }
     Elpong.load = load;
-    function setAjax(fn) {
-        Ajax_1.Ajax.setAjaxFunction(fn);
+    function setAjax(fn, type) {
+        Ajax_1.Ajax.setAjaxFunction(fn, type);
     }
     Elpong.setAjax = setAjax;
     function enableAutoload() {

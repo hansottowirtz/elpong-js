@@ -229,9 +229,10 @@ The `then` and `catch` functions should return a response object with a
 If you don't work with Angular or jQuery, you can use [window.fetch](fetch).
 
 ```javascript
-Elpong.setAjax(window.fetch)
-Elpong.setAjax($http)
-Elpong.setAjax($.ajax)
+Elpong.setAjax(window.fetch, 'fetch')
+Elpong.setAjax($http, 'angular')
+Elpong.setAjax($.ajax, 'fetch')
+Elpong.setAjax(http.request, 'angular2') // http: instance of Http or HttpClient
 ```
 
 ### Frameworks

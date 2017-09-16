@@ -1,3 +1,5 @@
+import { ElpongError } from './Errors';
+
 // export interface AjaxPromise extends Promise<any> {
 // }
 
@@ -82,7 +84,7 @@ export namespace Ajax {
 
     switch (type) {
       case 'jquery':
-        ajax_function = function(url: string, instruction: AjaxInstruction) {
+        ajax_function = (url: string, instruction: AjaxInstruction) => {
           let deferred = jQuery.Deferred();
           let ajax = fn(url, instruction);
           ajax.then((data: any, status: any, jqxhr: any) => deferred.resolve({data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders()}));
@@ -92,22 +94,42 @@ export namespace Ajax {
         break;
       case 'fetch':
         ajax_function = (url: string, instruction: AjaxInstruction) => {
-          return new Promise(function(resolve, reject) {
-            instruction['body'] = instruction.data;
+          return new Promise((resolve, reject) => {
+            // Request with GET/HEAD method cannot have body
+            (instruction as any).body = (instruction.method === 'GET') ? undefined : instruction.data;
             let http_promise = fn(url, instruction) as Promise<Response>;
-            http_promise.then(function(response: Response) {
-              if (response.headers.get('content-type') !== 'application/json') {
-                resolve(response);
+            http_promise.then((response: Response) => {
+              if (response.status === 204) {
+                resolve(response)
               } else {
+                const contentType = response.headers.get('content-type');
+                if (!contentType || contentType.indexOf('json') < 0) throw new ElpongError('ajahct');
                 let json_promise = response.json();
-                json_promise.then(function(json: string) {
-                  response['data'] = json; // typescript ignores square brackets
+                json_promise.then((json: string) => {
+                  (response as any).data = json; // typescript ignores square brackets
                   resolve(response);
                 });
                 json_promise.catch(reject);
               }
             });
             http_promise.catch(reject);
+          });
+        }
+        break;
+      case 'angular2':
+        ajax_function = (instruction: any) => {
+          return new Promise((resolve, reject) => {
+            instruction.responseType = undefined;
+            fn(instruction.url, instruction).subscribe((response: any) => {
+              if (response.status === 204) {
+                resolve(response)
+              } else {
+                (response as any).data = response.json();
+                const contentType = response.headers.get('content-type');
+                if (!contentType || contentType.indexOf('json') < 0) throw new Error('ajahct');
+                resolve(response);
+              }
+            });
           });
         }
         break;

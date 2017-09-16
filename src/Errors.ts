@@ -22,7 +22,8 @@ if (DEBUG) {
     'elesnf': 'Snapshot not found',
     'elesti': 'Invalid snapshot identifier: must be number <= list.length, string or RegExp',
     'eleafw': 'Pre element has an associated field that does not match the embedded element selector',
-    'elesnm': 'Selector is not matching get one request selector'
+    'elesnm': 'Selector is not matching get one request selector',
+    'ajahct': 'Content-Type header not set to application/json'
   }
 }
 

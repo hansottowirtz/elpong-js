@@ -47,8 +47,8 @@ export namespace Elpong {
     }
   }
 
-  export function setAjax(fn: Function): void {
-    Ajax.setAjaxFunction(fn);
+  export function setAjax(fn: Function, type?: string): void {
+    Ajax.setAjaxFunction(fn, type);
   }
 
   export function enableAutoload(): void {

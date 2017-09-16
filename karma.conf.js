@@ -1,5 +1,5 @@
 var webpack = require('webpack');
-
+var ENABLE_SOURCEMAPS = false;
 module.exports = function(config) {
   var customLaunchers = {
     'SL_Chrome_26': {
@@ -62,19 +62,22 @@ module.exports = function(config) {
     ],
     exclude: [],
     preprocessors: {
-      '**/*.ts': ['webpack', 'sourcemap'],
-      '**/*.coffee': ['webpack', 'sourcemap'],
-      '**/*.js': ['sourcemap']
+      '**/*.ts': ENABLE_SOURCEMAPS ? ['webpack', 'sourcemap'] : ['webpack'],
+      '**/*.coffee': ENABLE_SOURCEMAPS ? ['webpack', 'sourcemap'] : ['webpack'],
+      '**/*.js': ENABLE_SOURCEMAPS ? ['sourcemap'] : []
     },
-    plugins: [
-      'karma-jasmine',
-      'karma-chrome-launcher',
-      'karma-safari-launcher',
-      'karma-phantomjs-launcher',
-      'karma-sauce-launcher',
-      'karma-sourcemap-loader',
-      'karma-webpack'
-    ],
+    plugins: (function(){
+      var a = [
+        'karma-jasmine',
+        'karma-chrome-launcher',
+        'karma-safari-launcher',
+        'karma-phantomjs-launcher',
+        'karma-sauce-launcher',
+        'karma-webpack'
+      ];
+      if (ENABLE_SOURCEMAPS) a.push('karma-sourcemap-loader');
+      return a;
+    })(),
     reporters: ['progress'],
     port: 9876,
     colors: true,
@@ -94,13 +97,13 @@ module.exports = function(config) {
           { test: /\.json5$/,  loader: 'json5-loader' }
         ]
       },
-      plugins: [
+      plugins: ENABLE_SOURCEMAPS ? [
         new webpack.SourceMapDevToolPlugin({
           filename: null, // inline sourcemap
           test: /\.(ts|js|coffee)$/
         }),
         new webpack.EnvironmentPlugin(['FRAMEWORK'])
-      ],
+      ] : [new webpack.EnvironmentPlugin(['FRAMEWORK'])],
       devtool: 'inline-source-map'
     }
   })
