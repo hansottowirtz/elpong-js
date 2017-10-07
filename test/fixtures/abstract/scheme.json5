@@ -11,6 +11,16 @@
         ds: {
           embedded_collection: true, collection: 'bs'
         }
+      },
+      actions: {
+        f: {
+          method: 'DELETE'
+        }
+      },
+      collection_actions: {
+        g: {
+          method: 'DELETE'
+        }
       }
     },
     bs: {

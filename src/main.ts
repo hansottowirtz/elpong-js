@@ -6,7 +6,9 @@ export {
 export {
   Collection,
   CollectionActions,
-  CollectionActionFunction,
+  GetAllCollectionActionFunction,
+  GetOneCollectionActionFunction,
+  CustomCollectionActionFunction,
   CollectionArrayOptions,
   CollectionFindByOptions,
   FieldsKeyValueMap
