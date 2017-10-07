@@ -28,14 +28,14 @@ describe('Abstract', () => {
     const xs = scheme.select('xs');
     const bs = scheme.select('bs');
 
-    xs.actions.getAll().then((r) => {
-      expect(bs.array().length).toBe(2);
+    xs.actions.getAll({params: {c: true}}).then((r) => {
+      expect(bs.array().length).toBe(1);
       httpBackend.done(done);
-    });
 
-    xs.actions.getAll({params: {}}).then((r) => {
-      expect(bs.array().length).toBe(2);
-      httpBackend.done(done);
+      xs.actions.getAll().then((r) => {
+        expect(bs.array().length).toBe(2);
+        httpBackend.done(done);
+      });
     });
 
     httpBackend.flush();
