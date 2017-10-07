@@ -85,7 +85,7 @@ export interface FieldConfiguration {
   readonly no_send?: boolean;
 }
 export interface EmbeddedElementFieldConfiguration extends FieldConfiguration {
-  readonly field?: string;
+  readonly reference_field?: string;
   readonly collection?: string;
 }
 export interface EmbeddedCollectionFieldConfiguration extends FieldConfiguration {
