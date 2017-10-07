@@ -35,7 +35,7 @@ export interface FieldsKeyValueMap {
 }
 
 export class Collection {
-  readonly _scheme: Scheme;
+  private readonly _scheme: Scheme;
   readonly name: string;
   private readonly default_pre_element: PreElement;
   readonly elements: ElementMap;
@@ -58,13 +58,7 @@ export class Collection {
         this.default_pre_element[field_key] = field_config.default;
       }
     }
-
-    // for collection_action_name, collection_action_settings of settings.collection_actions
-    //   @actions[HP.Util.camelize(collection_action_name)] = ->
-    //     # collection_action_options = {method: collection_action_settings.method.toUpperCase(), }
-    //     # new_options = HP.Util.merge(HP.Util.merge({method: 'GET'}, {meth}), options)
-    //     # HPP.http_function(new_options)
-
+    
     this.actions = {
       getAll: (action_options?: CollectionActionOptions) => {
         return Actions.executeGetAll(this, action_options);
@@ -73,7 +67,6 @@ export class Collection {
         return Actions.executeGetOne(this, selector_value, action_options);
       }
     };
-
     Util.forEach(config.collection_actions, (action_config: ActionConfiguration, action_name: string) => {
       this.actions[Util.camelize(action_name)] = (action_options: CollectionActionOptions) =>
         Actions.executeCustom(this, action_name, action_config, action_options);

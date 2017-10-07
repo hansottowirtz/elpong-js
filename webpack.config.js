@@ -1,9 +1,9 @@
 module.exports = {
-  entry: './src/main',
+  entry: './src/entry',
   output: {
     filename: 'elpong.js',
     path: __dirname + '/dist',
-    library: 'Elpong',
+    library: 'elpong',
     libraryTarget: 'umd',
     umdNamedDefine: true
   },

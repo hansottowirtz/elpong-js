@@ -1,10 +1,9 @@
 import { Scheme } from './Scheme';
 import { Collection } from './Collection';
-import { SchemeConfiguration } from './Configuration';
+import { SchemeConfiguration, PreSchemeConfiguration } from './Configuration';
 import { ElpongError } from './Errors';
 import { Util } from './Util';
 import { Ajax, AjaxExternalFunction } from './Ajax';
-import { Element } from './Element';
 
 declare let DEBUG: boolean;
 
@@ -20,7 +19,7 @@ let schemes: SchemeMap = {};
 let autoload: boolean = false;
 
 export namespace Elpong {
-  export function add(scheme_config: SchemeConfiguration | Object): Scheme {
+  export function add(scheme_config: PreSchemeConfiguration): Scheme {
     let scheme = new Scheme(scheme_config);
     return schemes[scheme.name] = scheme;
   }
@@ -34,7 +33,7 @@ export namespace Elpong {
   }
 
   export function load(ignore_empty: boolean): void {
-    if (typeof document === 'undefined') return
+    if (typeof document === 'undefined') return;
 
     let scheme_tags: NodeListOf<HTMLMetaElement> =
       document.querySelectorAll('meta[name=elpong-scheme]') as NodeListOf<HTMLMetaElement>;
@@ -57,7 +56,7 @@ export namespace Elpong {
     Elpong.load(true);
   }
 
-  export function isAutoload(): boolean {
+  export function isAutoloadEnabled(): boolean {
     return autoload;
   }
 
@@ -66,5 +65,3 @@ export namespace Elpong {
     schemes = {};
   }
 }
-
-export { Scheme, Element, Collection };

@@ -1,5 +1,5 @@
 import { Collection } from './Collection';
-import { SchemeConfiguration } from './Configuration';
+import { SchemeConfiguration, PreSchemeConfiguration } from './Configuration';
 import { ElpongError } from './Errors';
 import { UrlHelper } from './Helpers';
 import { Elpong } from './Elpong';
@@ -13,46 +13,37 @@ interface SchemeOptions {
   no_create_collections: boolean;
 }
 
-function isSchemeConfiguration(sc: SchemeConfiguration | Object): sc is SchemeConfiguration {
-   return (sc as SchemeConfiguration) instanceof SchemeConfiguration;
-}
-
 export class Scheme {
   name: string;
   private _configuration: SchemeConfiguration;
   private _collections: CollectionMap;
   private api_url: string;
 
-  constructor(sc: SchemeConfiguration | Object) {
-    let _sc: SchemeConfiguration;
-    if (!isSchemeConfiguration(sc)) {
-      _sc = new SchemeConfiguration(sc);
-    } else {
-      _sc = sc;
-    }
-    this._configuration = _sc;
-    this.name = _sc.name;
+  constructor(preSchemeConfiguration: PreSchemeConfiguration) {
+    const sc = new SchemeConfiguration(preSchemeConfiguration);
+    this._configuration = sc;
+    this.name = sc.name;
     this._collections = {};
 
     // Create collections
-    for (let collection_name in _sc.collections) {
-      let collection_settings = _sc.collections[collection_name];
+    for (let collection_name in sc.collections) {
+      let collection_settings = sc.collections[collection_name];
       let collection = new Collection(this, collection_name);
       this._collections[collection_name] = collection;
     }
 
-    if (Elpong.isAutoload()) {
-      for (let collection_name in _sc.collections) {
+    if (Elpong.isAutoloadEnabled()) {
+      for (let collection_name in sc.collections) {
         this._collections[collection_name].load(true);
       }
     }
   }
 
-  configuration() {
+  configuration(): SchemeConfiguration {
     return this._configuration;
   }
 
-  select(name: string) {
+  select(name: string): Collection {
     let collection;
     if (collection = this._collections[name]) {
       return collection;
@@ -61,18 +52,16 @@ export class Scheme {
     }
   }
 
-  setApiUrl(url: string) {
-    let api_url = this.api_url = UrlHelper.trimSlashes(url);
-    if (!UrlHelper.isFqdn(api_url)) {
-      return this.api_url = `/${api_url}`;
-    }
+  setApiUrl(url: string): string {
+    const trimmed_url = UrlHelper.trimSlashes(url);
+    return this.api_url = UrlHelper.isFqdn(trimmed_url) ? trimmed_url : `/${trimmed_url}`;
   }
 
-  getApiUrl() {
+  getApiUrl(): string {
     return this.api_url;
   }
 
-  getCollections() {
+  getCollections(): CollectionMap {
     return this._collections;
   }
 }

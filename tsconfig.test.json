@@ -1,6 +1,0 @@
-{
-  "extends": "tsconfig.json",
-  "compilerOptions": {
-    "types": ["jquery", "angular", "isomorphic-fetch", "es6-promise", "jasmine", "node"]
-  }
-}

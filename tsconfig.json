@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
-    "outDir": "./dist/types/",
+    "outDir": "./built/",
     "target": "es5",
     "noFallthroughCasesInSwitch": true,
     "module": "commonjs",
     "strictNullChecks": true,
     "noImplicitAny" : true,
     "suppressImplicitAnyIndexErrors": true,
-    "types": ["jquery", "angular", "isomorphic-fetch", "es6-promise"]
+    "declaration": true,
+    "types": ["isomorphic-fetch", "es6-promise"]
   },
   "include": [
     "src/**/*.ts"

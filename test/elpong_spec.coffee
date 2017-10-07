@@ -11,7 +11,7 @@ describe 'Elpong', ->
 
   it 'can have autoload enabled', ->
     Elpong.enableAutoload()
-    expect(Elpong.isAutoload()).toBe(true)
+    expect(Elpong.isAutoloadEnabled()).toBe(true)
 
   it 'autoloads schemes', ->
     return if !document?

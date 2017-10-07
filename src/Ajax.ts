@@ -1,3 +1,6 @@
+/// <reference types="jquery"/>
+/// <reference types="angular"/>
+
 import { ElpongError } from './Errors';
 
 // export interface AjaxPromise extends Promise<any> {
@@ -53,16 +56,17 @@ export namespace Ajax {
   export function executeRequest(url: string, method: string, data?: AjaxData, headers?: AjaxHeaders) {
     if (!headers) { headers = {}; }
     headers['Accept'] = headers['Content-Type'] = 'application/json';
+    const serialized_data = JSON.stringify(data === undefined ? {} : data);
     let options: AjaxFunctionOptions = {
       method: method,
+      type: method,
       url: url,
-      data: JSON.stringify(data === undefined ? {} : data),
+      data: serialized_data,
+      body: serialized_data,
       headers: headers,
       dataType: 'json',
       responseType: 'json'
-    } as AjaxFunctionOptions;
-    options.type = options.method;
-    options.body = options.data;
+    };
     return ajaxFunction(options.url, options);
   }
 
@@ -87,10 +91,10 @@ export namespace Ajax {
       case 'jquery':
         ajaxFunction = (url: string, instruction: AjaxInstruction) => {
           let deferred = jQuery.Deferred();
-          let ajax = (<Function>fn)(url, instruction);
+          let ajax = (fn as Function)(url, instruction);
           ajax.then((data: any, status: any, jqxhr: any) => deferred.resolve({data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders()}));
           ajax.catch((data: any, status: any, jqxhr: any) => deferred.reject({data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders()}));
-          return <AjaxPromise>deferred.promise();
+          return deferred.promise();
         }
         break;
       case 'fetch':
@@ -98,7 +102,7 @@ export namespace Ajax {
           return new Promise((resolve, reject) => {
             // Request with GET/HEAD method cannot have body
             (instruction as any).body = (instruction.method === 'GET') ? undefined : instruction.data;
-            let http_promise = (<Function>fn)(url, instruction) as Promise<Response>;
+            let http_promise = (fn as Function)(url, instruction) as Promise<Response>;
             http_promise.then((response: Response) => {
               if (response.status === 204) {
                 resolve(response)
@@ -121,7 +125,7 @@ export namespace Ajax {
         ajaxFunction = (url: string, instruction: AjaxInstruction) => {
           return new Promise((resolve, reject) => {
             instruction.responseType = undefined;
-            (<any>fn).request.bind(fn)(url, instruction).subscribe((response: any) => {
+            (fn as any).request.bind(fn)(url, instruction).subscribe((response: any) => {
               if (response.status === 204) {
                 resolve(response)
               } else {
@@ -135,7 +139,7 @@ export namespace Ajax {
         }
         break;
       default:
-        ajaxFunction = (url: string, instruction: AjaxInstruction) => (<Function>fn)(instruction);
+        ajaxFunction = (url: string, instruction: AjaxInstruction) => (fn as Function)(instruction);
     }
   }
 }

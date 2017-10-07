@@ -2,14 +2,20 @@
   name: 'absctract',
   selector: 'id',
   collections: {
-    a: {
+    xs: {
       fields: {
         id: {},
+        cs: {
+          embedded_collection: true, collection: 'bs',
+        },
+        ds: {
+          embedded_collection: true, collection: 'bs'
+        }
       }
     },
-    b: {
+    bs: {
       fields: {
-        id: {},
+        id: {}
       }
     }
   }
