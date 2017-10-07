@@ -17,12 +17,13 @@ describe('Abstract', () => {
         cs: [{id: 1}],
         ds: [{id: 2}]
       }
-    ], 204);
+    ]);
 
     const xs = scheme.select('xs');
     const bs = scheme.select('bs');
 
-    xs.actions.getAll().then(() => {
+    xs.actions.getAll().then((r) => {
+      console.log(r.data);
       expect(bs.array().length).toBe(2);
       httpBackend.done(done);
     });

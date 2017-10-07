@@ -2,11 +2,11 @@
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
 	else if(typeof define === 'function' && define.amd)
-		define("Elpong", [], factory);
+		define("elpong", [], factory);
 	else if(typeof exports === 'object')
-		exports["Elpong"] = factory();
+		exports["elpong"] = factory();
 	else
-		root["Elpong"] = factory();
+		root["elpong"] = factory();
 })(this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -326,6 +326,8 @@ var CollectionHelper;
 
 "use strict";
 
+/// <reference types="jquery"/>
+/// <reference types="angular"/>
 Object.defineProperty(exports, "__esModule", { value: true });
 var Errors_1 = __webpack_require__(0);
 var Ajax;
@@ -336,16 +338,17 @@ var Ajax;
             headers = {};
         }
         headers['Accept'] = headers['Content-Type'] = 'application/json';
+        var serialized_data = JSON.stringify(data === undefined ? {} : data);
         var options = {
             method: method,
+            type: method,
             url: url,
-            data: JSON.stringify(data === undefined ? {} : data),
+            data: serialized_data,
+            body: serialized_data,
             headers: headers,
             dataType: 'json',
             responseType: 'json'
         };
-        options.type = options.method;
-        options.body = options.data;
         return ajaxFunction(options.url, options);
     }
     Ajax.executeRequest = executeRequest;
@@ -372,6 +375,8 @@ var Ajax;
                     var ajax = fn(url, instruction);
                     ajax.then(function (data, status, jqxhr) { return deferred.resolve({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
                     ajax.catch(function (data, status, jqxhr) { return deferred.reject({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
+                    // Convert to Promise, as Typescript users are probably not using jQuery
+                    // and if so, they won't have a lot of trouble with the differences.
                     return deferred.promise();
                 };
                 break;
@@ -391,7 +396,7 @@ var Ajax;
                                     throw new Errors_1.ElpongError('ajahct');
                                 var json_promise = response.json();
                                 json_promise.then(function (json) {
-                                    response.data = json; // typescript ignores square brackets
+                                    response.data = json;
                                     resolve(response);
                                 });
                                 json_promise.catch(reject);
@@ -410,17 +415,20 @@ var Ajax;
                                 resolve(response);
                             }
                             else {
-                                response.data = response.json();
                                 var contentType = response.headers.get('content-type');
                                 if (!contentType || contentType.indexOf('json') < 0)
                                     throw new Error('ajahct');
+                                var json = response.json();
+                                response.data = json;
                                 resolve(response);
                             }
-                        });
+                        }, function (httpErrorResponse) { reject(httpErrorResponse); });
                     });
                 };
                 break;
             default:
+                // Default is AngularJS behavior, a promise that resolves to a response
+                // object with the payload in the data field.
                 ajaxFunction = function (url, instruction) { return fn(instruction); };
         }
     }
@@ -676,10 +684,10 @@ var Elpong;
         Elpong.load(true);
     }
     Elpong.enableAutoload = enableAutoload;
-    function isAutoload() {
+    function isAutoloadEnabled() {
         return autoload;
     }
-    Elpong.isAutoload = isAutoload;
+    Elpong.isAutoloadEnabled = isAutoloadEnabled;
     function tearDown() {
         autoload = false;
         schemes = {};
@@ -720,7 +728,7 @@ var EmbeddedCollection;
         }
         var collection = element.collection();
         var scheme = collection.scheme();
-        var embedded_element_collection = scheme.select(field_key || field_config.collection);
+        var embedded_element_collection = scheme.select(field_config.collection || field_key);
         Util_1.Util.forEach(embedded_pre_collection, function (embedded_pre_element) {
             var embedded_element = new Element_1.Element(embedded_element_collection, embedded_pre_element);
             CollectionHelper_1.CollectionHelper.addElement(embedded_element_collection, embedded_element);
@@ -934,11 +942,6 @@ var Collection = /** @class */ (function () {
                 this.default_pre_element[field_key] = field_config.default;
             }
         }
-        // for collection_action_name, collection_action_settings of settings.collection_actions
-        //   @actions[HP.Util.camelize(collection_action_name)] = ->
-        //     # collection_action_options = {method: collection_action_settings.method.toUpperCase(), }
-        //     # new_options = HP.Util.merge(HP.Util.merge({method: 'GET'}, {meth}), options)
-        //     # HPP.http_function(new_options)
         this.actions = {
             getAll: function (action_options) {
                 return Actions_1.Actions.executeGetAll(_this, action_options);
@@ -1090,7 +1093,8 @@ var SchemeConfiguration = /** @class */ (function () {
             if (relations_conf = collection_preconf.relations) {
                 for (var _a = 0, relation_types_1 = relation_types; _a < relation_types_1.length; _a++) {
                     var relation_type = relation_types_1[_a];
-                    relations_conf[relation_type] = collection_preconf.relations[relation_type] || {};
+                    relations_conf[relation_type] =
+                        collection_preconf.relations[relation_type] || {};
                 }
             }
         }
@@ -1606,29 +1610,20 @@ var Configuration_1 = __webpack_require__(14);
 var Errors_1 = __webpack_require__(0);
 var Helpers_1 = __webpack_require__(8);
 var Elpong_1 = __webpack_require__(7);
-function isSchemeConfiguration(sc) {
-    return sc instanceof Configuration_1.SchemeConfiguration;
-}
 var Scheme = /** @class */ (function () {
-    function Scheme(sc) {
-        var _sc;
-        if (!isSchemeConfiguration(sc)) {
-            _sc = new Configuration_1.SchemeConfiguration(sc);
-        }
-        else {
-            _sc = sc;
-        }
-        this._configuration = _sc;
-        this.name = _sc.name;
+    function Scheme(preSchemeConfiguration) {
+        var sc = new Configuration_1.SchemeConfiguration(preSchemeConfiguration);
+        this._configuration = sc;
+        this.name = sc.name;
         this._collections = {};
         // Create collections
-        for (var collection_name in _sc.collections) {
-            var collection_settings = _sc.collections[collection_name];
+        for (var collection_name in sc.collections) {
+            var collection_settings = sc.collections[collection_name];
             var collection = new Collection_1.Collection(this, collection_name);
             this._collections[collection_name] = collection;
         }
-        if (Elpong_1.Elpong.isAutoload()) {
-            for (var collection_name in _sc.collections) {
+        if (Elpong_1.Elpong.isAutoloadEnabled()) {
+            for (var collection_name in sc.collections) {
                 this._collections[collection_name].load(true);
             }
         }
@@ -1646,10 +1641,8 @@ var Scheme = /** @class */ (function () {
         }
     };
     Scheme.prototype.setApiUrl = function (url) {
-        var api_url = this.api_url = Helpers_1.UrlHelper.trimSlashes(url);
-        if (!Helpers_1.UrlHelper.isFqdn(api_url)) {
-            return this.api_url = "/" + api_url;
-        }
+        var trimmed_url = Helpers_1.UrlHelper.trimSlashes(url);
+        return this.api_url = Helpers_1.UrlHelper.isFqdn(trimmed_url) ? trimmed_url : "/" + trimmed_url;
     };
     Scheme.prototype.getApiUrl = function () {
         return this.api_url;

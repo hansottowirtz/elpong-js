@@ -7,21 +7,19 @@ declare module 'elpong/Errors' {
 declare module 'elpong/Ajax' {
 	export type AjaxPromiseThenOnResolveFunction = (response: AjaxResponse) => void;
 	export type AjaxPromiseThenFunction = (resolve_fn: AjaxPromiseThenOnResolveFunction) => any;
-	export interface AjaxPromise {
-	    then: Function;
-	}
+	export type AjaxPromise = Promise<AjaxResponse>;
 	export interface AjaxResponse extends Response {
-	    data: any;
+	    data?: any;
 	}
 	export type AjaxExternalFunction = Function | any;
 	export type AjaxFunction = (url: string, instruction: AjaxInstruction) => AjaxPromise;
 	export interface AjaxObject {
-	    data: Object;
+	    data: {};
 	}
 	export interface AjaxInstruction {
-	    data: Object;
+	    data: {};
 	    method: string;
-	    headers: Object;
+	    headers: {};
 	    [prop: string]: any;
 	}
 	export interface AjaxData {
@@ -31,23 +29,42 @@ declare module 'elpong/Ajax' {
 	    [name: string]: string;
 	}
 	export namespace Ajax {
-	    function executeRequest(url: string, method: string, data?: AjaxData, headers?: AjaxHeaders): AjaxPromise;
+	    function executeRequest(url: string, method: string, data?: AjaxData, headers?: AjaxHeaders): Promise<AjaxResponse>;
 	    function setAjaxFunction(fn: AjaxExternalFunction, type?: string): void;
 	}
 
 }
 declare module 'elpong/Configuration' {
-	export class SchemeConfiguration {
+	export class SchemeConfiguration implements PreSchemeConfiguration {
 	    readonly name: string;
-	    readonly singular: string;
 	    readonly selector: string;
 	    readonly collections: CollectionConfigurationMap;
-	    constructor(preconf: any);
+	    constructor(preconf: PreSchemeConfiguration);
 	}
-	export interface CollectionConfigurationMap {
+	export interface PreSchemeConfiguration {
+	    name: string;
+	    selector: string;
+	    collections: CollectionConfigurationMapWithOptionals;
+	}
+	export interface SchemeConfiguration {
+	    readonly name: string;
+	    readonly selector: string;
+	    readonly collections: CollectionConfigurationMap;
+	}
+	export interface CollectionConfigurationMapWithOptionals {
+	    [name: string]: CollectionConfigurationWithOptionals;
+	}
+	export interface CollectionConfigurationMap extends CollectionConfigurationMapWithOptionals {
 	    [name: string]: CollectionConfiguration;
 	}
-	export interface CollectionConfiguration {
+	export interface CollectionConfigurationWithOptionals {
+	    readonly singular?: string;
+	    readonly fields: FieldConfigurationMap;
+	    readonly relations?: RelationConfigurationMapsWithOptionals;
+	    readonly actions?: ActionConfigurationMap;
+	    readonly collection_actions?: CollectionActionConfigurationMap;
+	}
+	export interface CollectionConfiguration extends CollectionConfigurationWithOptionals {
 	    readonly singular: string;
 	    readonly fields: FieldConfigurationMap;
 	    readonly relations: RelationConfigurationMaps;
@@ -58,18 +75,23 @@ declare module 'elpong/Configuration' {
 	    readonly [name: string]: FieldConfiguration;
 	}
 	export interface FieldConfiguration {
-	    readonly reference: boolean;
-	    readonly default: any;
-	    readonly embedded_element: boolean;
-	    readonly embedded_collection: boolean;
-	    readonly no_send: boolean;
+	    readonly reference?: boolean;
+	    readonly default?: any;
+	    readonly embedded_element?: boolean;
+	    readonly embedded_collection?: boolean;
+	    readonly no_send?: boolean;
 	}
 	export interface EmbeddedElementFieldConfiguration extends FieldConfiguration {
-	    readonly field: string;
-	    readonly collection: string;
+	    readonly field?: string;
+	    readonly collection?: string;
 	}
 	export interface EmbeddedCollectionFieldConfiguration extends FieldConfiguration {
-	    readonly collection: string;
+	    readonly collection?: string;
+	}
+	export interface RelationConfigurationMapsWithOptionals {
+	    readonly has_many?: HasManyRelationConfigurationMap;
+	    readonly has_one?: HasOneRelationConfigurationMap;
+	    readonly belongs_to?: BelongsToRelationConfigurationMap;
 	}
 	export interface RelationConfigurationMaps {
 	    readonly has_many: HasManyRelationConfigurationMap;
@@ -88,27 +110,35 @@ declare module 'elpong/Configuration' {
 	export interface RelationConfiguration {
 	}
 	export interface HasManyRelationConfiguration extends RelationConfiguration {
-	    readonly field: string;
-	    readonly collection: string;
-	    readonly references_field: string;
-	    readonly polymorphic: boolean;
-	    readonly as: string;
-	    readonly inline: boolean;
-	    readonly inline_field: string;
+	    readonly field?: string;
+	    readonly collection?: string;
+	    readonly references_field?: string;
+	    readonly polymorphic?: boolean;
+	    readonly as?: string;
+	    readonly inline?: boolean;
+	    readonly inline_field?: string;
 	}
 	export interface HasOneRelationConfiguration extends RelationConfiguration {
-	    readonly field: string;
-	    readonly collection: string;
-	    readonly references_field: string;
-	    readonly polymorphic: boolean;
-	    readonly as: string;
+	    readonly field?: string;
+	    readonly collection?: string;
+	    readonly references_field?: string;
+	    readonly polymorphic?: boolean;
+	    readonly as?: string;
 	}
-	export interface BelongsToRelationConfiguration extends RelationConfiguration {
-	    readonly collection: string;
-	    readonly polymorphic: boolean;
-	    readonly field: string;
-	    readonly collection_field: string;
+	export interface BelongsToRelationConfigurationBase extends RelationConfiguration {
+	    readonly collection?: string;
+	    readonly polymorphic?: boolean;
+	    readonly field?: string;
+	    readonly collection_field?: string;
 	}
+	export interface NonPolymorphicBelongsToRelationConfiguration extends BelongsToRelationConfigurationBase {
+	    readonly polymorphic?: false;
+	}
+	export interface PolymorphicBelongsToRelationConfiguration extends BelongsToRelationConfigurationBase {
+	    readonly polymorphic: true;
+	    readonly field: string;
+	}
+	export type BelongsToRelationConfiguration = NonPolymorphicBelongsToRelationConfiguration | PolymorphicBelongsToRelationConfiguration;
 	export interface ActionConfigurationMap {
 	    readonly [name: string]: ActionConfiguration;
 	}
@@ -117,14 +147,14 @@ declare module 'elpong/Configuration' {
 	}
 	export interface CollectionActionConfiguration {
 	    readonly method: string;
-	    readonly path: string;
+	    readonly path?: string;
 	}
 	export interface ActionConfiguration {
 	    readonly method: string;
-	    readonly returns_other: boolean;
-	    readonly no_data: boolean;
-	    readonly no_selector: boolean;
-	    readonly path: string;
+	    readonly returns_other?: boolean;
+	    readonly no_data?: boolean;
+	    readonly no_selector?: boolean;
+	    readonly path?: string;
 	}
 
 }
@@ -322,7 +352,10 @@ declare module 'elpong/Element' {
 	    constructor(collection: Collection, pre_element: PreElement);
 	    collection(): Collection;
 	    selector(): SelectorValue | undefined;
-	    remove(): any;
+	    remove(): Promise<void> | {
+	        then: (fn: Function) => any;
+	        catch: () => void;
+	    };
 	    save(): AjaxPromise;
 	    isNew(): boolean;
 	    merge(pre_element: PreElement): this;
@@ -355,7 +388,7 @@ declare module 'elpong/Helpers' {
 }
 declare module 'elpong/Scheme' {
 	import { Collection } from 'elpong/Collection';
-	import { SchemeConfiguration } from 'elpong/Configuration';
+	import { SchemeConfiguration, PreSchemeConfiguration } from 'elpong/Configuration';
 	export interface CollectionMap {
 	    [name: string]: Collection;
 	}
@@ -364,10 +397,10 @@ declare module 'elpong/Scheme' {
 	    private _configuration;
 	    private _collections;
 	    private api_url;
-	    constructor(sc: SchemeConfiguration | Object);
+	    constructor(preSchemeConfiguration: PreSchemeConfiguration);
 	    configuration(): SchemeConfiguration;
 	    select(name: string): Collection;
-	    setApiUrl(url: string): string | undefined;
+	    setApiUrl(url: string): string;
 	    getApiUrl(): string;
 	    getCollections(): CollectionMap;
 	}
@@ -375,25 +408,22 @@ declare module 'elpong/Scheme' {
 }
 declare module 'elpong/Elpong' {
 	import { Scheme } from 'elpong/Scheme';
-	import { Collection } from 'elpong/Collection';
-	import { SchemeConfiguration } from 'elpong/Configuration';
+	import { PreSchemeConfiguration } from 'elpong/Configuration';
 	import { AjaxExternalFunction } from 'elpong/Ajax';
-	import { Element } from 'elpong/Element';
 	export namespace Elpong {
-	    function add(scheme_config: SchemeConfiguration | Object): Scheme;
+	    function add(scheme_config: PreSchemeConfiguration): Scheme;
 	    function get(name: string): Scheme;
 	    function load(ignore_empty: boolean): void;
 	    function setAjax(fn: AjaxExternalFunction, type?: string): void;
 	    function enableAutoload(): void;
-	    function isAutoload(): boolean;
+	    function isAutoloadEnabled(): boolean;
 	    function tearDown(): void;
 	}
-	export { Scheme, Element, Collection };
 
 }
 declare module 'elpong/Helpers/Collection/Actions' {
 	import { Collection } from 'elpong/Collection';
-	import { AjaxData, AjaxHeaders, AjaxPromise } from 'elpong/Ajax';
+	import { AjaxResponse, AjaxData, AjaxHeaders, AjaxPromise } from 'elpong/Ajax';
 	import { SelectorValue } from 'elpong/Element';
 	import { CollectionActionConfiguration } from 'elpong/Configuration';
 	export interface CollectionActionOptions {
@@ -402,8 +432,8 @@ declare module 'elpong/Helpers/Collection/Actions' {
 	}
 	export namespace Actions {
 	    function executeGetAll(collection: Collection, action_options?: CollectionActionOptions): AjaxPromise;
-	    function executeGetOne(collection: Collection, selector_value: SelectorValue, action_options?: CollectionActionOptions): AjaxPromise;
-	    function executeCustom(collection: Collection, action_name: string, action_config: CollectionActionConfiguration, action_options?: CollectionActionOptions): AjaxPromise;
+	    function executeGetOne(collection: Collection, selector_value: SelectorValue, action_options?: CollectionActionOptions): Promise<AjaxResponse>;
+	    function executeCustom(collection: Collection, action_name: string, action_config: CollectionActionConfiguration, action_options?: CollectionActionOptions): Promise<AjaxResponse>;
 	}
 
 }
@@ -433,7 +463,7 @@ declare module 'elpong/Collection' {
 	    [key: string]: any;
 	}
 	export class Collection {
-	    readonly _scheme: Scheme;
+	    private readonly _scheme;
 	    readonly name: string;
 	    private readonly default_pre_element;
 	    readonly elements: ElementMap;
@@ -451,9 +481,20 @@ declare module 'elpong/Collection' {
 	}
 
 }
-declare module 'elpong/main' {
+declare module 'elpong/entry' {
 	import { Elpong } from 'elpong/Elpong';
 	export = Elpong;
+
+}
+declare module 'elpong/main' {
+	export { Elpong } from 'elpong/Elpong';
+	export { Scheme, CollectionMap } from 'elpong/Scheme';
+	export { Collection, CollectionActions, CollectionActionFunction, CollectionArrayOptions, CollectionFindByOptions, FieldsKeyValueMap } from 'elpong/Collection';
+	export { Element, PreElement, SelectorValue, Fields, Relations, Actions, Snapshots, RelationFunction, ActionFunction } from 'elpong/Element';
+	export { ElpongError } from 'elpong/Errors';
+	export { Snapshot } from 'elpong/Snapshot';
+	export { Util } from 'elpong/Util';
+	export { SchemeConfiguration, PreSchemeConfiguration, CollectionConfiguration, CollectionConfigurationMap, CollectionActionConfiguration, CollectionActionConfigurationMap, CollectionConfigurationWithOptionals, CollectionConfigurationMapWithOptionals, FieldConfiguration, FieldConfigurationMap, RelationConfiguration, RelationConfigurationMaps, HasOneRelationConfiguration, HasManyRelationConfiguration, BelongsToRelationConfiguration, HasOneRelationConfigurationMap, HasManyRelationConfigurationMap, BelongsToRelationConfigurationMap, EmbeddedElementFieldConfiguration, BelongsToRelationConfigurationBase, EmbeddedCollectionFieldConfiguration, RelationConfigurationMapsWithOptionals, ActionConfiguration, ActionConfigurationMap, PolymorphicBelongsToRelationConfiguration, NonPolymorphicBelongsToRelationConfiguration } from 'elpong/Configuration';
 
 }
 declare module 'elpong/PreElement' {
