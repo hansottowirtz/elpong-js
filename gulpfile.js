@@ -39,7 +39,7 @@ gulp.task('build:dts', (done) => {
 		name: 'elpong',
 		project: '.',
 		out: './dist/elpong.d.ts',
-    main: 'elpong/Elpong'
+    main: 'elpong/main'
   }).then(() => {
     done();
   });

@@ -203,15 +203,15 @@ the other data using `merge`.
 ### Preloading
 
 To preload a scheme, create a meta tag with
-`name=elpong-scheme`, <code>scheme=<i>scheme_name</i></code> and <code>content=<i>scheme</i></code>.<br/>
+`name="elpong-scheme"`, <code>scheme=<i>scheme_name</i></code> and <code>content=<i>scheme</i></code>.<br/>
 *scheme* is the JSON scheme.
 
 To preload data, create a meta tag with
-`name=elpong-collection`, <code>scheme=<i>scheme_name</i></code>, <code>content=<i>elements</i></code> and <code>collection=<i>collection_name</i></code>.<br/>
+`name="elpong-collection"`, <code>scheme=<i>scheme_name</i></code>, <code>content=<i>elements</i></code> and <code>collection=<i>collection_name</i></code>.<br/>
 *elements* is the same JSON data the API would return.
 
 To preload a single element, create a meta tag with
-`name=elpong-element`, <code>scheme=<i>scheme_name</i></code>, <code>content=<i>element</i></code> and <code>collection=<i>collection_name</i></code>.
+`name="elpong-element"`, <code>scheme=<i>scheme_name</i></code>, <code>content=<i>element</i></code> and <code>collection=<i>collection_name</i></code>.
 
 Then you can use `Elpong.load()` and `collection.load()` to load schemes and
 collections, respectively, or you can use `Elpong.enableAutoload()` and it will take
@@ -236,9 +236,9 @@ The ajax function expects one argument object with `url`, `method`, `data` and
 It should return a Promise-like object that catches when the response status is
 not between 200 and 299, and on other network errors.<br/>
 The `then` and `catch` functions should return a response object with a
-`data` key, that holds the parsed JSON object.<br/>
-`$http` and `jQuery.ajax` are supported out of the box.<br/>
-If you don't work with Angular or jQuery, you can use [window.fetch](fetch).
+`data` key, that holds the parsed JSON object.
+`$http`, `Http`, and `jQuery.ajax` are supported out of the box.<br/>
+If you don't work with AngularJS, Angular, or jQuery, you can use [window.fetch](fetch).
 
 ```javascript
 Elpong.setAjax(window.fetch, 'fetch') // built-in in modern browsers
@@ -246,13 +246,6 @@ Elpong.setAjax($http, 'angular') // if you use AngularJS
 Elpong.setAjax($.ajax, 'jquery') // if you use jQuery
 Elpong.setAjax(http, 'angular2') // if you use Angular, http: instance of Http or HttpClient
 ```
-
-### Frameworks
-
-To use Elpong with frameworks, see:
-
-[AngularJS][angularjs]<br/>
-[jQuery][jquery]
 
 ### Contributing
 

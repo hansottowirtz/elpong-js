@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 24);
+/******/ 	return __webpack_require__(__webpack_require__.s = 25);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -104,6 +104,7 @@ if (DEBUG) {
         'collex': 'Collection with name already exists in scheme',
         'elpgns': 'No scheme tags found',
         'elpnce': 'No collection or element tags found',
+        'elndoc': 'No document',
         'confns': 'Configuration has no selector',
         'confnn': 'Configuration has no name',
         'elenew': 'Element is new',
@@ -114,9 +115,11 @@ if (DEBUG) {
         'elesch': 'Element selector changed',
         'elesnf': 'Snapshot not found',
         'elesti': 'Invalid snapshot identifier: must be number <= list.length, string or RegExp',
-        'eleafw': 'Pre element has an associated field that does not match the embedded element selector',
+        'eleafw': 'Pre element has an reference field that does not match the embedded element selector',
         'elesnm': 'Selector is not matching get one request selector',
-        'ajahct': 'Content-Type header not set to application/json'
+        'elenos': 'No selector value given in getOne action',
+        'ajahct': 'Content-Type header not set to application/json',
+        'acgtda': 'GET request can\'t have data. Use params'
     };
 }
 var ElpongError = /** @class */ (function (_super) {
@@ -308,9 +311,9 @@ var CollectionHelper;
     }
     CollectionHelper.getSingularName = getSingularName;
     function addElement(collection, element) {
-        var selector_value;
-        if (selector_value = element.selector()) {
-            collection.elements[selector_value] = element;
+        var selector_value = element.selector();
+        if (selector_value !== undefined) {
+            collection.elements.set(selector_value, element);
         }
         else {
             collection.new_elements.push(element);
@@ -444,10 +447,10 @@ var Ajax;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Util_1 = __webpack_require__(1);
-var Fields_1 = __webpack_require__(17);
-var Relations_1 = __webpack_require__(18);
-var Actions_1 = __webpack_require__(16);
-var Snapshots_1 = __webpack_require__(21);
+var Fields_1 = __webpack_require__(18);
+var Relations_1 = __webpack_require__(19);
+var Actions_1 = __webpack_require__(17);
+var Snapshots_1 = __webpack_require__(22);
 var EmbeddedElement_1 = __webpack_require__(10);
 var EmbeddedCollection_1 = __webpack_require__(9);
 var Errors_1 = __webpack_require__(0);
@@ -477,11 +480,11 @@ var Element = /** @class */ (function () {
     };
     Element.prototype.remove = function () {
         var _this = this;
-        var selector_value;
-        if (selector_value = this.selector()) {
+        var selector_value = this.selector();
+        if (selector_value !== undefined) {
             return this.actions.delete().then(function () {
                 var elements = _this.collection().elements;
-                delete elements[selector_value];
+                elements.delete(selector_value);
             });
         }
         else {
@@ -584,7 +587,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var Errors_1 = __webpack_require__(0);
 var UrlHelper;
 (function (UrlHelper) {
-    function createForElement(action_name, action_configuration, element, url_options, no_selector) {
+    function createForElement(element, url_options) {
         var path, url;
         var collection = element.collection();
         var scheme = collection.scheme();
@@ -592,26 +595,20 @@ var UrlHelper;
         if (!api_url) {
             throw new Errors_1.ElpongError('apinur');
         }
-        if (url_options.path) {
-            path = UrlHelper.trimSlashes(url_options.path);
-            url = api_url + "/" + path;
-        }
-        else {
-            url = api_url + "/" + collection.name;
-            if (!action_configuration.no_selector && !no_selector) {
-                url = url + "/" + element.selector();
-            }
-        }
-        if (action_configuration.method) {
-            url = url + "/" + (action_configuration.path || action_name);
+        url = api_url + "/" + collection.name;
+        if (!url_options.no_selector) {
+            url = url + "/" + element.selector();
         }
         if (url_options.suffix) {
             url = url + "/" + url_options.suffix;
         }
+        if (url_options.params) {
+            url = appendParamsToUrl(url, url_options.params);
+        }
         return url;
     }
     UrlHelper.createForElement = createForElement;
-    function createForCollection(action_name, collection, url_options) {
+    function createForCollection(collection, url_options) {
         var api_url = collection.scheme().getApiUrl();
         if (!api_url) {
             throw new Errors_1.ElpongError('apinur');
@@ -619,6 +616,9 @@ var UrlHelper;
         var url = api_url + "/" + collection.name; //HPP.Helpers.Url.createForCollection(, hpe, user_options) # (action_name, element, user_options = {}, suffix)
         if (url_options.suffix) {
             url = url + "/" + url_options.suffix;
+        }
+        if (url_options.params) {
+            url = appendParamsToUrl(url, url_options.params);
         }
         return url;
     }
@@ -631,6 +631,15 @@ var UrlHelper;
         return /^https?:\/\//.test(s);
     }
     UrlHelper.isFqdn = isFqdn;
+    function appendParamsToUrl(url, params) {
+        url = url + "?";
+        for (var k in params) {
+            url = "" + url + k + "=" + encodeURIComponent(params[k]) + "&";
+        }
+        url = url.slice(0, -1);
+        return url;
+    }
+    UrlHelper.appendParamsToUrl = appendParamsToUrl;
 })(UrlHelper = exports.UrlHelper || (exports.UrlHelper = {}));
 
 
@@ -641,7 +650,7 @@ var UrlHelper;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Scheme_1 = __webpack_require__(22);
+var Scheme_1 = __webpack_require__(23);
 var Errors_1 = __webpack_require__(0);
 var Util_1 = __webpack_require__(1);
 var Ajax_1 = __webpack_require__(3);
@@ -764,13 +773,18 @@ var EmbeddedElement;
             embedded_element_collection = SchemeHelper_1.SchemeHelper.getCollectionBySingularName(scheme, field_key);
         }
         var embedded_element = embedded_element_collection.buildOrMerge(embedded_pre_element);
-        var associated_field_key = field_config.field || field_key + "_" + scheme.configuration().selector;
+        var reference_field_key = field_config.reference_field || field_key + "_" + scheme.configuration().selector;
+        var reference_field_config = collection.configuration().fields[reference_field_key];
+        if (!reference_field_config)
+            return;
+        if (!reference_field_config.reference)
+            return;
         var selector_value = embedded_element.selector();
-        var associated_field_value = pre_element[associated_field_key];
-        if (associated_field_value && (associated_field_value != selector_value)) {
-            throw new Errors_1.ElpongError('eleafw', associated_field_value + " != " + selector_value);
+        var reference_field_value = pre_element[reference_field_key];
+        if (reference_field_value !== undefined && (reference_field_value != selector_value)) {
+            throw new Errors_1.ElpongError('eleafw', reference_field_value + " != " + selector_value);
         }
-        element.fields[associated_field_key] = selector_value;
+        element.fields[reference_field_key] = selector_value;
     }
     EmbeddedElement.handle = handle;
 })(EmbeddedElement = exports.EmbeddedElement || (exports.EmbeddedElement = {}));
@@ -925,14 +939,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var Helpers_1 = __webpack_require__(8);
 var Element_1 = __webpack_require__(4);
 var Util_1 = __webpack_require__(1);
-var Actions_1 = __webpack_require__(15);
+var CollectionActions_1 = __webpack_require__(16);
 var Errors_1 = __webpack_require__(0);
+var FakeThings_1 = __webpack_require__(15);
 var Collection = /** @class */ (function () {
     function Collection(scheme, name) {
         var _this = this;
         this._scheme = scheme;
         this.name = name;
-        this.elements = {};
+        this.elements = new FakeThings_1.FakeMap();
         this.new_elements = [];
         this.default_pre_element = {};
         var config = Helpers_1.CollectionHelper.getConfiguration(this);
@@ -944,15 +959,19 @@ var Collection = /** @class */ (function () {
         }
         this.actions = {
             getAll: function (action_options) {
-                return Actions_1.Actions.executeGetAll(_this, action_options);
+                return CollectionActions_1.CollectionActions.executeGetAll(_this, action_options);
             },
             getOne: function (selector_value, action_options) {
-                return Actions_1.Actions.executeGetOne(_this, selector_value, action_options);
+                if (selector_value === undefined) {
+                    throw new Errors_1.ElpongError('elenos');
+                }
+                return CollectionActions_1.CollectionActions.executeGetOne(_this, selector_value, action_options);
             }
         };
         Util_1.Util.forEach(config.collection_actions, function (action_config, action_name) {
             _this.actions[Util_1.Util.camelize(action_name)] = function (action_options) {
-                return Actions_1.Actions.executeCustom(_this, action_name, action_config, action_options);
+                if (action_options === void 0) { action_options = {}; }
+                return CollectionActions_1.CollectionActions.executeCustom(_this, action_name, action_config, action_options);
             };
         });
     }
@@ -962,7 +981,7 @@ var Collection = /** @class */ (function () {
     Collection.prototype.load = function (ignore_empty) {
         var _this = this;
         if (typeof document === 'undefined')
-            return;
+            throw new Errors_1.ElpongError('elndoc');
         var collection_tags = document.querySelectorAll("meta[name=elpong-collection][collection='" + this.name + "'][scheme='" + this.scheme().name + "']");
         var element_tags = document.querySelectorAll("meta[name=elpong-element][collection='" + this.name + "'][scheme='" + this.scheme().name + "']");
         if (!ignore_empty && !collection_tags.length && !element_tags.length) {
@@ -990,10 +1009,10 @@ var Collection = /** @class */ (function () {
             options = { no_new: false };
         }
         var arr = options.no_new ? [] : this.new_elements;
-        return arr.concat(Util_1.Util.values(this.elements));
+        return arr.concat(this.elements.values());
     };
     Collection.prototype.find = function (selector_value) {
-        return this.elements[selector_value] || null;
+        return this.elements.get(selector_value) || null;
     };
     Collection.prototype.findBy = function (fields_key_value_map, find_options) {
         if (!find_options) {
@@ -1111,17 +1130,68 @@ exports.SchemeConfiguration = SchemeConfiguration;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var Util_1 = __webpack_require__(1);
+var supportsMap = typeof Map !== 'undefined' && (new Map()).values;
+var FakeMap = /** @class */ (function () {
+    function FakeMap() {
+        // in IE 11, Map#values doesn't exist. Don't bother about that.
+        this.hasRealMap = supportsMap;
+        this.map = supportsMap ? new Map() : {};
+    }
+    FakeMap.prototype.get = function (k) {
+        return supportsMap ? this.map.get(k) : this.map[k];
+    };
+    FakeMap.prototype.set = function (k, v) {
+        if (supportsMap) {
+            this.map.set(k, v);
+        }
+        else {
+            this.map[k] = v;
+        }
+        ;
+        return this;
+    };
+    FakeMap.prototype.has = function (k) {
+        return supportsMap ? this.map.has(k) : !!this.map[k];
+    };
+    FakeMap.prototype.values = function () {
+        // if Map is there, Array.from should also be there
+        return supportsMap ? Array.from(this.map.values()) : Util_1.Util.values(this.map);
+    };
+    FakeMap.prototype.delete = function (k) {
+        if (supportsMap) {
+            this.map.delete(k);
+        }
+        else {
+            delete this.map[k];
+        }
+    };
+    return FakeMap;
+}());
+exports.FakeMap = FakeMap;
+
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 var Ajax_1 = __webpack_require__(3);
 var UrlHelper_1 = __webpack_require__(6);
 var Errors_1 = __webpack_require__(0);
-var Actions;
-(function (Actions) {
+var CollectionActions;
+(function (CollectionActions) {
     function executeGetAll(collection, action_options) {
+        if (action_options === void 0) { action_options = {}; }
         if (!action_options) {
             action_options = {};
         }
-        var data = action_options.data;
-        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection('GET', collection, {}), 'GET', data, action_options.headers);
+        if (action_options.data) {
+            throw new Errors_1.ElpongError('acgtda');
+        }
+        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection(collection, { params: action_options.params || {} }), 'GET', undefined, action_options.headers);
         promise.then(function (response) {
             response.data.map(function (pre_element) {
                 collection.buildOrMerge(pre_element);
@@ -1129,13 +1199,17 @@ var Actions;
         });
         return promise;
     }
-    Actions.executeGetAll = executeGetAll;
+    CollectionActions.executeGetAll = executeGetAll;
     function executeGetOne(collection, selector_value, action_options) {
-        if (!action_options) {
-            action_options = {};
+        if (action_options === void 0) { action_options = {}; }
+        if (action_options.data) {
+            throw new Errors_1.ElpongError('acgtda');
         }
-        var data = action_options.data;
-        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection('GET', collection, { suffix: selector_value }), 'GET', data, action_options.headers);
+        var url_options = {
+            suffix: selector_value,
+            params: action_options.params || {}
+        };
+        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection(collection, url_options), 'GET', undefined, action_options.headers);
         promise.then(function (response) {
             if (response.data) {
                 var selector_key = collection.scheme().configuration().selector;
@@ -1147,21 +1221,21 @@ var Actions;
         });
         return promise;
     }
-    Actions.executeGetOne = executeGetOne;
+    CollectionActions.executeGetOne = executeGetOne;
     function executeCustom(collection, action_name, action_config, action_options) {
         if (!action_options) {
             action_options = {};
         }
         var data = action_options.data;
         var method = action_config.method.toUpperCase();
-        return Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection('GET', collection, { suffix: action_config.path || action_name }), method, data, action_options.headers);
+        return Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection(collection, { suffix: action_config.path || action_name, params: action_options.params }), method, data, action_options.headers);
     }
-    Actions.executeCustom = executeCustom;
-})(Actions = exports.Actions || (exports.Actions = {}));
+    CollectionActions.executeCustom = executeCustom;
+})(CollectionActions = exports.CollectionActions || (exports.CollectionActions = {}));
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1195,13 +1269,16 @@ var Actions;
     }
     Actions.setup = setup;
     function execute(element, method, action_options) {
-        if (!action_options) {
-            action_options = {};
-        }
+        if (action_options === void 0) { action_options = {}; }
         element.snapshots.make("before_" + method.toLowerCase());
         var data;
-        if (data = action_options.data) {
-            data = action_options.data;
+        if (action_options.data) {
+            if (method !== 'GET') {
+                data = action_options.data;
+            }
+            else {
+                throw new Errors_1.ElpongError('acgtda');
+            }
         }
         else if (method !== 'GET') {
             data = ElementHelper_1.ElementHelper.toData(element);
@@ -1216,7 +1293,11 @@ var Actions;
                 throw new Error('Element is new');
             }
         }
-        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForElement(method, {}, element, action_options.url_options || {}, method === 'POST'), method, data, action_options.headers);
+        var url_options = {
+            no_selector: method === 'POST',
+            params: action_options.params || {}
+        };
+        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForElement(element, url_options), method, data, action_options.headers);
         promise.then(function (response) {
             if (response.data) {
                 element.merge(response.data);
@@ -1225,26 +1306,34 @@ var Actions;
             var collection = element.collection();
             if (Util_1.Util.includes(collection.new_elements, element)) {
                 Util_1.Util.removeFromArray(collection.new_elements, element);
-                collection.elements[element.selector()] = element;
+                collection.elements.set(element.selector(), element);
             }
         });
         return promise;
     }
     Actions.execute = execute;
     function executeCustom(element, action_name, action_config, action_options) {
-        if (!action_options) {
-            action_options = {};
-        }
+        if (action_options === void 0) { action_options = {}; }
         var method = action_config.method.toUpperCase();
         element.snapshots.make("before_" + action_name);
         var data;
         if (action_options.data) {
-            data = action_options.data;
+            if (method !== 'GET') {
+                data = action_options.data;
+            }
+            else {
+                throw new Errors_1.ElpongError('acgtda');
+            }
         }
         else if (!action_config.no_data) {
             data = ElementHelper_1.ElementHelper.toData(element);
         }
-        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForElement(action_name, action_config, element, action_options.url_options || {}), method, data, action_options.headers);
+        var url_options = {
+            suffix: action_config.path || action_name,
+            params: action_options.params || {}
+        };
+        url_options.no_selector = action_config.no_selector;
+        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForElement(element, url_options), method, data, action_options.headers);
         promise.then(function (response) {
             var selector_value;
             if (!action_config.returns_other) {
@@ -1256,18 +1345,17 @@ var Actions;
             var collection = element.collection();
             if ((selector_value = element.selector()) && Util_1.Util.includes(collection.new_elements, element)) {
                 Util_1.Util.removeFromArray(collection.new_elements, element);
-                return collection.elements[selector_value] = element;
+                return collection.elements.set(selector_value, element);
             }
         });
         return promise;
     }
     Actions.executeCustom = executeCustom;
-    ;
 })(Actions = exports.Actions || (exports.Actions = {}));
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1302,7 +1390,7 @@ var Fields;
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1310,8 +1398,8 @@ var Fields;
 Object.defineProperty(exports, "__esModule", { value: true });
 var Util_1 = __webpack_require__(1);
 var HasMany_1 = __webpack_require__(11);
-var HasOne_1 = __webpack_require__(20);
-var BelongsTo_1 = __webpack_require__(19);
+var HasOne_1 = __webpack_require__(21);
+var BelongsTo_1 = __webpack_require__(20);
 var Relations;
 (function (Relations) {
     function setup(element, relations_config_maps) {
@@ -1330,7 +1418,7 @@ var Relations;
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1400,7 +1488,7 @@ var BelongsTo;
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1431,14 +1519,14 @@ var HasOne;
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Util_1 = __webpack_require__(1);
-var Snapshot_1 = __webpack_require__(23);
+var Snapshot_1 = __webpack_require__(24);
 var Errors_1 = __webpack_require__(0);
 var Snapshots;
 (function (Snapshots) {
@@ -1599,7 +1687,7 @@ var Snapshots;
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1656,7 +1744,7 @@ exports.Scheme = Scheme;
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1689,7 +1777,7 @@ exports.Snapshot = Snapshot;
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
