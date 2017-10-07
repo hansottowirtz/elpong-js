@@ -41,6 +41,11 @@ promise.then(function(response) {
 })
 ```
 
+For usage with Typescript:
+```javascript
+import { Elpong, Scheme, Element, Collection } from 'elpong';
+```
+
 ## Schemes
 
 You can create a scheme in two ways:
