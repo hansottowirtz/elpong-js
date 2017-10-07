@@ -1,3 +1,6 @@
+/// <reference types="node"/>
+/// <reference types="jasmine"/>
+
 import { Util } from '../src/Util';
 
 describe('Util', () =>

@@ -13,7 +13,7 @@ export namespace EmbeddedCollection {
     if (!(embedded_pre_collection = pre_element[field_key])) { return; }
     let collection: Collection = element.collection();
     let scheme: Scheme = collection.scheme();
-    let embedded_element_collection = scheme.select(field_key || field_config.collection);
+    let embedded_element_collection = scheme.select(field_config.collection || field_key);
 
     Util.forEach(embedded_pre_collection, function(embedded_pre_element: PreElement) {
       let embedded_element = new Element(embedded_element_collection, embedded_pre_element);

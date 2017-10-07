@@ -3,15 +3,22 @@
   "version": "1.0.0-beta.7",
   "description": "Elpong for Javascript",
   "main": "./dist/elpong.js",
-  "types": "./dist/types/main.d.ts",
+  "types": "./dist/elpong.d.ts",
   "devDependencies": {
+    "@types/angular": "^1.6.9",
+    "@types/es6-promise": "0.0.33",
+    "@types/isomorphic-fetch": "0.0.34",
+    "@types/jasmine": "^2.6.0",
+    "@types/jquery": "^2.0.41",
+    "@types/node": "^8.0.33",
     "acorn-dynamic-import": "^2.0.1",
     "angular": "^1.6.1",
     "angular-mocks": "^1.6.1",
-    "awesome-typescript-loader": "^3.0.0-beta.18",
+    "awesome-typescript-loader": "^3.2.0",
     "coffee-loader": "^0.7.2",
     "coffee-script": "1.12",
     "diffie-hellman": "^5.0.2",
+    "dts-generator": "^2.1.0",
     "fetch-mock": "^5.8.1",
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-rename": "^1.2.2",
@@ -59,12 +66,5 @@
     "src",
     "typings",
     "README.md"
-  ],
-  "dependencies": {
-    "@types/angular": "^1.6.9",
-    "@types/es6-promise": "0.0.32",
-    "@types/isomorphic-fetch": "0.0.34",
-    "@types/jasmine": "^2.5.45",
-    "@types/jquery": "^2.0.41"
-  }
+  ]
 }

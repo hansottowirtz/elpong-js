@@ -22,10 +22,10 @@ module.exports = function(config) {
       browserName: 'firefox',
       version: 'dev'
     },
-    'SL_Safari_6': {
+    'SL_Safari_9': {
       base: 'SauceLabs',
       browserName: 'safari',
-      version: '6'
+      version: '9'
     },
     'SL_Safari_10': {
       base: 'SauceLabs',

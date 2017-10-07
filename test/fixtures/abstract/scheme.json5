@@ -1,0 +1,22 @@
+{
+  name: 'absctract',
+  selector: 'id',
+  collections: {
+    xs: {
+      fields: {
+        id: {},
+        cs: {
+          embedded_collection: true, collection: 'bs',
+        },
+        ds: {
+          embedded_collection: true, collection: 'bs'
+        }
+      }
+    },
+    bs: {
+      fields: {
+        id: {}
+      }
+    }
+  }
+}

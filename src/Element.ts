@@ -71,7 +71,7 @@ export class Element {
     this.snapshots.make('creation');
   }
 
-  collection() {
+  collection(): Collection {
     return this._collection;
   }
 
@@ -95,7 +95,7 @@ export class Element {
     }
   }
 
-  save() {
+  save(): AjaxPromise {
     if (this.isNew()) {
       return this.actions.post();
     } else {
@@ -103,7 +103,7 @@ export class Element {
     }
   }
 
-  isNew() {
+  isNew(): boolean {
     if (Util.includes(this.collection().new_elements, this)) {
       if (this.selector()) {
         throw new ElpongError('elesna');
@@ -119,7 +119,7 @@ export class Element {
     }
   }
 
-  merge(pre_element: PreElement) {
+  merge(pre_element: PreElement): this {
     let collection_config = this.collection().configuration();
     let selector_key = this.collection().scheme().configuration().selector;
     Util.forEach(collection_config.fields, (field_config: FieldConfiguration, field_key: string) => {
