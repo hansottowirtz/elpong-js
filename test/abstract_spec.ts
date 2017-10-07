@@ -40,7 +40,7 @@ describe('Abstract', () => {
     httpBackend.flush();
   });
 
-  fit('can pass ajax data to actions', (done) => {
+  it('can pass ajax data to actions', (done) => {
     const scheme = Elpong.add(require('./fixtures/abstract/scheme.json5'));
     scheme.setApiUrl('/api');
 
@@ -63,5 +63,7 @@ describe('Abstract', () => {
       });
     });
 
+
+    httpBackend.flush();
   });
 });
