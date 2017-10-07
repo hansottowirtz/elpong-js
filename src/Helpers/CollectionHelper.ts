@@ -10,9 +10,9 @@ export namespace CollectionHelper {
     return getConfiguration(collection).singular; // Last char cut in Configuration
   }
   export function addElement(collection: Collection, element: Element): void {
-    let selector_value;
-    if (selector_value = element.selector()) {
-      collection.elements[selector_value] = element;
+    const selector_value = element.selector();
+    if (selector_value !== undefined) {
+      collection.elements.set(selector_value, element);
     } else {
       collection.new_elements.push(element);
     }

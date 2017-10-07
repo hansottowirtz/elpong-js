@@ -1,4 +1,4 @@
-import { FutureString, FutureArrayConstructor } from './Interfaces'
+import { FakeString, FakeArrayConstructor } from './FakeThings'
 
 export const Util = {
   // BREAK: new Object(),
@@ -80,22 +80,22 @@ export const Util = {
   //   }
   // },
   endsWith: (string: string, search: string): boolean => {
-    if ((string as any as FutureString).endsWith) {
-      return (string as any as FutureString).endsWith(search);
+    if ((string as any as FakeString).endsWith) {
+      return (string as any as FakeString).endsWith(search);
     } else {
       return string.substr(-search.length) === search;
     }
   },
   startsWith: (string: string, search: string): boolean => {
-    if ((string as any as FutureString).startsWith) {
-      return (string as any as FutureString).startsWith(search);
+    if ((string as any as FakeString).startsWith) {
+      return (string as any as FakeString).startsWith(search);
     } else {
       return string.substr(0, search.length) === search;
     }
   },
   arrayFromHTML: (node_list: NodeListOf<HTMLElement>): Array<HTMLElement> => {
-    if ((Array as any as FutureArrayConstructor).from) {
-      return (Array as any as FutureArrayConstructor).from(node_list);
+    if ((Array as any as FakeArrayConstructor).from) {
+      return (Array as any as FakeArrayConstructor).from(node_list);
     }
     else {
       return [].slice.call(node_list);

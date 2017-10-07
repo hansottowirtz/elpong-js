@@ -4,13 +4,12 @@ import { CollectionHelper } from './Helpers';
 import { Element, SelectorValue, PreElement } from './Element';
 import { Util } from './Util';
 import { ActionConfiguration, CollectionConfiguration } from './Configuration';
-import { Actions, CollectionActionOptions } from './Helpers/Collection/Actions';
+import { CollectionActions, CollectionActionOptions } from './Helpers/Collection/CollectionActions';
 import { AjaxPromise } from './Ajax';
 import { ElpongError } from './Errors';
+import { FakeMap } from './FakeThings';
 
-export interface ElementMap {
-  [key: string]: Element;
-}
+export type ElementMap = FakeMap;
 
 export type CollectionActionFunction = (action_options?: CollectionActionOptions) => AjaxPromise;
 export type GetOneCollectionActionFunction = (selector_value: SelectorValue, action_options?: CollectionActionOptions) => AjaxPromise;
@@ -38,14 +37,14 @@ export class Collection {
   private readonly _scheme: Scheme;
   readonly name: string;
   private readonly default_pre_element: PreElement;
-  readonly elements: ElementMap;
+  readonly elements: FakeMap;
   readonly new_elements: Element[];
   readonly actions: CollectionActions;
 
   constructor(scheme: Scheme, name: string) {
     this._scheme = scheme;
     this.name = name;
-    this.elements = {};
+    this.elements = new FakeMap();
     this.new_elements = [];
     this.default_pre_element = {};
 
@@ -58,18 +57,18 @@ export class Collection {
         this.default_pre_element[field_key] = field_config.default;
       }
     }
-    
+
     this.actions = {
       getAll: (action_options?: CollectionActionOptions) => {
-        return Actions.executeGetAll(this, action_options);
+        return CollectionActions.executeGetAll(this, action_options);
       },
       getOne: (selector_value: SelectorValue, action_options?: CollectionActionOptions) => {
-        return Actions.executeGetOne(this, selector_value, action_options);
+        return CollectionActions.executeGetOne(this, selector_value, action_options);
       }
     };
     Util.forEach(config.collection_actions, (action_config: ActionConfiguration, action_name: string) => {
       this.actions[Util.camelize(action_name)] = (action_options: CollectionActionOptions) =>
-        Actions.executeCustom(this, action_name, action_config, action_options);
+        CollectionActions.executeCustom(this, action_name, action_config, action_options);
     });
   }
 
@@ -108,11 +107,11 @@ export class Collection {
   array(options?: CollectionArrayOptions): Element[] {
     if (!options) { options = {no_new: false}; }
     let arr = options.no_new ? [] : this.new_elements;
-    return arr.concat(Util.values(this.elements));
+    return arr.concat(this.elements.values());
   }
 
   find(selector_value: SelectorValue): Element|null {
-    return this.elements[selector_value] || null;
+    return this.elements.get(selector_value) || null;
   }
 
   findBy(fields_key_value_map: FieldsKeyValueMap, find_options: CollectionFindByOptions): Element|Element[]|null {

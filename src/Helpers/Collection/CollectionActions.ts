@@ -10,7 +10,7 @@ export interface CollectionActionOptions {
   headers?: AjaxHeaders;
 }
 
-export namespace Actions {
+export namespace CollectionActions {
   export function executeGetAll(collection: Collection, action_options?: CollectionActionOptions): AjaxPromise {
     if (!action_options) { action_options = {}; }
     let data = action_options.data;
