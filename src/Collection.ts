@@ -11,13 +11,14 @@ import { FakeMap } from './FakeThings';
 
 export type ElementMap = FakeMap;
 
-export type CollectionActionFunction = (action_options?: CollectionActionOptions) => AjaxPromise;
-export type GetOneCollectionActionFunction = (selector_value: SelectorValue, action_options?: CollectionActionOptions) => AjaxPromise;
+export type GetAllCollectionActionFunction = (action_options?: CollectionActionOptions) => AjaxPromise;
+export type GetOneCollectionActionFunction = (selector_value?: SelectorValue, action_options?: CollectionActionOptions) => AjaxPromise;
+// SelectorValue needs to be an argument type because of https://github.com/Microsoft/TypeScript/issues/10042
+export type CustomCollectionActionFunction = (action_options?: CollectionActionOptions|SelectorValue) => AjaxPromise;
 
 export interface CollectionActions {
-  // only CollectionActionFunction gives an error https://github.com/Microsoft/TypeScript/issues/10042
-  [action_name: string]: CollectionActionFunction | GetOneCollectionActionFunction;
-  getAll: CollectionActionFunction;
+  [action_name: string]: CustomCollectionActionFunction;
+  getAll: GetAllCollectionActionFunction;
   getOne: GetOneCollectionActionFunction;
 }
 
@@ -62,12 +63,13 @@ export class Collection {
       getAll: (action_options?: CollectionActionOptions) => {
         return CollectionActions.executeGetAll(this, action_options);
       },
-      getOne: (selector_value: SelectorValue, action_options?: CollectionActionOptions) => {
+      getOne: (selector_value?: SelectorValue, action_options?: CollectionActionOptions) => {
+        if (selector_value === undefined) { throw new ElpongError('elenos'); }
         return CollectionActions.executeGetOne(this, selector_value, action_options);
       }
     };
     Util.forEach(config.collection_actions, (action_config: ActionConfiguration, action_name: string) => {
-      this.actions[Util.camelize(action_name)] = (action_options: CollectionActionOptions) =>
+      this.actions[Util.camelize(action_name)] = (action_options: CollectionActionOptions = {}) =>
         CollectionActions.executeCustom(this, action_name, action_config, action_options);
     });
   }

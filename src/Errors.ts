@@ -24,8 +24,9 @@ if (DEBUG) {
     'elesti': 'Invalid snapshot identifier: must be number <= list.length, string or RegExp',
     'eleafw': 'Pre element has an reference field that does not match the embedded element selector',
     'elesnm': 'Selector is not matching get one request selector',
+    'elenos': 'No selector value given in getOne action',
     'ajahct': 'Content-Type header not set to application/json',
-    'acgtda': 'GET request can\'t have data. Use url_options.params'
+    'acgtda': 'GET request can\'t have data. Use params'
   }
 }
 

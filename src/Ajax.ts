@@ -26,9 +26,7 @@ export interface AjaxInstruction {
   [prop: string]: any;
 }
 
-export interface AjaxData {
-  [key: string]: any;
-}
+export type AjaxData = any;
 
 export interface AjaxHeaders {
   [name: string]: string;
