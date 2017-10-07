@@ -77,7 +77,7 @@ export class Collection {
   }
 
   load(ignore_empty: boolean): void {
-    if (typeof document === 'undefined') return
+    if (typeof document === 'undefined') throw new ElpongError('elndoc');
 
     let collection_tags: NodeListOf<HTMLMetaElement> =
       document.querySelectorAll(`meta[name=elpong-collection][collection='${this.name}'][scheme='${this.scheme().name}']`) as NodeListOf<HTMLMetaElement>;
