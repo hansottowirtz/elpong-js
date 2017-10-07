@@ -24,7 +24,11 @@ or download it [here](https://github.com/hansottowirtz/elpong-js/archive/master.
 ```
 
 ```javascript
-Elpong.setAjax($http); // or $.ajax, window.fetch, or something like that
+// Choose one of these:
+Elpong.setAjax(window.fetch, 'fetch') // built-in in modern browsers
+Elpong.setAjax($http, 'angular') // if you use AngularJS
+Elpong.setAjax($.ajax, 'jquery') // if you use jQuery
+Elpong.setAjax(http, 'angular2') // if you use Angular, http: instance of Http or HttpClient
 
 Elpong.enableAutoload(); // when using preloading
 // or
@@ -41,7 +45,7 @@ promise.then(function(response) {
 })
 ```
 
-For usage with Typescript:
+If you use Typescript or ES6 modules:
 ```javascript
 import { Elpong, Scheme, Element, Collection } from 'elpong';
 ```
@@ -50,7 +54,7 @@ import { Elpong, Scheme, Element, Collection } from 'elpong';
 
 You can create a scheme in two ways:
 
-`new Elpong.add(scheme_config)`
+`Elpong.add(scheme_config)`
 
 or by preloading it, see [Preloading](#preloading)
 
@@ -234,10 +238,10 @@ The `then` and `catch` functions should return a response object with a
 If you don't work with Angular or jQuery, you can use [window.fetch](fetch).
 
 ```javascript
-Elpong.setAjax(window.fetch, 'fetch')
-Elpong.setAjax($http, 'angular')
-Elpong.setAjax($.ajax, 'fetch')
-Elpong.setAjax(http, 'angular2') // http: instance of Http or HttpClient
+Elpong.setAjax(window.fetch, 'fetch') // built-in in modern browsers
+Elpong.setAjax($http, 'angular') // if you use AngularJS
+Elpong.setAjax($.ajax, 'jquery') // if you use jQuery
+Elpong.setAjax(http, 'angular2') // if you use Angular, http: instance of Http or HttpClient
 ```
 
 ### Frameworks
