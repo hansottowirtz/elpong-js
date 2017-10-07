@@ -18,13 +18,13 @@ export type AjaxExternalFunction = Function | any;
 export type AjaxFunction = (url: string, instruction: AjaxInstruction) => AjaxPromise;
 
 export interface AjaxObject {
-  data: Object;
+  data: {};
 }
 
 export interface AjaxInstruction {
-  data: Object;
+  data: {};
   method: string;
-  headers: Object;
+  headers: {};
   [prop: string]: any;
 }
 
@@ -90,7 +90,7 @@ export namespace Ajax {
           let ajax = (<Function>fn)(url, instruction);
           ajax.then((data: any, status: any, jqxhr: any) => deferred.resolve({data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders()}));
           ajax.catch((data: any, status: any, jqxhr: any) => deferred.reject({data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders()}));
-          return deferred.promise();
+          return <AjaxPromise>deferred.promise();
         }
         break;
       case 'fetch':

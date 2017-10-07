@@ -93,7 +93,13 @@ module.exports = function(config) {
       module: {
         loaders: [
           { test: /\.coffee$/, loader: 'coffee-loader' },
-          { test: /\.ts$/, loader: 'awesome-typescript-loader' },
+          {
+            test: /\.ts$/,
+            loader: 'awesome-typescript-loader',
+            options: {
+              configFileName: 'tsconfig.test.json'
+            },
+          },
           { test: /\.json5$/,  loader: 'json5-loader' }
         ]
       },

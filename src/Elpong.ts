@@ -4,6 +4,7 @@ import { SchemeConfiguration } from './Configuration';
 import { ElpongError } from './Errors';
 import { Util } from './Util';
 import { Ajax, AjaxExternalFunction } from './Ajax';
+import { Element } from './Element';
 
 declare let DEBUG: boolean;
 
@@ -65,3 +66,5 @@ export namespace Elpong {
     schemes = {};
   }
 }
+
+export { Scheme, Element, Collection };

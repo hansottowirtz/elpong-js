@@ -1,0 +1,16 @@
+{
+  name: 'absctract',
+  selector: 'id',
+  collections: {
+    a: {
+      fields: {
+        id: {},
+      }
+    },
+    b: {
+      fields: {
+        id: {},
+      }
+    }
+  }
+}

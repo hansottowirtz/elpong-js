@@ -1,6 +1,8 @@
 import { Scheme } from './Scheme';
+import { Collection } from './Collection';
 import { SchemeConfiguration } from './Configuration';
 import { AjaxExternalFunction } from './Ajax';
+import { Element } from './Element';
 export declare namespace Elpong {
     function add(scheme_config: SchemeConfiguration | Object): Scheme;
     function get(name: string): Scheme;
@@ -10,3 +12,4 @@ export declare namespace Elpong {
     function isAutoload(): boolean;
     function tearDown(): void;
 }
+export { Scheme, Element, Collection };
