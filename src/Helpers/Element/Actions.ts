@@ -4,12 +4,12 @@ import { Element, SelectorValue } from '../../Element';
 import { Util } from '../../Util';
 import { ElpongError } from '../../Errors';
 import { ElementHelper } from '../ElementHelper';
-import { UrlHelper, UrlOptions } from '../UrlHelper';
+import { UrlHelper, UrlOptions, UrlHelperElementOptions } from '../UrlHelper';
 
 export interface ActionOptions {
   data?: AjaxData;
   headers?: AjaxHeaders;
-  url_options?: UrlOptions;
+  params?: any;
 }
 
 export namespace Actions {
@@ -28,14 +28,16 @@ export namespace Actions {
     });
   }
 
-  export function execute(element: Element, method: string, action_options?: ActionOptions): AjaxPromise {
-    if (!action_options) { action_options = {}; }
-
+  export function execute(element: Element, method: string, action_options: ActionOptions = {}): AjaxPromise {
     element.snapshots.make(`before_${method.toLowerCase()}`);
 
     let data;
-    if (data = action_options.data) {
-      data = action_options.data;
+    if (action_options.data) {
+      if (method !== 'GET') {
+        data = action_options.data;
+      } else {
+        throw new ElpongError('acgtda');
+      }
     } else if (method !== 'GET') {
       data = ElementHelper.toData(element);
     }
@@ -46,8 +48,13 @@ export namespace Actions {
       if (element.isNew()) { throw new Error('Element is new'); }
     }
 
+    const url_options: UrlHelperElementOptions = {
+      no_selector: method === 'POST',
+      params: action_options.params || {}
+    }
+
     let promise = Ajax.executeRequest(
-      UrlHelper.createForElement(method, {} as ActionConfiguration, element, action_options.url_options || {}, method === 'POST'),
+      UrlHelper.createForElement(element, url_options),
       method,
       data,
       action_options.headers
@@ -69,21 +76,29 @@ export namespace Actions {
     return promise;
   }
 
-  export function executeCustom(element: Element, action_name: string, action_config: ActionConfiguration, action_options?: ActionOptions): AjaxPromise {
-    if (!action_options) { action_options = {}; }
-
+  export function executeCustom(element: Element, action_name: string, action_config: ActionConfiguration, action_options: ActionOptions = {}): AjaxPromise {
     const method = action_config.method.toUpperCase();
     element.snapshots.make(`before_${action_name}`);
 
     let data;
     if (action_options.data) {
-      data = action_options.data;
+      if (method !== 'GET') {
+        data = action_options.data;
+      } else {
+        throw new ElpongError('acgtda');
+      }
     } else if (!action_config.no_data) {
       data = ElementHelper.toData(element);
     }
 
+    const url_options: UrlHelperElementOptions = {
+      suffix: action_config.path || action_name,
+      params: action_options.params || {}
+    };
+    url_options.no_selector = action_config.no_selector;
+
     const promise = Ajax.executeRequest(
-      UrlHelper.createForElement(action_name, action_config, element, action_options.url_options || {}),
+      UrlHelper.createForElement(element, url_options),
       method,
       data,
       action_options.headers
@@ -106,5 +121,5 @@ export namespace Actions {
     });
 
     return promise;
-  };
+  }
 }

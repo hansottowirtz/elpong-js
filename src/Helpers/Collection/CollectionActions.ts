@@ -1,6 +1,6 @@
 import { Collection } from '../../Collection';
 import { Ajax, AjaxResponse, AjaxData, AjaxHeaders, AjaxPromise } from '../../Ajax';
-import { UrlHelper, UrlOptions } from '../UrlHelper';
+import { UrlHelper, UrlOptions, UrlHelperOptions } from '../UrlHelper';
 import { SelectorValue, PreElement } from '../../Element';
 import { CollectionActionConfiguration } from '../../Configuration';
 import { ElpongError } from '../../Errors';
@@ -8,17 +8,20 @@ import { ElpongError } from '../../Errors';
 export interface CollectionActionOptions {
   data?: AjaxData;
   headers?: AjaxHeaders;
+  params?: any;
 }
 
 export namespace CollectionActions {
-  export function executeGetAll(collection: Collection, action_options?: CollectionActionOptions): AjaxPromise {
+  export function executeGetAll(collection: Collection, action_options: CollectionActionOptions = {}): AjaxPromise {
     if (!action_options) { action_options = {}; }
-    let data = action_options.data;
+    if (action_options.data) {
+      throw new ElpongError('acgtda');
+    }
 
     let promise = Ajax.executeRequest(
-      UrlHelper.createForCollection('GET', collection, {}),
+      UrlHelper.createForCollection(collection, {params: action_options.params || {}}),
       'GET',
-      data,
+      undefined,
       action_options.headers
     );
     promise.then((response: AjaxResponse) => {
@@ -29,14 +32,20 @@ export namespace CollectionActions {
     return promise;
   }
 
-  export function executeGetOne(collection: Collection, selector_value: SelectorValue, action_options?: CollectionActionOptions) {
-    if (!action_options) { action_options = {}; }
-    let data = action_options.data;
+  export function executeGetOne(collection: Collection, selector_value: SelectorValue, action_options: CollectionActionOptions = {}) {
+    if (action_options.data) {
+      throw new ElpongError('acgtda');
+    }
+
+    const url_options: UrlHelperOptions = {
+      suffix: selector_value as string,
+      params: action_options.params || {}
+    }
 
     let promise = Ajax.executeRequest(
-      UrlHelper.createForCollection('GET', collection, {suffix: selector_value as string}),
+      UrlHelper.createForCollection(collection, url_options),
       'GET',
-      data,
+      undefined,
       action_options.headers
     );
     promise.then((response: AjaxResponse) => {
@@ -58,7 +67,7 @@ export namespace CollectionActions {
     let method = action_config.method.toUpperCase();
 
     return Ajax.executeRequest(
-      UrlHelper.createForCollection('GET', collection, {suffix: action_config.path || action_name}),
+      UrlHelper.createForCollection(collection, {suffix: action_config.path || action_name, params: action_options.params}),
       method,
       data,
       action_options.headers

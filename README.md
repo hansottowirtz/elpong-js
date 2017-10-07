@@ -110,7 +110,7 @@ You can execute actions on the `actions` key. There are four built in ones:
 
 `post`: Sends a POST to the collection url. Should only be called if the
 element is new, because it assigns a selector to the element.
-(The server should)
+(The server should save it in some database, and thus it gets an id)
 
 `put`: Sends a PUT with the new data, and expects the same data sent back,
 or otherwise small updates.
@@ -118,6 +118,8 @@ or otherwise small updates.
 `delete`: Sends a DELETE, which should remove the element from the server,
 but does not delete the element from the collection on the client side.
 Use `remove` to do that.
+
+All actions accept params to be passed in the url.
 
 Example:
 ```javascript
@@ -128,6 +130,7 @@ pig.actions.put();
 pig.actions.delete();
 
 pig.actions.oink(); // sends a PUT to /api/pigs/8/oink
+pig.actions.oink({params: {loud: true}}); // sends a PUT to /api/pigs/8/oink?load=true
 ```
 
 Actions and collection actions (e.g. `getAll()`) return a promise that returns

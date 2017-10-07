@@ -11,6 +11,13 @@ describe('Abstract', () => {
 
     const httpBackend = new HttpBackend();
 
+
+    httpBackend.reply('GET', '/api/xs?c=true', [
+      {
+        id: 1,
+        cs: [{id: 1}]
+      }
+    ]);
     httpBackend.reply('GET', '/api/xs', [
       {
         id: 1,
@@ -18,14 +25,17 @@ describe('Abstract', () => {
         ds: [{id: 2}]
       }
     ]);
-
+    
     const xs = scheme.select('xs');
     const bs = scheme.select('bs');
 
-    xs.actions.getAll().then((r) => {
-      console.log(r.data);
-      expect(bs.array().length).toBe(2);
-      httpBackend.done(done);
+    xs.actions.getAll({params: {c: true}}).then((r) => {
+      expect(bs.array().length).toBe(1);
+
+      xs.actions.getAll().then((r) => {
+        expect(bs.array().length).toBe(2);
+        httpBackend.done(done);
+      });
     });
 
     httpBackend.flush();

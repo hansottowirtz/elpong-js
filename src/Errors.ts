@@ -11,6 +11,7 @@ if (DEBUG) {
     'collex': 'Collection with name already exists in scheme',
     'elpgns': 'No scheme tags found',
     'elpnce': 'No collection or element tags found',
+    'elndoc': 'No document',
     'confns': 'Configuration has no selector',
     'confnn': 'Configuration has no name',
     'elenew': 'Element is new',
@@ -23,7 +24,8 @@ if (DEBUG) {
     'elesti': 'Invalid snapshot identifier: must be number <= list.length, string or RegExp',
     'eleafw': 'Pre element has an associated field that does not match the embedded element selector',
     'elesnm': 'Selector is not matching get one request selector',
-    'ajahct': 'Content-Type header not set to application/json'
+    'ajahct': 'Content-Type header not set to application/json',
+    'acgtda': 'GET request can\'t have data. Use url_options.params'
   }
 }
 
