@@ -62,7 +62,7 @@ export namespace Actions {
 
       if (Util.includes(collection.new_elements, element)) {
         Util.removeFromArray(collection.new_elements, element);
-        collection.elements[element.selector() as SelectorValue] = element;
+        collection.elements.set(element.selector() as SelectorValue, element);
       }
     });
 
@@ -72,7 +72,7 @@ export namespace Actions {
   export function executeCustom(element: Element, action_name: string, action_config: ActionConfiguration, action_options?: ActionOptions): AjaxPromise {
     if (!action_options) { action_options = {}; }
 
-    let method = action_config.method.toUpperCase();
+    const method = action_config.method.toUpperCase();
     element.snapshots.make(`before_${action_name}`);
 
     let data;
@@ -82,7 +82,7 @@ export namespace Actions {
       data = ElementHelper.toData(element);
     }
 
-    let promise = Ajax.executeRequest(
+    const promise = Ajax.executeRequest(
       UrlHelper.createForElement(action_name, action_config, element, action_options.url_options || {}),
       method,
       data,
@@ -97,11 +97,11 @@ export namespace Actions {
         element.snapshots.make(`after_${method.toLowerCase()}`);
       }
 
-      let collection = element.collection();
+      const collection = element.collection();
 
       if ((selector_value = element.selector()) && Util.includes(collection.new_elements, element)) {
         Util.removeFromArray(collection.new_elements, element);
-        return collection.elements[selector_value] = element;
+        return collection.elements.set(selector_value, element);
       }
     });
 

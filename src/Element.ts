@@ -80,11 +80,11 @@ export class Element {
   }
 
   remove() {
-    let selector_value: SelectorValue|undefined;
-    if (selector_value = this.selector()) {
+    const selector_value: SelectorValue|undefined = this.selector();
+    if (selector_value !== undefined) {
       return this.actions.delete().then(() => {
         let elements = this.collection().elements;
-        delete elements[selector_value as SelectorValue];
+        elements.delete(selector_value);
       });
     } else {
       Util.removeFromArray(this.collection().new_elements, this);
