@@ -5,10 +5,10 @@ import { Elpong, Scheme, Element, Collection, SchemeConfiguration } from '../src
 const HttpBackend = require('./spec_helper').HttpBackend;
 
 describe('Abstract', () => {
-  it('can have collection names on embedded collections', () => {
+  it('can have collection names on embedded collections', (done) => {
     const scheme = Elpong.add(require('./fixtures/abstract/scheme.json5'));
     scheme.setApiUrl('/api');
-    
+
     const httpBackend = new HttpBackend();
 
     httpBackend.reply('GET', '/api/xs', [
@@ -24,9 +24,9 @@ describe('Abstract', () => {
 
     xs.actions.getAll().then(() => {
       expect(bs.array().length).toBe(2);
-      httpBackend.done();
-    })
+      httpBackend.done(done);
+    });
 
-    httpBackend.flush()
+    httpBackend.flush();
   });
 });
