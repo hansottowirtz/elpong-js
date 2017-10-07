@@ -8,11 +8,6 @@ export interface CollectionMap {
   [name: string]: Collection;
 }
 
-interface SchemeOptions {
-  no_normalize: boolean;
-  no_create_collections: boolean;
-}
-
 export class Scheme {
   name: string;
   private _configuration: SchemeConfiguration;
