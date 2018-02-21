@@ -19,7 +19,7 @@ export class SchemeConfiguration implements PreSchemeConfiguration {
     if (DEBUG && !this.selector) {
       throw new ElpongError('confns', preconf.name);
     }
-    this.collections = {} as CollectionConfigurationMap;
+    this.collections = {};
 
     for (let collection_name in preconf.collections) {
       let collection_preconf = preconf.collections[collection_name];

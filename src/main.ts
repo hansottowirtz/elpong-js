@@ -1,4 +1,5 @@
-export { Elpong } from './Elpong';
+import { Elpong } from './Elpong';
+export default Elpong;
 export {
   Scheme,
   CollectionMap

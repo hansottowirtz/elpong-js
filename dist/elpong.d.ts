@@ -158,14 +158,14 @@ declare module 'elpong/Configuration' {
 }
 declare module 'elpong/FakeThings' {
 	export type FakeMapKey = string | number;
-	export class FakeMap {
+	export class FakeMap<T> {
 	    readonly hasRealMap: boolean;
 	    readonly map: any;
 	    constructor();
-	    get(k: FakeMapKey): any;
-	    set(k: FakeMapKey, v: any): this;
+	    get(k: FakeMapKey): T;
+	    set(k: FakeMapKey, v: T): this;
 	    has(k: FakeMapKey): boolean;
-	    values(): any[];
+	    values(): T[];
 	    delete(k: FakeMapKey): void;
 	}
 	export interface FakeString {
@@ -405,20 +405,19 @@ declare module 'elpong/Helpers' {
 declare module 'elpong/Scheme' {
 	import { Collection } from 'elpong/Collection';
 	import { SchemeConfiguration, PreSchemeConfiguration } from 'elpong/Configuration';
-	export interface CollectionMap {
-	    [name: string]: Collection;
-	}
+	import { FakeMap } from 'elpong/FakeThings';
+	export type CollectionMap = FakeMap<Collection>;
 	export class Scheme {
 	    name: string;
 	    private _configuration;
 	    private _collections;
-	    private api_url;
+	    private _api_url;
 	    constructor(preSchemeConfiguration: PreSchemeConfiguration);
 	    configuration(): SchemeConfiguration;
 	    select(name: string): Collection;
 	    setApiUrl(url: string): string;
 	    getApiUrl(): string;
-	    getCollections(): CollectionMap;
+	    getCollectionMap(): CollectionMap;
 	}
 
 }
@@ -461,7 +460,7 @@ declare module 'elpong/Collection' {
 	import { CollectionActionOptions } from 'elpong/Helpers/Collection/CollectionActions';
 	import { AjaxPromise } from 'elpong/Ajax';
 	import { FakeMap } from 'elpong/FakeThings';
-	export type ElementMap = FakeMap;
+	export type ElementMap = FakeMap<any>;
 	export type GetAllCollectionActionFunction = (action_options?: CollectionActionOptions) => AjaxPromise;
 	export type GetOneCollectionActionFunction = (selector_value?: SelectorValue, action_options?: CollectionActionOptions) => AjaxPromise;
 	export type CustomCollectionActionFunction = (action_options?: CollectionActionOptions | SelectorValue) => AjaxPromise;
@@ -482,8 +481,8 @@ declare module 'elpong/Collection' {
 	export class Collection {
 	    private readonly _scheme;
 	    readonly name: string;
-	    private readonly default_pre_element;
-	    readonly elements: FakeMap;
+	    readonly default_pre_element: PreElement;
+	    readonly elements: ElementMap;
 	    readonly new_elements: Element[];
 	    readonly actions: CollectionActions;
 	    constructor(scheme: Scheme, name: string);
@@ -498,13 +497,9 @@ declare module 'elpong/Collection' {
 	}
 
 }
-declare module 'elpong/entry' {
-	import { Elpong } from 'elpong/Elpong';
-	export = Elpong;
-
-}
 declare module 'elpong/main' {
-	export { Elpong } from 'elpong/Elpong';
+	import { Elpong } from 'elpong/Elpong';
+	export default Elpong;
 	export { Scheme, CollectionMap } from 'elpong/Scheme';
 	export { Collection, CollectionActions, GetAllCollectionActionFunction, GetOneCollectionActionFunction, CustomCollectionActionFunction, CollectionArrayOptions, CollectionFindByOptions, FieldsKeyValueMap } from 'elpong/Collection';
 	export { Element, PreElement, SelectorValue, Fields, Relations, Actions, Snapshots, RelationFunction, ActionFunction } from 'elpong/Element';

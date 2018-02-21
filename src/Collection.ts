@@ -9,7 +9,7 @@ import { AjaxPromise } from './Ajax';
 import { ElpongError } from './Errors';
 import { FakeMap } from './FakeThings';
 
-export type ElementMap = FakeMap;
+export type ElementMap = FakeMap<any>;
 
 export type GetAllCollectionActionFunction = (action_options?: CollectionActionOptions) => AjaxPromise;
 export type GetOneCollectionActionFunction = (selector_value?: SelectorValue, action_options?: CollectionActionOptions) => AjaxPromise;
@@ -37,17 +37,14 @@ export interface FieldsKeyValueMap {
 export class Collection {
   private readonly _scheme: Scheme;
   readonly name: string;
-  private readonly default_pre_element: PreElement;
-  readonly elements: FakeMap;
-  readonly new_elements: Element[];
+  readonly default_pre_element: PreElement = {};
+  readonly elements: ElementMap = new FakeMap<any>();
+  readonly new_elements: Element[] = [];
   readonly actions: CollectionActions;
 
   constructor(scheme: Scheme, name: string) {
     this._scheme = scheme;
     this.name = name;
-    this.elements = new FakeMap();
-    this.new_elements = [];
-    this.default_pre_element = {};
 
     let config = CollectionHelper.getConfiguration(this);
 

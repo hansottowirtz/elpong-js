@@ -300,6 +300,120 @@ exports.Util = {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var Util_1 = __webpack_require__(1);
+var Fields_1 = __webpack_require__(20);
+var Relations_1 = __webpack_require__(21);
+var Actions_1 = __webpack_require__(19);
+var Snapshots_1 = __webpack_require__(24);
+var EmbeddedElement_1 = __webpack_require__(15);
+var EmbeddedCollection_1 = __webpack_require__(14);
+var Errors_1 = __webpack_require__(0);
+function isSelectorValue(v) {
+    return (!!v || v === 0 || v === '') && (typeof v === 'string' || typeof v === 'number');
+}
+exports.isSelectorValue = isSelectorValue;
+var Element = /** @class */ (function () {
+    function Element(collection, pre_element) {
+        this.fields = {};
+        this.relations = {};
+        this.actions = {};
+        this.snapshots = {};
+        this._collection = collection;
+        var collection_config = collection.configuration();
+        Fields_1.Fields.setup(this, collection_config.fields, pre_element);
+        Relations_1.Relations.setup(this, collection_config.relations);
+        Actions_1.Actions.setup(this, collection_config.actions);
+        Snapshots_1.Snapshots.setup(this);
+        this.snapshots.make('creation');
+    }
+    Element.prototype.collection = function () {
+        return this._collection;
+    };
+    Element.prototype.selector = function () {
+        return this.fields[this.collection().scheme().configuration().selector];
+    };
+    Element.prototype.remove = function () {
+        var _this = this;
+        var selector_value = this.selector();
+        if (selector_value !== undefined) {
+            return this.actions.delete().then(function () {
+                var elements = _this.collection().elements;
+                elements.delete(selector_value);
+            });
+        }
+        else {
+            Util_1.Util.removeFromArray(this.collection().new_elements, this);
+            return {
+                then: function (fn) { return fn(); },
+                catch: function () { }
+            };
+        }
+    };
+    Element.prototype.save = function () {
+        if (this.isNew()) {
+            return this.actions.post();
+        }
+        else {
+            return this.actions.put();
+        }
+    };
+    Element.prototype.isNew = function () {
+        if (Util_1.Util.includes(this.collection().new_elements, this)) {
+            if (this.selector()) {
+                throw new Errors_1.ElpongError('elesna');
+            }
+            else {
+                return true;
+            }
+        }
+        else {
+            if (!this.selector()) {
+                throw new Errors_1.ElpongError('elense');
+            }
+            else {
+                return false;
+            }
+        }
+    };
+    Element.prototype.merge = function (pre_element) {
+        var _this = this;
+        var collection_config = this.collection().configuration();
+        var selector_key = this.collection().scheme().configuration().selector;
+        Util_1.Util.forEach(collection_config.fields, function (field_config, field_key) {
+            var field_value;
+            if (field_value = pre_element[field_key]) {
+                if (field_config.embedded_element) {
+                    EmbeddedElement_1.EmbeddedElement.handle(_this, pre_element, field_key, field_config);
+                }
+                else if (field_config.embedded_collection) {
+                    EmbeddedCollection_1.EmbeddedCollection.handle(_this, pre_element, field_key, field_config);
+                }
+                else if (field_key === selector_key) {
+                    var selector_value = _this.fields[field_key];
+                    if ((selector_value !== field_value) && isSelectorValue(selector_value) && isSelectorValue(field_value)) {
+                        throw new Errors_1.ElpongError('elesch', selector_value + " -> " + field_value);
+                    }
+                    _this.fields[field_key] = field_value;
+                }
+                else {
+                    _this.fields[field_key] = field_value;
+                }
+            }
+        });
+        return this;
+    };
+    return Element;
+}());
+exports.Element = Element;
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 var CollectionHelper;
 (function (CollectionHelper) {
     function getConfiguration(collection) {
@@ -324,7 +438,7 @@ var CollectionHelper;
 
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -440,120 +554,6 @@ var Ajax;
 
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Util_1 = __webpack_require__(1);
-var Fields_1 = __webpack_require__(18);
-var Relations_1 = __webpack_require__(19);
-var Actions_1 = __webpack_require__(17);
-var Snapshots_1 = __webpack_require__(22);
-var EmbeddedElement_1 = __webpack_require__(10);
-var EmbeddedCollection_1 = __webpack_require__(9);
-var Errors_1 = __webpack_require__(0);
-function isSelectorValue(v) {
-    return (!!v || v === 0 || v === '') && (typeof v === 'string' || typeof v === 'number');
-}
-exports.isSelectorValue = isSelectorValue;
-var Element = /** @class */ (function () {
-    function Element(collection, pre_element) {
-        this.fields = {};
-        this.relations = {};
-        this.actions = {};
-        this.snapshots = {};
-        this._collection = collection;
-        var collection_config = collection.configuration();
-        Fields_1.Fields.setup(this, collection_config.fields, pre_element);
-        Relations_1.Relations.setup(this, collection_config.relations);
-        Actions_1.Actions.setup(this, collection_config.actions);
-        Snapshots_1.Snapshots.setup(this);
-        this.snapshots.make('creation');
-    }
-    Element.prototype.collection = function () {
-        return this._collection;
-    };
-    Element.prototype.selector = function () {
-        return this.fields[this.collection().scheme().configuration().selector];
-    };
-    Element.prototype.remove = function () {
-        var _this = this;
-        var selector_value = this.selector();
-        if (selector_value !== undefined) {
-            return this.actions.delete().then(function () {
-                var elements = _this.collection().elements;
-                elements.delete(selector_value);
-            });
-        }
-        else {
-            Util_1.Util.removeFromArray(this.collection().new_elements, this);
-            return {
-                then: function (fn) { return fn(); },
-                catch: function () { }
-            };
-        }
-    };
-    Element.prototype.save = function () {
-        if (this.isNew()) {
-            return this.actions.post();
-        }
-        else {
-            return this.actions.put();
-        }
-    };
-    Element.prototype.isNew = function () {
-        if (Util_1.Util.includes(this.collection().new_elements, this)) {
-            if (this.selector()) {
-                throw new Errors_1.ElpongError('elesna');
-            }
-            else {
-                return true;
-            }
-        }
-        else {
-            if (!this.selector()) {
-                throw new Errors_1.ElpongError('elense');
-            }
-            else {
-                return false;
-            }
-        }
-    };
-    Element.prototype.merge = function (pre_element) {
-        var _this = this;
-        var collection_config = this.collection().configuration();
-        var selector_key = this.collection().scheme().configuration().selector;
-        Util_1.Util.forEach(collection_config.fields, function (field_config, field_key) {
-            var field_value;
-            if (field_value = pre_element[field_key]) {
-                if (field_config.embedded_element) {
-                    EmbeddedElement_1.EmbeddedElement.handle(_this, pre_element, field_key, field_config);
-                }
-                else if (field_config.embedded_collection) {
-                    EmbeddedCollection_1.EmbeddedCollection.handle(_this, pre_element, field_key, field_config);
-                }
-                else if (field_key === selector_key) {
-                    var selector_value = _this.fields[field_key];
-                    if ((selector_value !== field_value) && isSelectorValue(selector_value) && isSelectorValue(field_value)) {
-                        throw new Errors_1.ElpongError('elesch', selector_value + " -> " + field_value);
-                    }
-                    _this.fields[field_key] = field_value;
-                }
-                else {
-                    _this.fields[field_key] = field_value;
-                }
-            }
-        });
-        return this;
-    };
-    return Element;
-}());
-exports.Element = Element;
-
-
-/***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -561,12 +561,12 @@ exports.Element = Element;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Errors_1 = __webpack_require__(0);
-var CollectionHelper_1 = __webpack_require__(2);
+var CollectionHelper_1 = __webpack_require__(3);
 var SchemeHelper;
 (function (SchemeHelper) {
     function getCollectionBySingularName(scheme, singular_name) {
-        for (var collection_name in scheme.getCollections()) {
-            var collection = scheme.select(collection_name);
+        for (var _i = 0, _a = scheme.getCollectionMap().values(); _i < _a.length; _i++) {
+            var collection = _a[_i];
             if (CollectionHelper_1.CollectionHelper.getSingularName(collection) === singular_name) {
                 return collection;
             }
@@ -650,306 +650,20 @@ var UrlHelper;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Scheme_1 = __webpack_require__(23);
+var Helpers_1 = __webpack_require__(13);
+var Element_1 = __webpack_require__(2);
+var Util_1 = __webpack_require__(1);
+var CollectionActions_1 = __webpack_require__(18);
 var Errors_1 = __webpack_require__(0);
-var Util_1 = __webpack_require__(1);
-var Ajax_1 = __webpack_require__(3);
-var schemes = {};
-var autoload = false;
-var Elpong;
-(function (Elpong) {
-    function add(scheme_config) {
-        var scheme = new Scheme_1.Scheme(scheme_config);
-        return schemes[scheme.name] = scheme;
-    }
-    Elpong.add = add;
-    function get(name) {
-        var scheme;
-        if (scheme = schemes[name]) {
-            return scheme;
-        }
-        throw new Errors_1.ElpongError('schmnf', name); // Scheme not found
-    }
-    Elpong.get = get;
-    function load(ignore_empty) {
-        if (typeof document === 'undefined')
-            return;
-        var scheme_tags = document.querySelectorAll('meta[name=elpong-scheme]');
-        if (!ignore_empty && !scheme_tags.length) {
-            throw new Errors_1.ElpongError('elpgns');
-        }
-        for (var _i = 0, _a = Util_1.Util.arrayFromHTML(scheme_tags); _i < _a.length; _i++) {
-            var scheme_tag = _a[_i];
-            var scheme = Elpong.add(JSON.parse(scheme_tag.content));
-        }
-    }
-    Elpong.load = load;
-    function setAjax(fn, type) {
-        Ajax_1.Ajax.setAjaxFunction(fn, type);
-    }
-    Elpong.setAjax = setAjax;
-    function enableAutoload() {
-        autoload = true;
-        Elpong.load(true);
-    }
-    Elpong.enableAutoload = enableAutoload;
-    function isAutoloadEnabled() {
-        return autoload;
-    }
-    Elpong.isAutoloadEnabled = isAutoloadEnabled;
-    function tearDown() {
-        autoload = false;
-        schemes = {};
-    }
-    Elpong.tearDown = tearDown;
-})(Elpong = exports.Elpong || (exports.Elpong = {}));
-
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var UrlHelper_1 = __webpack_require__(6);
-exports.UrlHelper = UrlHelper_1.UrlHelper;
-var CollectionHelper_1 = __webpack_require__(2);
-exports.CollectionHelper = CollectionHelper_1.CollectionHelper;
-
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Element_1 = __webpack_require__(4);
-var Util_1 = __webpack_require__(1);
-var CollectionHelper_1 = __webpack_require__(2);
-var EmbeddedCollection;
-(function (EmbeddedCollection) {
-    function handle(element, pre_element, field_key, field_config) {
-        var embedded_pre_collection;
-        if (!(embedded_pre_collection = pre_element[field_key])) {
-            return;
-        }
-        var collection = element.collection();
-        var scheme = collection.scheme();
-        var embedded_element_collection = scheme.select(field_config.collection || field_key);
-        Util_1.Util.forEach(embedded_pre_collection, function (embedded_pre_element) {
-            var embedded_element = new Element_1.Element(embedded_element_collection, embedded_pre_element);
-            CollectionHelper_1.CollectionHelper.addElement(embedded_element_collection, embedded_element);
-        });
-    }
-    EmbeddedCollection.handle = handle;
-})(EmbeddedCollection = exports.EmbeddedCollection || (exports.EmbeddedCollection = {}));
-
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var SchemeHelper_1 = __webpack_require__(5);
-var Errors_1 = __webpack_require__(0);
-var EmbeddedElement;
-(function (EmbeddedElement) {
-    function handle(element, pre_element, field_key, field_config) {
-        var embedded_element_collection;
-        var embedded_pre_element = pre_element[field_key];
-        if (!embedded_pre_element) {
-            return;
-        }
-        var collection = element.collection();
-        var scheme = collection.scheme();
-        if (field_config.collection) {
-            embedded_element_collection = scheme.select(field_config.collection);
-        }
-        else {
-            embedded_element_collection = SchemeHelper_1.SchemeHelper.getCollectionBySingularName(scheme, field_key);
-        }
-        var embedded_element = embedded_element_collection.buildOrMerge(embedded_pre_element);
-        var reference_field_key = field_config.reference_field || field_key + "_" + scheme.configuration().selector;
-        var reference_field_config = collection.configuration().fields[reference_field_key];
-        if (!reference_field_config)
-            return;
-        if (!reference_field_config.reference)
-            return;
-        var selector_value = embedded_element.selector();
-        var reference_field_value = pre_element[reference_field_key];
-        if (reference_field_value !== undefined && (reference_field_value != selector_value)) {
-            throw new Errors_1.ElpongError('eleafw', reference_field_value + " != " + selector_value);
-        }
-        element.fields[reference_field_key] = selector_value;
-    }
-    EmbeddedElement.handle = handle;
-})(EmbeddedElement = exports.EmbeddedElement || (exports.EmbeddedElement = {}));
-
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var CollectionHelper_1 = __webpack_require__(2);
-var Util_1 = __webpack_require__(1);
-var Errors_1 = __webpack_require__(0);
-var HasMany;
-(function (HasMany) {
-    function setup(element, relation_collection_name, relation_settings) {
-        var collection = element.collection();
-        var collection_config = collection.configuration();
-        var relation_collection = collection.scheme().select(relation_settings.collection || relation_collection_name);
-        // let relation_field_settings: FieldConfiguration;
-        // if (relation_field_settings = collection_config.fields[references_field_key]) {
-        //   // throw new Error("Field #{field_key} of collection #{collection.getName()} are not references") if !relation_field_settings.references
-        //   return element.relations[Util.camelize(relation_collection_name)] = (): Element[] =>
-        //     getHasManyRelationArrayThroughReferencesField(element, relation_collection, references_field_key);
-        //
-        // }
-        if (relation_settings.inline) {
-            var references_field_key_1 = relation_settings.inline_field || relation_collection_name + "_" + collection.scheme().configuration().selector + "s"; // dogs_ids, unless specified otherwise
-            return element.relations[Util_1.Util.camelize(relation_collection_name)] = function () {
-                return getHasManyRelationArrayInline(element, relation_collection, references_field_key_1);
-            };
-        }
-        else {
-            return element.relations[Util_1.Util.camelize(relation_collection_name)] =
-                getHasManyRelationFunction(element, collection, relation_settings, relation_collection);
-        }
-    }
-    HasMany.setup = setup;
-    function getHasManyRelationFunction(element, collection, relation_config, relation_collection, limit_to_one) {
-        var has_many_field_key;
-        var collection_singular_name = CollectionHelper_1.CollectionHelper.getSingularName(collection);
-        var relation_collection_settings = relation_collection.configuration();
-        var selector_key = collection.scheme().configuration().selector;
-        if (relation_config.polymorphic) {
-            has_many_field_key = relation_config.as + "_" + selector_key;
-            var has_many_collection_field_key_1 = relation_config.as + "_collection";
-            return function () { return getPolymorphicHasManyRelationArray(element, relation_collection, has_many_field_key, has_many_collection_field_key_1, limit_to_one); };
-        }
-        else {
-            if (relation_config.field) {
-                has_many_field_key = relation_config.field;
-            }
-            else if (relation_config.as) {
-                has_many_field_key = relation_config.as + "_" + selector_key;
-            }
-            else {
-                has_many_field_key = collection_singular_name + "_" + selector_key;
-            }
-            return function () { return getHasManyRelationArray(element, relation_collection, has_many_field_key, limit_to_one); };
-        }
-    }
-    HasMany.getHasManyRelationFunction = getHasManyRelationFunction;
-    function getHasManyRelationArray(element, relation_collection, has_many_field_key, limit_to_one) {
-        var element2_arr = [];
-        var selector_value = element.selector();
-        for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
-            var element2 = _a[_i];
-            if (selector_value === element2.fields[has_many_field_key]) {
-                element2_arr.push(element2);
-                if (limit_to_one) {
-                    return element2_arr;
-                }
-            }
-        }
-        return element2_arr;
-    }
-    function getPolymorphicHasManyRelationArray(element, relation_collection, has_many_field_key, has_many_collection_field_key, limit_to_one) {
-        var element2_arr = [];
-        var selector_value = element.selector();
-        var collection_name = element.collection().name;
-        for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
-            var element2 = _a[_i];
-            if (selector_value === element2.fields[has_many_field_key] && collection_name === element2.fields[has_many_collection_field_key]) {
-                element2_arr.push(element2);
-                if (limit_to_one) {
-                    return element2_arr;
-                }
-            }
-        }
-        return element2_arr;
-    }
-    function getHasManyRelationArrayInline(element, relation_collection, field_key) {
-        var selector_value_arr = element.fields[field_key];
-        if (!Array.isArray(selector_value_arr)) {
-            throw new Errors_1.ElpongError('fldnrf', field_key);
-        }
-        var element2_arr = [];
-        for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
-            var element2 = _a[_i];
-            if (Util_1.Util.includes(selector_value_arr, element2.selector())) {
-                element2_arr.push(element2);
-            }
-        }
-        return element2_arr;
-    }
-})(HasMany = exports.HasMany || (exports.HasMany = {}));
-
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Util_1 = __webpack_require__(1);
-var ElementHelper;
-(function (ElementHelper) {
-    function toData(element, full_duplicate) {
-        var collection = element.collection();
-        var scheme = collection.scheme();
-        var o = {};
-        var object = scheme.configuration().collections[collection.name].fields;
-        for (var field_key in object) {
-            var field_settings = object[field_key];
-            if (field_settings.no_send || field_settings.embedded_collection || field_settings.embedded_element) {
-                continue;
-            }
-            var field_value = element.fields[field_key];
-            if (full_duplicate && (typeof field_value === 'object')) {
-                o[field_key] = Util_1.Util.copyJSON(field_value);
-            }
-            else {
-                o[field_key] = field_value;
-            }
-        }
-        return o;
-    }
-    ElementHelper.toData = toData;
-})(ElementHelper = exports.ElementHelper || (exports.ElementHelper = {}));
-
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Helpers_1 = __webpack_require__(8);
-var Element_1 = __webpack_require__(4);
-var Util_1 = __webpack_require__(1);
-var CollectionActions_1 = __webpack_require__(16);
-var Errors_1 = __webpack_require__(0);
-var FakeThings_1 = __webpack_require__(15);
+var FakeThings_1 = __webpack_require__(12);
 var Collection = /** @class */ (function () {
     function Collection(scheme, name) {
         var _this = this;
-        this._scheme = scheme;
-        this.name = name;
+        this.default_pre_element = {};
         this.elements = new FakeThings_1.FakeMap();
         this.new_elements = [];
-        this.default_pre_element = {};
+        this._scheme = scheme;
+        this.name = name;
         var config = Helpers_1.CollectionHelper.getConfiguration(this);
         for (var field_key in config.fields) {
             var field_config = config.fields[field_key];
@@ -1076,7 +790,7 @@ exports.Collection = Collection;
 
 
 /***/ }),
-/* 14 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1124,7 +838,160 @@ exports.SchemeConfiguration = SchemeConfiguration;
 
 
 /***/ }),
-/* 15 */
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Scheme_1 = __webpack_require__(10);
+var Errors_1 = __webpack_require__(0);
+var Util_1 = __webpack_require__(1);
+var Ajax_1 = __webpack_require__(4);
+var schemes = {};
+var autoload = false;
+var Elpong;
+(function (Elpong) {
+    function add(scheme_config) {
+        var scheme = new Scheme_1.Scheme(scheme_config);
+        return schemes[scheme.name] = scheme;
+    }
+    Elpong.add = add;
+    function get(name) {
+        var scheme;
+        if (scheme = schemes[name]) {
+            return scheme;
+        }
+        throw new Errors_1.ElpongError('schmnf', name); // Scheme not found
+    }
+    Elpong.get = get;
+    function load(ignore_empty) {
+        if (typeof document === 'undefined')
+            return;
+        var scheme_tags = document.querySelectorAll('meta[name=elpong-scheme]');
+        if (!ignore_empty && !scheme_tags.length) {
+            throw new Errors_1.ElpongError('elpgns');
+        }
+        for (var _i = 0, _a = Util_1.Util.arrayFromHTML(scheme_tags); _i < _a.length; _i++) {
+            var scheme_tag = _a[_i];
+            var scheme = Elpong.add(JSON.parse(scheme_tag.content));
+        }
+    }
+    Elpong.load = load;
+    function setAjax(fn, type) {
+        Ajax_1.Ajax.setAjaxFunction(fn, type);
+    }
+    Elpong.setAjax = setAjax;
+    function enableAutoload() {
+        autoload = true;
+        Elpong.load(true);
+    }
+    Elpong.enableAutoload = enableAutoload;
+    function isAutoloadEnabled() {
+        return autoload;
+    }
+    Elpong.isAutoloadEnabled = isAutoloadEnabled;
+    function tearDown() {
+        autoload = false;
+        schemes = {};
+    }
+    Elpong.tearDown = tearDown;
+})(Elpong = exports.Elpong || (exports.Elpong = {}));
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Collection_1 = __webpack_require__(7);
+var Configuration_1 = __webpack_require__(8);
+var Errors_1 = __webpack_require__(0);
+var Helpers_1 = __webpack_require__(13);
+var Elpong_1 = __webpack_require__(9);
+var FakeThings_1 = __webpack_require__(12);
+var Scheme = /** @class */ (function () {
+    function Scheme(preSchemeConfiguration) {
+        this._collections = new FakeThings_1.FakeMap();
+        var sc = new Configuration_1.SchemeConfiguration(preSchemeConfiguration);
+        this._configuration = sc;
+        this.name = sc.name;
+        // Create collections
+        for (var collection_name in sc.collections) {
+            var collection_settings = sc.collections[collection_name];
+            var collection = new Collection_1.Collection(this, collection_name);
+            this._collections.set(collection_name, collection);
+        }
+        if (Elpong_1.Elpong.isAutoloadEnabled()) {
+            for (var collection_name in sc.collections) {
+                this._collections.get(collection_name).load(true);
+            }
+        }
+    }
+    Scheme.prototype.configuration = function () {
+        return this._configuration;
+    };
+    Scheme.prototype.select = function (name) {
+        var collection;
+        if (collection = this._collections.get(name)) {
+            return collection;
+        }
+        else {
+            throw new Errors_1.ElpongError('collnf', name);
+        }
+    };
+    Scheme.prototype.setApiUrl = function (url) {
+        var trimmed_url = Helpers_1.UrlHelper.trimSlashes(url);
+        return this._api_url = Helpers_1.UrlHelper.isFqdn(trimmed_url) ? trimmed_url : "/" + trimmed_url;
+    };
+    Scheme.prototype.getApiUrl = function () {
+        return this._api_url;
+    };
+    Scheme.prototype.getCollectionMap = function () {
+        return this._collections;
+    };
+    return Scheme;
+}());
+exports.Scheme = Scheme;
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var ElementHelper_1 = __webpack_require__(17);
+var Snapshot = /** @class */ (function () {
+    function Snapshot(element, tag) {
+        this.element = element;
+        this.tag = tag;
+        this.data = ElementHelper_1.ElementHelper.toData(element, true);
+        this.undone = false;
+        this.time = Date.now();
+        this.index = element.snapshots.list.length;
+        element.snapshots.list.push(this);
+        element.snapshots.current_index = this.index;
+    }
+    Snapshot.prototype.revert = function () {
+        var list = this.element.snapshots.list;
+        this.element.merge(this.data);
+        this.element.snapshots.current_index = this.index;
+        this.undone = false;
+        for (var i = this.index + 1, l = list.length; i < l; i++) {
+            list[i].undone = true;
+        }
+    };
+    return Snapshot;
+}());
+exports.Snapshot = Snapshot;
+
+
+/***/ }),
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1172,13 +1039,237 @@ exports.FakeMap = FakeMap;
 
 
 /***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var UrlHelper_1 = __webpack_require__(6);
+exports.UrlHelper = UrlHelper_1.UrlHelper;
+var CollectionHelper_1 = __webpack_require__(3);
+exports.CollectionHelper = CollectionHelper_1.CollectionHelper;
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Element_1 = __webpack_require__(2);
+var Util_1 = __webpack_require__(1);
+var CollectionHelper_1 = __webpack_require__(3);
+var EmbeddedCollection;
+(function (EmbeddedCollection) {
+    function handle(element, pre_element, field_key, field_config) {
+        var embedded_pre_collection;
+        if (!(embedded_pre_collection = pre_element[field_key])) {
+            return;
+        }
+        var collection = element.collection();
+        var scheme = collection.scheme();
+        var embedded_element_collection = scheme.select(field_config.collection || field_key);
+        Util_1.Util.forEach(embedded_pre_collection, function (embedded_pre_element) {
+            var embedded_element = new Element_1.Element(embedded_element_collection, embedded_pre_element);
+            CollectionHelper_1.CollectionHelper.addElement(embedded_element_collection, embedded_element);
+        });
+    }
+    EmbeddedCollection.handle = handle;
+})(EmbeddedCollection = exports.EmbeddedCollection || (exports.EmbeddedCollection = {}));
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var SchemeHelper_1 = __webpack_require__(5);
+var Errors_1 = __webpack_require__(0);
+var EmbeddedElement;
+(function (EmbeddedElement) {
+    function handle(element, pre_element, field_key, field_config) {
+        var embedded_element_collection;
+        var embedded_pre_element = pre_element[field_key];
+        if (!embedded_pre_element) {
+            return;
+        }
+        var collection = element.collection();
+        var scheme = collection.scheme();
+        if (field_config.collection) {
+            embedded_element_collection = scheme.select(field_config.collection);
+        }
+        else {
+            embedded_element_collection = SchemeHelper_1.SchemeHelper.getCollectionBySingularName(scheme, field_key);
+        }
+        var embedded_element = embedded_element_collection.buildOrMerge(embedded_pre_element);
+        var reference_field_key = field_config.reference_field || field_key + "_" + scheme.configuration().selector;
+        var reference_field_config = collection.configuration().fields[reference_field_key];
+        if (!reference_field_config)
+            return;
+        if (!reference_field_config.reference)
+            return;
+        var selector_value = embedded_element.selector();
+        var reference_field_value = pre_element[reference_field_key];
+        if (reference_field_value !== undefined && (reference_field_value != selector_value)) {
+            throw new Errors_1.ElpongError('eleafw', reference_field_value + " != " + selector_value);
+        }
+        element.fields[reference_field_key] = selector_value;
+    }
+    EmbeddedElement.handle = handle;
+})(EmbeddedElement = exports.EmbeddedElement || (exports.EmbeddedElement = {}));
+
+
+/***/ }),
 /* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Ajax_1 = __webpack_require__(3);
+var CollectionHelper_1 = __webpack_require__(3);
+var Util_1 = __webpack_require__(1);
+var Errors_1 = __webpack_require__(0);
+var HasMany;
+(function (HasMany) {
+    function setup(element, relation_collection_name, relation_settings) {
+        var collection = element.collection();
+        var collection_config = collection.configuration();
+        var relation_collection = collection.scheme().select(relation_settings.collection || relation_collection_name);
+        // let relation_field_settings: FieldConfiguration;
+        // if (relation_field_settings = collection_config.fields[references_field_key]) {
+        //   // throw new Error("Field #{field_key} of collection #{collection.getName()} are not references") if !relation_field_settings.references
+        //   return element.relations[Util.camelize(relation_collection_name)] = (): Element[] =>
+        //     getHasManyRelationArrayThroughReferencesField(element, relation_collection, references_field_key);
+        //
+        // }
+        if (relation_settings.inline) {
+            var references_field_key_1 = relation_settings.inline_field || relation_collection_name + "_" + collection.scheme().configuration().selector + "s"; // dogs_ids, unless specified otherwise
+            return element.relations[Util_1.Util.camelize(relation_collection_name)] = function () {
+                return getHasManyRelationArrayInline(element, relation_collection, references_field_key_1);
+            };
+        }
+        else {
+            return element.relations[Util_1.Util.camelize(relation_collection_name)] =
+                getHasManyRelationFunction(element, collection, relation_settings, relation_collection);
+        }
+    }
+    HasMany.setup = setup;
+    function getHasManyRelationFunction(element, collection, relation_config, relation_collection, limit_to_one) {
+        var has_many_field_key;
+        var collection_singular_name = CollectionHelper_1.CollectionHelper.getSingularName(collection);
+        var relation_collection_settings = relation_collection.configuration();
+        var selector_key = collection.scheme().configuration().selector;
+        if (relation_config.polymorphic) {
+            has_many_field_key = relation_config.as + "_" + selector_key;
+            var has_many_collection_field_key_1 = relation_config.as + "_collection";
+            return function () { return getPolymorphicHasManyRelationArray(element, relation_collection, has_many_field_key, has_many_collection_field_key_1, limit_to_one); };
+        }
+        else {
+            if (relation_config.field) {
+                has_many_field_key = relation_config.field;
+            }
+            else if (relation_config.as) {
+                has_many_field_key = relation_config.as + "_" + selector_key;
+            }
+            else {
+                has_many_field_key = collection_singular_name + "_" + selector_key;
+            }
+            return function () { return getHasManyRelationArray(element, relation_collection, has_many_field_key, limit_to_one); };
+        }
+    }
+    HasMany.getHasManyRelationFunction = getHasManyRelationFunction;
+    function getHasManyRelationArray(element, relation_collection, has_many_field_key, limit_to_one) {
+        var element2_arr = [];
+        var selector_value = element.selector();
+        for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
+            var element2 = _a[_i];
+            if (selector_value === element2.fields[has_many_field_key]) {
+                element2_arr.push(element2);
+                if (limit_to_one) {
+                    return element2_arr;
+                }
+            }
+        }
+        return element2_arr;
+    }
+    function getPolymorphicHasManyRelationArray(element, relation_collection, has_many_field_key, has_many_collection_field_key, limit_to_one) {
+        var element2_arr = [];
+        var selector_value = element.selector();
+        var collection_name = element.collection().name;
+        for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
+            var element2 = _a[_i];
+            if (selector_value === element2.fields[has_many_field_key] && collection_name === element2.fields[has_many_collection_field_key]) {
+                element2_arr.push(element2);
+                if (limit_to_one) {
+                    return element2_arr;
+                }
+            }
+        }
+        return element2_arr;
+    }
+    function getHasManyRelationArrayInline(element, relation_collection, field_key) {
+        var selector_value_arr = element.fields[field_key];
+        if (!Array.isArray(selector_value_arr)) {
+            throw new Errors_1.ElpongError('fldnrf', field_key);
+        }
+        var element2_arr = [];
+        for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
+            var element2 = _a[_i];
+            if (Util_1.Util.includes(selector_value_arr, element2.selector())) {
+                element2_arr.push(element2);
+            }
+        }
+        return element2_arr;
+    }
+})(HasMany = exports.HasMany || (exports.HasMany = {}));
+
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Util_1 = __webpack_require__(1);
+var ElementHelper;
+(function (ElementHelper) {
+    function toData(element, full_duplicate) {
+        var collection = element.collection();
+        var scheme = collection.scheme();
+        var o = {};
+        var object = scheme.configuration().collections[collection.name].fields;
+        for (var field_key in object) {
+            var field_settings = object[field_key];
+            if (field_settings.no_send || field_settings.embedded_collection || field_settings.embedded_element) {
+                continue;
+            }
+            var field_value = element.fields[field_key];
+            if (full_duplicate && (typeof field_value === 'object')) {
+                o[field_key] = Util_1.Util.copyJSON(field_value);
+            }
+            else {
+                o[field_key] = field_value;
+            }
+        }
+        return o;
+    }
+    ElementHelper.toData = toData;
+})(ElementHelper = exports.ElementHelper || (exports.ElementHelper = {}));
+
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Ajax_1 = __webpack_require__(4);
 var UrlHelper_1 = __webpack_require__(6);
 var Errors_1 = __webpack_require__(0);
 var CollectionActions;
@@ -1235,16 +1326,16 @@ var CollectionActions;
 
 
 /***/ }),
-/* 17 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Ajax_1 = __webpack_require__(3);
+var Ajax_1 = __webpack_require__(4);
 var Util_1 = __webpack_require__(1);
 var Errors_1 = __webpack_require__(0);
-var ElementHelper_1 = __webpack_require__(12);
+var ElementHelper_1 = __webpack_require__(17);
 var UrlHelper_1 = __webpack_require__(6);
 var Actions;
 (function (Actions) {
@@ -1355,7 +1446,7 @@ var Actions;
 
 
 /***/ }),
-/* 18 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1364,8 +1455,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var Util_1 = __webpack_require__(1);
 // import { Scheme } from '../../Scheme';
 // import { ElpongError } from '../../Errors';
-var EmbeddedElement_1 = __webpack_require__(10);
-var EmbeddedCollection_1 = __webpack_require__(9);
+var EmbeddedElement_1 = __webpack_require__(15);
+var EmbeddedCollection_1 = __webpack_require__(14);
 var Fields;
 (function (Fields) {
     function setup(element, fields_config_map, pre_element) {
@@ -1390,16 +1481,16 @@ var Fields;
 
 
 /***/ }),
-/* 19 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Util_1 = __webpack_require__(1);
-var HasMany_1 = __webpack_require__(11);
-var HasOne_1 = __webpack_require__(21);
-var BelongsTo_1 = __webpack_require__(20);
+var HasMany_1 = __webpack_require__(16);
+var HasOne_1 = __webpack_require__(23);
+var BelongsTo_1 = __webpack_require__(22);
 var Relations;
 (function (Relations) {
     function setup(element, relations_config_maps) {
@@ -1418,13 +1509,13 @@ var Relations;
 
 
 /***/ }),
-/* 20 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Element_1 = __webpack_require__(4);
+var Element_1 = __webpack_require__(2);
 var Util_1 = __webpack_require__(1);
 var SchemeHelper_1 = __webpack_require__(5);
 var BelongsTo;
@@ -1488,13 +1579,13 @@ var BelongsTo;
 
 
 /***/ }),
-/* 21 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var HasMany_1 = __webpack_require__(11);
+var HasMany_1 = __webpack_require__(16);
 var SchemeHelper_1 = __webpack_require__(5);
 var Util_1 = __webpack_require__(1);
 var HasOne;
@@ -1519,14 +1610,14 @@ var HasOne;
 
 
 /***/ }),
-/* 22 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Util_1 = __webpack_require__(1);
-var Snapshot_1 = __webpack_require__(24);
+var Snapshot_1 = __webpack_require__(11);
 var Errors_1 = __webpack_require__(0);
 var Snapshots;
 (function (Snapshots) {
@@ -1687,103 +1778,28 @@ var Snapshots;
 
 
 /***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Collection_1 = __webpack_require__(13);
-var Configuration_1 = __webpack_require__(14);
-var Errors_1 = __webpack_require__(0);
-var Helpers_1 = __webpack_require__(8);
-var Elpong_1 = __webpack_require__(7);
-var Scheme = /** @class */ (function () {
-    function Scheme(preSchemeConfiguration) {
-        var sc = new Configuration_1.SchemeConfiguration(preSchemeConfiguration);
-        this._configuration = sc;
-        this.name = sc.name;
-        this._collections = {};
-        // Create collections
-        for (var collection_name in sc.collections) {
-            var collection_settings = sc.collections[collection_name];
-            var collection = new Collection_1.Collection(this, collection_name);
-            this._collections[collection_name] = collection;
-        }
-        if (Elpong_1.Elpong.isAutoloadEnabled()) {
-            for (var collection_name in sc.collections) {
-                this._collections[collection_name].load(true);
-            }
-        }
-    }
-    Scheme.prototype.configuration = function () {
-        return this._configuration;
-    };
-    Scheme.prototype.select = function (name) {
-        var collection;
-        if (collection = this._collections[name]) {
-            return collection;
-        }
-        else {
-            throw new Errors_1.ElpongError('collnf', name);
-        }
-    };
-    Scheme.prototype.setApiUrl = function (url) {
-        var trimmed_url = Helpers_1.UrlHelper.trimSlashes(url);
-        return this.api_url = Helpers_1.UrlHelper.isFqdn(trimmed_url) ? trimmed_url : "/" + trimmed_url;
-    };
-    Scheme.prototype.getApiUrl = function () {
-        return this.api_url;
-    };
-    Scheme.prototype.getCollections = function () {
-        return this._collections;
-    };
-    return Scheme;
-}());
-exports.Scheme = Scheme;
-
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var ElementHelper_1 = __webpack_require__(12);
-var Snapshot = /** @class */ (function () {
-    function Snapshot(element, tag) {
-        this.element = element;
-        this.tag = tag;
-        this.data = ElementHelper_1.ElementHelper.toData(element, true);
-        this.undone = false;
-        this.time = Date.now();
-        this.index = element.snapshots.list.length;
-        element.snapshots.list.push(this);
-        element.snapshots.current_index = this.index;
-    }
-    Snapshot.prototype.revert = function () {
-        var list = this.element.snapshots.list;
-        this.element.merge(this.data);
-        this.element.snapshots.current_index = this.index;
-        this.undone = false;
-        for (var i = this.index + 1, l = list.length; i < l; i++) {
-            list[i].undone = true;
-        }
-    };
-    return Snapshot;
-}());
-exports.Snapshot = Snapshot;
-
-
-/***/ }),
 /* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var Elpong_1 = __webpack_require__(7);
-module.exports = Elpong_1.Elpong;
+Object.defineProperty(exports, "__esModule", { value: true });
+var Elpong_1 = __webpack_require__(9);
+exports.default = Elpong_1.Elpong;
+var Scheme_1 = __webpack_require__(10);
+exports.Scheme = Scheme_1.Scheme;
+var Collection_1 = __webpack_require__(7);
+exports.Collection = Collection_1.Collection;
+var Element_1 = __webpack_require__(2);
+exports.Element = Element_1.Element;
+var Errors_1 = __webpack_require__(0);
+exports.ElpongError = Errors_1.ElpongError;
+var Snapshot_1 = __webpack_require__(11);
+exports.Snapshot = Snapshot_1.Snapshot;
+var Util_1 = __webpack_require__(1);
+exports.Util = Util_1.Util;
+var Configuration_1 = __webpack_require__(8);
+exports.SchemeConfiguration = Configuration_1.SchemeConfiguration;
 
 
 /***/ })

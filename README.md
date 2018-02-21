@@ -47,7 +47,7 @@ promise.then(function(response) {
 
 If you use Typescript or ES6 modules:
 ```javascript
-import { Elpong, Scheme, Element, Collection } from 'elpong';
+import Elpong, { Scheme, Element, Collection } from 'elpong';
 ```
 
 ## Schemes

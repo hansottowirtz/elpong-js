@@ -1,3 +1,6 @@
+/// <reference types="node"/>
+/// <reference types="jasmine"/>
+
 import { SchemeHelper } from '../../src/Helpers/SchemeHelper';
 import { Elpong } from '../../src/Elpong';
 

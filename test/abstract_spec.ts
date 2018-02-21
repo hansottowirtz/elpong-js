@@ -1,7 +1,7 @@
 /// <reference types="node"/>
 /// <reference types="jasmine"/>
 
-import { Elpong, Scheme, Element, Collection, SchemeConfiguration } from '../src/main';
+import Elpong, { Scheme, Element, Collection, SchemeConfiguration } from '../src/main';
 const HttpBackend = require('./spec_helper').HttpBackend;
 
 describe('Abstract', () => {

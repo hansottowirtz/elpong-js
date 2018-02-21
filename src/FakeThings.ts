@@ -6,7 +6,7 @@ export type FakeMapKey = string|number;
 
 const supportsMap = typeof Map !== 'undefined' && (new Map()).values;
 
-export class FakeMap {
+export class FakeMap<T> {
   readonly hasRealMap: boolean;
   readonly map: any;
 
@@ -16,11 +16,11 @@ export class FakeMap {
     this.map = supportsMap ? new Map() : {};
   }
 
-  get(k: FakeMapKey): any {
+  get(k: FakeMapKey): T {
     return supportsMap ? this.map.get(k) : this.map[k];
   }
 
-  set(k: FakeMapKey, v: any): this {
+  set(k: FakeMapKey, v: T): this {
     if (supportsMap) { this.map.set(k, v) } else { this.map[k] = v };
     return this;
   }
@@ -29,7 +29,7 @@ export class FakeMap {
     return supportsMap ? this.map.has(k) : !!this.map[k];
   }
 
-  values(): any[] {
+  values(): T[] {
     // if Map is there, Array.from should also be there
     return supportsMap ? (Array as any as FakeArrayConstructor).from(this.map.values()) : Util.values(this.map);
   }
