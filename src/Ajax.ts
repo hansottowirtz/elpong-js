@@ -120,7 +120,7 @@ export namespace Ajax {
         ajaxFunction = (url: string, instruction: AjaxInstruction) => {
           return new Promise<AjaxResponse>((resolve, reject) => {
             instruction.responseType = undefined;
-            (fn as any).request.bind(fn)(url, instruction).subscribe((response: any) => {
+            (fn as any).request.bind(fn)(instruction.method, url, instruction).subscribe((response: any) => {
               if (response.status === 204) {
                 resolve(response)
               } else {

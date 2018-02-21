@@ -497,7 +497,7 @@ declare module 'elpong/Collection' {
 	}
 
 }
-declare module 'elpong/main' {
+declare module 'elpong' {
 	import { Elpong } from 'elpong/Elpong';
 	export default Elpong;
 	export { Scheme, CollectionMap } from 'elpong/Scheme';
@@ -514,8 +514,4 @@ declare module 'elpong/PreElement' {
 	    [prop: string]: any;
 	}
 
-}
-declare module 'elpong' {
-	import main = require('elpong/main');
-	export = main;
 }

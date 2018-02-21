@@ -527,7 +527,7 @@ var Ajax;
                 ajaxFunction = function (url, instruction) {
                     return new Promise(function (resolve, reject) {
                         instruction.responseType = undefined;
-                        fn.request.bind(fn)(url, instruction).subscribe(function (response) {
+                        fn.request.bind(fn)(instruction.method, url, instruction).subscribe(function (response) {
                             if (response.status === 204) {
                                 resolve(response);
                             }
