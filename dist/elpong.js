@@ -527,6 +527,7 @@ var Ajax;
                 ajaxFunction = function (url, instruction) {
                     return new Promise(function (resolve, reject) {
                         instruction.responseType = undefined;
+												instruction.observe = 'response';
                         fn.request.bind(fn)(instruction.method, url, instruction).subscribe(function (response) {
                             if (response.status === 204) {
                                 resolve(response);
@@ -535,7 +536,7 @@ var Ajax;
                                 var contentType = response.headers.get('content-type');
                                 if (!contentType || contentType.indexOf('json') < 0)
                                     throw new Error('ajahct');
-                                var json = response.json();
+                                var json = response.json ? response.json() : response.body;
                                 response.data = json;
                                 resolve(response);
                             }

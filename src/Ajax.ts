@@ -116,17 +116,18 @@ export namespace Ajax {
           });
         }
         break;
-      case 'angular2':
+      case 'angular':
         ajaxFunction = (url: string, instruction: AjaxInstruction) => {
           return new Promise<AjaxResponse>((resolve, reject) => {
             instruction.responseType = undefined;
+            instruction.observe = 'response';
             (fn as any).request.bind(fn)(instruction.method, url, instruction).subscribe((response: any) => {
               if (response.status === 204) {
                 resolve(response)
               } else {
                 const contentType = response.headers.get('content-type');
                 if (!contentType || contentType.indexOf('json') < 0) throw new Error('ajahct');
-                const json = response.json();
+                const json = response.json ? response.json() : response.body;
                 (response as any).data = json;
                 resolve(response);
               }
