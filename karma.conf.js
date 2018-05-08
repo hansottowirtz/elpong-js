@@ -81,17 +81,18 @@ module.exports = function(config) {
     reporters: ['progress'],
     port: 9876,
     colors: true,
-    logLevel: config.LOG_INFO,
+    logLevel: config.LOG_DEBUG,
     autoWatch: false,
     browsers: Object.keys(customLaunchers), // overridden by certain gulp tasks
     singleRun: true,
     concurrency: Infinity,
     webpack: {
+      mode: 'development',
       resolve: {
         extensions: ['.ts', '.coffee', '.js', '.json']
       },
       module: {
-        loaders: [
+        rules: [
           { test: /\.coffee$/, loader: 'coffee-loader' },
           { test: /\.ts$/, loader: 'awesome-typescript-loader' },
           { test: /\.json5$/,  loader: 'json5-loader' }

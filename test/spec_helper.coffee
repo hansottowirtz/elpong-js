@@ -1,4 +1,5 @@
 Elpong = require('../src/Elpong').Elpong
+fetchMock = require('fetch-mock')
 
 FRAMEWORK = process.env.FRAMEWORK || 'fetch'
 

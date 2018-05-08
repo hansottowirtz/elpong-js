@@ -7,7 +7,7 @@
 		exports["elpong"] = factory();
 	else
 		root["elpong"] = factory();
-})(this, function() {
+})(window, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -43,18 +43,35 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
 /******/
-/******/ 	// identity function for calling harmony imports with the correct context
-/******/ 	__webpack_require__.i = function(value) { return value; };
-/******/
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
 /******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, {
-/******/ 				configurable: false,
-/******/ 				enumerable: true,
-/******/ 				get: getter
-/******/ 			});
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
 /******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
 /******/ 	};
 /******/
 /******/ 	// getDefaultExport function for compatibility with non-harmony modules
@@ -72,8 +89,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
 /******/
+/******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 25);
+/******/ 	return __webpack_require__(__webpack_require__.s = 13);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -83,9 +101,12 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    }
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -329,114 +350,64 @@ var CollectionHelper;
 
 "use strict";
 
-/// <reference types="jquery"/>
-/// <reference types="angular"/>
 Object.defineProperty(exports, "__esModule", { value: true });
 var Errors_1 = __webpack_require__(0);
-var Ajax;
-(function (Ajax) {
-    var ajaxFunction;
-    function executeRequest(url, method, data, headers) {
-        if (!headers) {
-            headers = {};
+var UrlHelper;
+(function (UrlHelper) {
+    function createForElement(element, url_options) {
+        var path, url;
+        var collection = element.collection();
+        var scheme = collection.scheme();
+        var api_url = scheme.getApiUrl();
+        if (!api_url) {
+            throw new Errors_1.ElpongError('apinur');
         }
-        headers['Accept'] = headers['Content-Type'] = 'application/json';
-        var serialized_data = JSON.stringify(data === undefined ? {} : data);
-        var options = {
-            method: method,
-            type: method,
-            url: url,
-            data: serialized_data,
-            body: serialized_data,
-            headers: headers,
-            dataType: 'json',
-            responseType: 'json'
-        };
-        return ajaxFunction(options.url, options);
+        url = api_url + "/" + collection.name;
+        if (!url_options.no_selector) {
+            url = url + "/" + element.selector();
+        }
+        if (url_options.suffix) {
+            url = url + "/" + url_options.suffix;
+        }
+        if (url_options.params) {
+            url = appendParamsToUrl(url, url_options.params);
+        }
+        return url;
     }
-    Ajax.executeRequest = executeRequest;
-    // Set the http function used for requests
-    // The function should accept one object with keys
-    // method, url, params, headers
-    // and return a promise-like object
-    // with then and catch
-    //
-    // @note Like $http or jQuery.ajax or http.request or fetch
-    // @param {Function} fn The function.
-    // @param {string} type The function.
-    function setAjaxFunction(fn, type) {
-        if (typeof type === 'undefined') {
-            if ((typeof jQuery !== 'undefined') && (fn === jQuery.ajax))
-                type = 'jquery';
-            else if ((typeof fetch !== 'undefined') && (fn === fetch))
-                type = 'fetch';
+    UrlHelper.createForElement = createForElement;
+    function createForCollection(collection, url_options) {
+        var api_url = collection.scheme().getApiUrl();
+        if (!api_url) {
+            throw new Errors_1.ElpongError('apinur');
         }
-        switch (type) {
-            case 'jquery':
-                ajaxFunction = function (url, instruction) {
-                    var deferred = jQuery.Deferred();
-                    var ajax = fn(url, instruction);
-                    ajax.then(function (data, status, jqxhr) { return deferred.resolve({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
-                    ajax.catch(function (data, status, jqxhr) { return deferred.reject({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
-                    // Convert to Promise, as Typescript users are probably not using jQuery
-                    // and if so, they won't have a lot of trouble with the differences.
-                    return deferred.promise();
-                };
-                break;
-            case 'fetch':
-                ajaxFunction = function (url, instruction) {
-                    return new Promise(function (resolve, reject) {
-                        // Request with GET/HEAD method cannot have body
-                        instruction.body = (instruction.method === 'GET') ? undefined : instruction.data;
-                        var http_promise = fn(url, instruction);
-                        http_promise.then(function (response) {
-                            if (response.status === 204) {
-                                resolve(response);
-                            }
-                            else {
-                                var contentType = response.headers.get('content-type');
-                                if (!contentType || contentType.indexOf('json') < 0)
-                                    throw new Errors_1.ElpongError('ajahct');
-                                var json_promise = response.json();
-                                json_promise.then(function (json) {
-                                    response.data = json;
-                                    resolve(response);
-                                });
-                                json_promise.catch(reject);
-                            }
-                        });
-                        http_promise.catch(reject);
-                    });
-                };
-                break;
-            case 'angular2':
-                ajaxFunction = function (url, instruction) {
-                    return new Promise(function (resolve, reject) {
-                        instruction.responseType = undefined;
-                        fn.request.bind(fn)(url, instruction).subscribe(function (response) {
-                            if (response.status === 204) {
-                                resolve(response);
-                            }
-                            else {
-                                var contentType = response.headers.get('content-type');
-                                if (!contentType || contentType.indexOf('json') < 0)
-                                    throw new Error('ajahct');
-                                var json = response.json();
-                                response.data = json;
-                                resolve(response);
-                            }
-                        }, function (httpErrorResponse) { reject(httpErrorResponse); });
-                    });
-                };
-                break;
-            default:
-                // Default is AngularJS behavior, a promise that resolves to a response
-                // object with the payload in the data field.
-                ajaxFunction = function (url, instruction) { return fn(instruction); };
+        var url = api_url + "/" + collection.name; //HPP.Helpers.Url.createForCollection(, hpe, user_options) # (action_name, element, user_options = {}, suffix)
+        if (url_options.suffix) {
+            url = url + "/" + url_options.suffix;
         }
+        if (url_options.params) {
+            url = appendParamsToUrl(url, url_options.params);
+        }
+        return url;
     }
-    Ajax.setAjaxFunction = setAjaxFunction;
-})(Ajax = exports.Ajax || (exports.Ajax = {}));
+    UrlHelper.createForCollection = createForCollection;
+    function trimSlashes(s) {
+        return s.replace(/^\/|\/$/g, '');
+    }
+    UrlHelper.trimSlashes = trimSlashes;
+    function isFqdn(s) {
+        return /^https?:\/\//.test(s);
+    }
+    UrlHelper.isFqdn = isFqdn;
+    function appendParamsToUrl(url, params) {
+        url = url + "?";
+        for (var k in params) {
+            url = "" + url + k + "=" + encodeURIComponent(params[k]) + "&";
+        }
+        url = url.slice(0, -1);
+        return url;
+    }
+    UrlHelper.appendParamsToUrl = appendParamsToUrl;
+})(UrlHelper = exports.UrlHelper || (exports.UrlHelper = {}));
 
 
 /***/ }),
@@ -447,12 +418,12 @@ var Ajax;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Util_1 = __webpack_require__(1);
-var Fields_1 = __webpack_require__(18);
-var Relations_1 = __webpack_require__(19);
-var Actions_1 = __webpack_require__(17);
-var Snapshots_1 = __webpack_require__(22);
-var EmbeddedElement_1 = __webpack_require__(10);
-var EmbeddedCollection_1 = __webpack_require__(9);
+var Fields_1 = __webpack_require__(16);
+var Relations_1 = __webpack_require__(17);
+var Actions_1 = __webpack_require__(20);
+var Snapshots_1 = __webpack_require__(21);
+var EmbeddedElement_1 = __webpack_require__(9);
+var EmbeddedCollection_1 = __webpack_require__(10);
 var Errors_1 = __webpack_require__(0);
 function isSelectorValue(v) {
     return (!!v || v === 0 || v === '') && (typeof v === 'string' || typeof v === 'number');
@@ -583,64 +554,114 @@ var SchemeHelper;
 
 "use strict";
 
+/// <reference types="jquery"/>
+/// <reference types="angular"/>
 Object.defineProperty(exports, "__esModule", { value: true });
 var Errors_1 = __webpack_require__(0);
-var UrlHelper;
-(function (UrlHelper) {
-    function createForElement(element, url_options) {
-        var path, url;
-        var collection = element.collection();
-        var scheme = collection.scheme();
-        var api_url = scheme.getApiUrl();
-        if (!api_url) {
-            throw new Errors_1.ElpongError('apinur');
+var Ajax;
+(function (Ajax) {
+    var ajaxFunction;
+    function executeRequest(url, method, data, headers) {
+        if (!headers) {
+            headers = {};
         }
-        url = api_url + "/" + collection.name;
-        if (!url_options.no_selector) {
-            url = url + "/" + element.selector();
-        }
-        if (url_options.suffix) {
-            url = url + "/" + url_options.suffix;
-        }
-        if (url_options.params) {
-            url = appendParamsToUrl(url, url_options.params);
-        }
-        return url;
+        headers['Accept'] = headers['Content-Type'] = 'application/json';
+        var serialized_data = JSON.stringify(data === undefined ? {} : data);
+        var options = {
+            method: method,
+            type: method,
+            url: url,
+            data: serialized_data,
+            body: serialized_data,
+            headers: headers,
+            dataType: 'json',
+            responseType: 'json'
+        };
+        return ajaxFunction(options.url, options);
     }
-    UrlHelper.createForElement = createForElement;
-    function createForCollection(collection, url_options) {
-        var api_url = collection.scheme().getApiUrl();
-        if (!api_url) {
-            throw new Errors_1.ElpongError('apinur');
+    Ajax.executeRequest = executeRequest;
+    // Set the http function used for requests
+    // The function should accept one object with keys
+    // method, url, params, headers
+    // and return a promise-like object
+    // with then and catch
+    //
+    // @note Like $http or jQuery.ajax or http.request or fetch
+    // @param {Function} fn The function.
+    // @param {string} type The function.
+    function setAjaxFunction(fn, type) {
+        if (typeof type === 'undefined') {
+            if ((typeof jQuery !== 'undefined') && (fn === jQuery.ajax))
+                type = 'jquery';
+            else if ((typeof fetch !== 'undefined') && (fn === fetch))
+                type = 'fetch';
         }
-        var url = api_url + "/" + collection.name; //HPP.Helpers.Url.createForCollection(, hpe, user_options) # (action_name, element, user_options = {}, suffix)
-        if (url_options.suffix) {
-            url = url + "/" + url_options.suffix;
+        switch (type) {
+            case 'jquery':
+                ajaxFunction = function (url, instruction) {
+                    var deferred = jQuery.Deferred();
+                    var ajax = fn(url, instruction);
+                    ajax.then(function (data, status, jqxhr) { return deferred.resolve({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
+                    ajax.catch(function (data, status, jqxhr) { return deferred.reject({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
+                    // Convert to Promise, as Typescript users are probably not using jQuery
+                    // and if so, they won't have a lot of trouble with the differences.
+                    return deferred.promise();
+                };
+                break;
+            case 'fetch':
+                ajaxFunction = function (url, instruction) {
+                    return new Promise(function (resolve, reject) {
+                        // Request with GET/HEAD method cannot have body
+                        instruction.body = (instruction.method === 'GET') ? undefined : instruction.data;
+                        var http_promise = fn(url, instruction);
+                        http_promise.then(function (response) {
+                            if (response.status === 204) {
+                                resolve(response);
+                            }
+                            else {
+                                var contentType = response.headers.get('content-type');
+                                if (!contentType || contentType.indexOf('json') < 0)
+                                    throw new Errors_1.ElpongError('ajahct');
+                                var json_promise = response.json();
+                                json_promise.then(function (json) {
+                                    response.data = json;
+                                    resolve(response);
+                                });
+                                json_promise.catch(reject);
+                            }
+                        });
+                        http_promise.catch(reject);
+                    });
+                };
+                break;
+            case 'angular2':
+                ajaxFunction = function (url, instruction) {
+                    return new Promise(function (resolve, reject) {
+                        instruction.responseType = undefined;
+                        fn.request.bind(fn)(url, instruction).subscribe(function (response) {
+                            if (response.status === 204) {
+                                resolve(response);
+                            }
+                            else {
+                                var contentType = response.headers.get('content-type');
+                                if (!contentType || contentType.indexOf('json') < 0)
+                                    throw new Error('ajahct');
+                                var json = response.json();
+                                response.data = json;
+                                resolve(response);
+                            }
+                        }, function (httpErrorResponse) { reject(httpErrorResponse); });
+                    });
+                };
+                break;
+            default:
+                // Default is AngularJS behavior, a promise that resolves to a response
+                // object with the payload in the data field.
+                ajaxFunction = function (url, instruction) { return fn(instruction); };
         }
-        if (url_options.params) {
-            url = appendParamsToUrl(url, url_options.params);
-        }
-        return url;
     }
-    UrlHelper.createForCollection = createForCollection;
-    function trimSlashes(s) {
-        return s.replace(/^\/|\/$/g, '');
-    }
-    UrlHelper.trimSlashes = trimSlashes;
-    function isFqdn(s) {
-        return /^https?:\/\//.test(s);
-    }
-    UrlHelper.isFqdn = isFqdn;
-    function appendParamsToUrl(url, params) {
-        url = url + "?";
-        for (var k in params) {
-            url = "" + url + k + "=" + encodeURIComponent(params[k]) + "&";
-        }
-        url = url.slice(0, -1);
-        return url;
-    }
-    UrlHelper.appendParamsToUrl = appendParamsToUrl;
-})(UrlHelper = exports.UrlHelper || (exports.UrlHelper = {}));
+    Ajax.setAjaxFunction = setAjaxFunction;
+})(Ajax = exports.Ajax || (exports.Ajax = {}));
 
 
 /***/ }),
@@ -650,10 +671,10 @@ var UrlHelper;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Scheme_1 = __webpack_require__(23);
+var Scheme_1 = __webpack_require__(14);
 var Errors_1 = __webpack_require__(0);
 var Util_1 = __webpack_require__(1);
-var Ajax_1 = __webpack_require__(3);
+var Ajax_1 = __webpack_require__(6);
 var schemes = {};
 var autoload = false;
 var Elpong;
@@ -712,7 +733,7 @@ var Elpong;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var UrlHelper_1 = __webpack_require__(6);
+var UrlHelper_1 = __webpack_require__(3);
 exports.UrlHelper = UrlHelper_1.UrlHelper;
 var CollectionHelper_1 = __webpack_require__(2);
 exports.CollectionHelper = CollectionHelper_1.CollectionHelper;
@@ -720,35 +741,6 @@ exports.CollectionHelper = CollectionHelper_1.CollectionHelper;
 
 /***/ }),
 /* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Element_1 = __webpack_require__(4);
-var Util_1 = __webpack_require__(1);
-var CollectionHelper_1 = __webpack_require__(2);
-var EmbeddedCollection;
-(function (EmbeddedCollection) {
-    function handle(element, pre_element, field_key, field_config) {
-        var embedded_pre_collection;
-        if (!(embedded_pre_collection = pre_element[field_key])) {
-            return;
-        }
-        var collection = element.collection();
-        var scheme = collection.scheme();
-        var embedded_element_collection = scheme.select(field_config.collection || field_key);
-        Util_1.Util.forEach(embedded_pre_collection, function (embedded_pre_element) {
-            var embedded_element = new Element_1.Element(embedded_element_collection, embedded_pre_element);
-            CollectionHelper_1.CollectionHelper.addElement(embedded_element_collection, embedded_element);
-        });
-    }
-    EmbeddedCollection.handle = handle;
-})(EmbeddedCollection = exports.EmbeddedCollection || (exports.EmbeddedCollection = {}));
-
-
-/***/ }),
-/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -791,6 +783,35 @@ var EmbeddedElement;
 
 
 /***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Element_1 = __webpack_require__(4);
+var Util_1 = __webpack_require__(1);
+var CollectionHelper_1 = __webpack_require__(2);
+var EmbeddedCollection;
+(function (EmbeddedCollection) {
+    function handle(element, pre_element, field_key, field_config) {
+        var embedded_pre_collection;
+        if (!(embedded_pre_collection = pre_element[field_key])) {
+            return;
+        }
+        var collection = element.collection();
+        var scheme = collection.scheme();
+        var embedded_element_collection = scheme.select(field_config.collection || field_key);
+        Util_1.Util.forEach(embedded_pre_collection, function (embedded_pre_element) {
+            var embedded_element = new Element_1.Element(embedded_element_collection, embedded_pre_element);
+            CollectionHelper_1.CollectionHelper.addElement(embedded_element_collection, embedded_element);
+        });
+    }
+    EmbeddedCollection.handle = handle;
+})(EmbeddedCollection = exports.EmbeddedCollection || (exports.EmbeddedCollection = {}));
+
+
+/***/ }),
 /* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -819,7 +840,7 @@ var HasMany;
                 return getHasManyRelationArrayInline(element, relation_collection, references_field_key_1);
             };
         }
-        else {
+        else { // normal has_many relationship
             return element.relations[Util_1.Util.camelize(relation_collection_name)] =
                 getHasManyRelationFunction(element, collection, relation_settings, relation_collection);
         }
@@ -935,13 +956,80 @@ var ElementHelper;
 
 "use strict";
 
+var Elpong_1 = __webpack_require__(7);
+module.exports = Elpong_1.Elpong;
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Collection_1 = __webpack_require__(15);
+var Configuration_1 = __webpack_require__(25);
+var Errors_1 = __webpack_require__(0);
+var Helpers_1 = __webpack_require__(8);
+var Elpong_1 = __webpack_require__(7);
+var Scheme = /** @class */ (function () {
+    function Scheme(preSchemeConfiguration) {
+        var sc = new Configuration_1.SchemeConfiguration(preSchemeConfiguration);
+        this._configuration = sc;
+        this.name = sc.name;
+        this._collections = {};
+        // Create collections
+        for (var collection_name in sc.collections) {
+            var collection_settings = sc.collections[collection_name];
+            var collection = new Collection_1.Collection(this, collection_name);
+            this._collections[collection_name] = collection;
+        }
+        if (Elpong_1.Elpong.isAutoloadEnabled()) {
+            for (var collection_name in sc.collections) {
+                this._collections[collection_name].load(true);
+            }
+        }
+    }
+    Scheme.prototype.configuration = function () {
+        return this._configuration;
+    };
+    Scheme.prototype.select = function (name) {
+        var collection;
+        if (collection = this._collections[name]) {
+            return collection;
+        }
+        else {
+            throw new Errors_1.ElpongError('collnf', name);
+        }
+    };
+    Scheme.prototype.setApiUrl = function (url) {
+        var trimmed_url = Helpers_1.UrlHelper.trimSlashes(url);
+        return this.api_url = Helpers_1.UrlHelper.isFqdn(trimmed_url) ? trimmed_url : "/" + trimmed_url;
+    };
+    Scheme.prototype.getApiUrl = function () {
+        return this.api_url;
+    };
+    Scheme.prototype.getCollections = function () {
+        return this._collections;
+    };
+    return Scheme;
+}());
+exports.Scheme = Scheme;
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 Object.defineProperty(exports, "__esModule", { value: true });
 var Helpers_1 = __webpack_require__(8);
 var Element_1 = __webpack_require__(4);
 var Util_1 = __webpack_require__(1);
-var CollectionActions_1 = __webpack_require__(16);
+var CollectionActions_1 = __webpack_require__(23);
 var Errors_1 = __webpack_require__(0);
-var FakeThings_1 = __webpack_require__(15);
+var FakeThings_1 = __webpack_require__(24);
 var Collection = /** @class */ (function () {
     function Collection(scheme, name) {
         var _this = this;
@@ -1076,162 +1164,38 @@ exports.Collection = Collection;
 
 
 /***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Errors_1 = __webpack_require__(0);
-if (typeof DEBUG === 'undefined') {
-    var DEBUG = true;
-}
-var SchemeConfiguration = /** @class */ (function () {
-    function SchemeConfiguration(preconf) {
-        this.name = preconf.name;
-        if (DEBUG && !this.name) {
-            throw new Errors_1.ElpongError('confnn');
-        }
-        this.selector = preconf.selector;
-        if (DEBUG && !this.selector) {
-            throw new Errors_1.ElpongError('confns', preconf.name);
-        }
-        this.collections = {};
-        for (var collection_name in preconf.collections) {
-            var collection_preconf = preconf.collections[collection_name];
-            var collection_configuration = this.collections[collection_name] = {
-                singular: collection_preconf.singular || collection_name.slice(0, -1)
-            };
-            var props = ['fields', 'relations', 'actions', 'collection_actions'];
-            var relation_types = ['has_many', 'has_one', 'belongs_to'];
-            for (var _i = 0, props_1 = props; _i < props_1.length; _i++) {
-                var prop = props_1[_i];
-                collection_configuration[prop] = collection_preconf[prop] || {};
-            }
-            var relations_conf = void 0;
-            if (relations_conf = collection_preconf.relations) {
-                for (var _a = 0, relation_types_1 = relation_types; _a < relation_types_1.length; _a++) {
-                    var relation_type = relation_types_1[_a];
-                    relations_conf[relation_type] =
-                        collection_preconf.relations[relation_type] || {};
-                }
-            }
-        }
-    }
-    return SchemeConfiguration;
-}());
-exports.SchemeConfiguration = SchemeConfiguration;
-
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Util_1 = __webpack_require__(1);
-var supportsMap = typeof Map !== 'undefined' && (new Map()).values;
-var FakeMap = /** @class */ (function () {
-    function FakeMap() {
-        // in IE 11, Map#values doesn't exist. Don't bother about that.
-        this.hasRealMap = supportsMap;
-        this.map = supportsMap ? new Map() : {};
-    }
-    FakeMap.prototype.get = function (k) {
-        return supportsMap ? this.map.get(k) : this.map[k];
-    };
-    FakeMap.prototype.set = function (k, v) {
-        if (supportsMap) {
-            this.map.set(k, v);
-        }
-        else {
-            this.map[k] = v;
-        }
-        ;
-        return this;
-    };
-    FakeMap.prototype.has = function (k) {
-        return supportsMap ? this.map.has(k) : !!this.map[k];
-    };
-    FakeMap.prototype.values = function () {
-        // if Map is there, Array.from should also be there
-        return supportsMap ? Array.from(this.map.values()) : Util_1.Util.values(this.map);
-    };
-    FakeMap.prototype.delete = function (k) {
-        if (supportsMap) {
-            this.map.delete(k);
-        }
-        else {
-            delete this.map[k];
-        }
-    };
-    return FakeMap;
-}());
-exports.FakeMap = FakeMap;
-
-
-/***/ }),
 /* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Ajax_1 = __webpack_require__(3);
-var UrlHelper_1 = __webpack_require__(6);
-var Errors_1 = __webpack_require__(0);
-var CollectionActions;
-(function (CollectionActions) {
-    function executeGetAll(collection, action_options) {
-        if (action_options === void 0) { action_options = {}; }
-        if (!action_options) {
-            action_options = {};
-        }
-        if (action_options.data) {
-            throw new Errors_1.ElpongError('acgtda');
-        }
-        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection(collection, { params: action_options.params || {} }), 'GET', undefined, action_options.headers);
-        promise.then(function (response) {
-            response.data.map(function (pre_element) {
-                collection.buildOrMerge(pre_element);
-            });
-        });
-        return promise;
-    }
-    CollectionActions.executeGetAll = executeGetAll;
-    function executeGetOne(collection, selector_value, action_options) {
-        if (action_options === void 0) { action_options = {}; }
-        if (action_options.data) {
-            throw new Errors_1.ElpongError('acgtda');
-        }
-        var url_options = {
-            suffix: selector_value,
-            params: action_options.params || {}
-        };
-        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection(collection, url_options), 'GET', undefined, action_options.headers);
-        promise.then(function (response) {
-            if (response.data) {
-                var selector_key = collection.scheme().configuration().selector;
-                if (response.data[selector_key] !== selector_value) {
-                    throw new Errors_1.ElpongError('elesnm', response.data[selector_key] + " != " + selector_value);
+var Util_1 = __webpack_require__(1);
+// import { Scheme } from '../../Scheme';
+// import { ElpongError } from '../../Errors';
+var EmbeddedElement_1 = __webpack_require__(9);
+var EmbeddedCollection_1 = __webpack_require__(10);
+var Fields;
+(function (Fields) {
+    function setup(element, fields_config_map, pre_element) {
+        Util_1.Util.forEach(fields_config_map, function (field_config, field_key) {
+            if (field_config.embedded_element) {
+                EmbeddedElement_1.EmbeddedElement.handle(element, pre_element, field_key, field_config);
+            }
+            else if (field_config.embedded_collection) {
+                EmbeddedCollection_1.EmbeddedCollection.handle(element, pre_element, field_key, field_config);
+            }
+            else {
+                if (!pre_element.hasOwnProperty(field_key)) {
+                    return;
                 }
-                collection.buildOrMerge(response.data);
+                var field_value = pre_element[field_key];
+                element.fields[field_key] = field_value;
             }
         });
-        return promise;
     }
-    CollectionActions.executeGetOne = executeGetOne;
-    function executeCustom(collection, action_name, action_config, action_options) {
-        if (!action_options) {
-            action_options = {};
-        }
-        var data = action_options.data;
-        var method = action_config.method.toUpperCase();
-        return Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection(collection, { suffix: action_config.path || action_name, params: action_options.params }), method, data, action_options.headers);
-    }
-    CollectionActions.executeCustom = executeCustom;
-})(CollectionActions = exports.CollectionActions || (exports.CollectionActions = {}));
+    Fields.setup = setup;
+})(Fields = exports.Fields || (exports.Fields = {}));
 
 
 /***/ }),
@@ -1241,11 +1205,140 @@ var CollectionActions;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Ajax_1 = __webpack_require__(3);
+var Util_1 = __webpack_require__(1);
+var HasMany_1 = __webpack_require__(11);
+var HasOne_1 = __webpack_require__(18);
+var BelongsTo_1 = __webpack_require__(19);
+var Relations;
+(function (Relations) {
+    function setup(element, relations_config_maps) {
+        Util_1.Util.forEach(relations_config_maps.has_many, function (relation_config, relation_collection_name) {
+            HasMany_1.HasMany.setup(element, relation_collection_name, relation_config);
+        });
+        Util_1.Util.forEach(relations_config_maps.has_one, function (relation_config, relation_collection_singular_name) {
+            HasOne_1.HasOne.setup(element, relation_collection_singular_name, relation_config);
+        });
+        Util_1.Util.forEach(relations_config_maps.belongs_to, function (relation_config, relation_collection_singular_name) {
+            BelongsTo_1.BelongsTo.setup(element, relation_collection_singular_name, relation_config);
+        });
+    }
+    Relations.setup = setup;
+})(Relations = exports.Relations || (exports.Relations = {}));
+
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var HasMany_1 = __webpack_require__(11);
+var SchemeHelper_1 = __webpack_require__(5);
+var Util_1 = __webpack_require__(1);
+var HasOne;
+(function (HasOne) {
+    function setup(element, relation_collection_singular_name, relation_config) {
+        var relation_collection;
+        var collection = element.collection();
+        var collection_config = element.collection().configuration();
+        var scheme = collection.scheme();
+        if (relation_config.collection) {
+            relation_collection = scheme.select(relation_config.collection);
+        }
+        else {
+            relation_collection = SchemeHelper_1.SchemeHelper.getCollectionBySingularName(scheme, relation_collection_singular_name);
+        }
+        return element.relations[Util_1.Util.camelize(relation_collection_singular_name)] = function () {
+            return HasMany_1.HasMany.getHasManyRelationFunction(element, collection, relation_config, relation_collection, true)()[0];
+        };
+    }
+    HasOne.setup = setup;
+})(HasOne = exports.HasOne || (exports.HasOne = {}));
+
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Element_1 = __webpack_require__(4);
+var Util_1 = __webpack_require__(1);
+var SchemeHelper_1 = __webpack_require__(5);
+var BelongsTo;
+(function (BelongsTo) {
+    function setup(element, relation_collection_singular_name, relation_config) {
+        var field_key;
+        var relation_collection;
+        var collection = element.collection();
+        // TODO should be reference
+        if (relation_config.polymorphic) {
+            var collection_field_key_1 = relation_config.collection_field || relation_collection_singular_name + "_collection";
+            field_key = relation_config.field;
+            element.relations[Util_1.Util.camelize(relation_collection_singular_name)] = function () {
+                return getPolymorphicBelongsToElement(element, field_key, collection_field_key_1, relation_collection_singular_name);
+            };
+        }
+        else { // normal
+            var scheme = collection.scheme();
+            if (relation_config.collection) {
+                relation_collection = collection.scheme().select(relation_config.collection);
+            }
+            else {
+                relation_collection = SchemeHelper_1.SchemeHelper.getCollectionBySingularName(scheme, relation_collection_singular_name);
+            }
+            field_key = relation_config.field || relation_collection_singular_name + "_" + scheme.configuration().selector;
+            element.relations[Util_1.Util.camelize(relation_collection_singular_name)] = function () {
+                return getBelongsToElement(element, relation_collection, field_key);
+            };
+        }
+    }
+    BelongsTo.setup = setup;
+    var getBelongsToElement = function (element, relation_collection, field_key) {
+        var selector_value = element.fields[field_key];
+        if (Element_1.isSelectorValue(selector_value)) {
+            return relation_collection.find(selector_value) || null;
+        }
+        else {
+            return undefined;
+        }
+    };
+    // Gets the polymorphic belongs_to element
+    //
+    // @param {Element} hpe              The element to which the other element belongs
+    // @param {string} field_key                The foreign key, e.g. parent_id.
+    // @param {string} collection_field_key     The field name of the other collection, required, e.g. parent_collection.
+    // @param {string} collection_selector_field The selector name of the other collection, if it was specified, e.g. id. (Will not be looked at if field_key is present)
+    // @param {string} collection_singular_name  e.g. parent
+    //
+    // @return {Element|null}            The related element.
+    var getPolymorphicBelongsToElement = function (element, field_key, collection_field_key, collection_singular_name) {
+        var relation_collection_name = element.fields[collection_field_key];
+        var relation_collection = element.collection().scheme().select(relation_collection_name);
+        if (!field_key) {
+            var selector_key = element.collection().scheme().configuration().selector;
+            field_key = collection_singular_name + "_" + selector_key;
+        }
+        var selector_value = element.fields[field_key];
+        return relation_collection.find(selector_value) || null;
+    };
+})(BelongsTo = exports.BelongsTo || (exports.BelongsTo = {}));
+
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Ajax_1 = __webpack_require__(6);
 var Util_1 = __webpack_require__(1);
 var Errors_1 = __webpack_require__(0);
 var ElementHelper_1 = __webpack_require__(12);
-var UrlHelper_1 = __webpack_require__(6);
+var UrlHelper_1 = __webpack_require__(3);
 var Actions;
 (function (Actions) {
     function setup(element, actions_config) {
@@ -1355,178 +1448,14 @@ var Actions;
 
 
 /***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Util_1 = __webpack_require__(1);
-// import { Scheme } from '../../Scheme';
-// import { ElpongError } from '../../Errors';
-var EmbeddedElement_1 = __webpack_require__(10);
-var EmbeddedCollection_1 = __webpack_require__(9);
-var Fields;
-(function (Fields) {
-    function setup(element, fields_config_map, pre_element) {
-        Util_1.Util.forEach(fields_config_map, function (field_config, field_key) {
-            if (field_config.embedded_element) {
-                EmbeddedElement_1.EmbeddedElement.handle(element, pre_element, field_key, field_config);
-            }
-            else if (field_config.embedded_collection) {
-                EmbeddedCollection_1.EmbeddedCollection.handle(element, pre_element, field_key, field_config);
-            }
-            else {
-                if (!pre_element.hasOwnProperty(field_key)) {
-                    return;
-                }
-                var field_value = pre_element[field_key];
-                element.fields[field_key] = field_value;
-            }
-        });
-    }
-    Fields.setup = setup;
-})(Fields = exports.Fields || (exports.Fields = {}));
-
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Util_1 = __webpack_require__(1);
-var HasMany_1 = __webpack_require__(11);
-var HasOne_1 = __webpack_require__(21);
-var BelongsTo_1 = __webpack_require__(20);
-var Relations;
-(function (Relations) {
-    function setup(element, relations_config_maps) {
-        Util_1.Util.forEach(relations_config_maps.has_many, function (relation_config, relation_collection_name) {
-            HasMany_1.HasMany.setup(element, relation_collection_name, relation_config);
-        });
-        Util_1.Util.forEach(relations_config_maps.has_one, function (relation_config, relation_collection_singular_name) {
-            HasOne_1.HasOne.setup(element, relation_collection_singular_name, relation_config);
-        });
-        Util_1.Util.forEach(relations_config_maps.belongs_to, function (relation_config, relation_collection_singular_name) {
-            BelongsTo_1.BelongsTo.setup(element, relation_collection_singular_name, relation_config);
-        });
-    }
-    Relations.setup = setup;
-})(Relations = exports.Relations || (exports.Relations = {}));
-
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Element_1 = __webpack_require__(4);
-var Util_1 = __webpack_require__(1);
-var SchemeHelper_1 = __webpack_require__(5);
-var BelongsTo;
-(function (BelongsTo) {
-    function setup(element, relation_collection_singular_name, relation_config) {
-        var field_key;
-        var relation_collection;
-        var collection = element.collection();
-        // TODO should be reference
-        if (relation_config.polymorphic) {
-            var collection_field_key_1 = relation_config.collection_field || relation_collection_singular_name + "_collection";
-            field_key = relation_config.field;
-            element.relations[Util_1.Util.camelize(relation_collection_singular_name)] = function () {
-                return getPolymorphicBelongsToElement(element, field_key, collection_field_key_1, relation_collection_singular_name);
-            };
-        }
-        else {
-            var scheme = collection.scheme();
-            if (relation_config.collection) {
-                relation_collection = collection.scheme().select(relation_config.collection);
-            }
-            else {
-                relation_collection = SchemeHelper_1.SchemeHelper.getCollectionBySingularName(scheme, relation_collection_singular_name);
-            }
-            field_key = relation_config.field || relation_collection_singular_name + "_" + scheme.configuration().selector;
-            element.relations[Util_1.Util.camelize(relation_collection_singular_name)] = function () {
-                return getBelongsToElement(element, relation_collection, field_key);
-            };
-        }
-    }
-    BelongsTo.setup = setup;
-    var getBelongsToElement = function (element, relation_collection, field_key) {
-        var selector_value = element.fields[field_key];
-        if (Element_1.isSelectorValue(selector_value)) {
-            return relation_collection.find(selector_value) || null;
-        }
-        else {
-            return undefined;
-        }
-    };
-    // Gets the polymorphic belongs_to element
-    //
-    // @param {Element} hpe              The element to which the other element belongs
-    // @param {string} field_key                The foreign key, e.g. parent_id.
-    // @param {string} collection_field_key     The field name of the other collection, required, e.g. parent_collection.
-    // @param {string} collection_selector_field The selector name of the other collection, if it was specified, e.g. id. (Will not be looked at if field_key is present)
-    // @param {string} collection_singular_name  e.g. parent
-    //
-    // @return {Element|null}            The related element.
-    var getPolymorphicBelongsToElement = function (element, field_key, collection_field_key, collection_singular_name) {
-        var relation_collection_name = element.fields[collection_field_key];
-        var relation_collection = element.collection().scheme().select(relation_collection_name);
-        if (!field_key) {
-            var selector_key = element.collection().scheme().configuration().selector;
-            field_key = collection_singular_name + "_" + selector_key;
-        }
-        var selector_value = element.fields[field_key];
-        return relation_collection.find(selector_value) || null;
-    };
-})(BelongsTo = exports.BelongsTo || (exports.BelongsTo = {}));
-
-
-/***/ }),
 /* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var HasMany_1 = __webpack_require__(11);
-var SchemeHelper_1 = __webpack_require__(5);
 var Util_1 = __webpack_require__(1);
-var HasOne;
-(function (HasOne) {
-    function setup(element, relation_collection_singular_name, relation_config) {
-        var relation_collection;
-        var collection = element.collection();
-        var collection_config = element.collection().configuration();
-        var scheme = collection.scheme();
-        if (relation_config.collection) {
-            relation_collection = scheme.select(relation_config.collection);
-        }
-        else {
-            relation_collection = SchemeHelper_1.SchemeHelper.getCollectionBySingularName(scheme, relation_collection_singular_name);
-        }
-        return element.relations[Util_1.Util.camelize(relation_collection_singular_name)] = function () {
-            return HasMany_1.HasMany.getHasManyRelationFunction(element, collection, relation_config, relation_collection, true)()[0];
-        };
-    }
-    HasOne.setup = setup;
-})(HasOne = exports.HasOne || (exports.HasOne = {}));
-
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Util_1 = __webpack_require__(1);
-var Snapshot_1 = __webpack_require__(24);
+var Snapshot_1 = __webpack_require__(22);
 var Errors_1 = __webpack_require__(0);
 var Snapshots;
 (function (Snapshots) {
@@ -1687,64 +1616,7 @@ var Snapshots;
 
 
 /***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Collection_1 = __webpack_require__(13);
-var Configuration_1 = __webpack_require__(14);
-var Errors_1 = __webpack_require__(0);
-var Helpers_1 = __webpack_require__(8);
-var Elpong_1 = __webpack_require__(7);
-var Scheme = /** @class */ (function () {
-    function Scheme(preSchemeConfiguration) {
-        var sc = new Configuration_1.SchemeConfiguration(preSchemeConfiguration);
-        this._configuration = sc;
-        this.name = sc.name;
-        this._collections = {};
-        // Create collections
-        for (var collection_name in sc.collections) {
-            var collection_settings = sc.collections[collection_name];
-            var collection = new Collection_1.Collection(this, collection_name);
-            this._collections[collection_name] = collection;
-        }
-        if (Elpong_1.Elpong.isAutoloadEnabled()) {
-            for (var collection_name in sc.collections) {
-                this._collections[collection_name].load(true);
-            }
-        }
-    }
-    Scheme.prototype.configuration = function () {
-        return this._configuration;
-    };
-    Scheme.prototype.select = function (name) {
-        var collection;
-        if (collection = this._collections[name]) {
-            return collection;
-        }
-        else {
-            throw new Errors_1.ElpongError('collnf', name);
-        }
-    };
-    Scheme.prototype.setApiUrl = function (url) {
-        var trimmed_url = Helpers_1.UrlHelper.trimSlashes(url);
-        return this.api_url = Helpers_1.UrlHelper.isFqdn(trimmed_url) ? trimmed_url : "/" + trimmed_url;
-    };
-    Scheme.prototype.getApiUrl = function () {
-        return this.api_url;
-    };
-    Scheme.prototype.getCollections = function () {
-        return this._collections;
-    };
-    return Scheme;
-}());
-exports.Scheme = Scheme;
-
-
-/***/ }),
-/* 24 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1777,13 +1649,162 @@ exports.Snapshot = Snapshot;
 
 
 /***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Ajax_1 = __webpack_require__(6);
+var UrlHelper_1 = __webpack_require__(3);
+var Errors_1 = __webpack_require__(0);
+var CollectionActions;
+(function (CollectionActions) {
+    function executeGetAll(collection, action_options) {
+        if (action_options === void 0) { action_options = {}; }
+        if (!action_options) {
+            action_options = {};
+        }
+        if (action_options.data) {
+            throw new Errors_1.ElpongError('acgtda');
+        }
+        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection(collection, { params: action_options.params || {} }), 'GET', undefined, action_options.headers);
+        promise.then(function (response) {
+            response.data.map(function (pre_element) {
+                collection.buildOrMerge(pre_element);
+            });
+        });
+        return promise;
+    }
+    CollectionActions.executeGetAll = executeGetAll;
+    function executeGetOne(collection, selector_value, action_options) {
+        if (action_options === void 0) { action_options = {}; }
+        if (action_options.data) {
+            throw new Errors_1.ElpongError('acgtda');
+        }
+        var url_options = {
+            suffix: selector_value,
+            params: action_options.params || {}
+        };
+        var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection(collection, url_options), 'GET', undefined, action_options.headers);
+        promise.then(function (response) {
+            if (response.data) {
+                var selector_key = collection.scheme().configuration().selector;
+                if (response.data[selector_key] !== selector_value) {
+                    throw new Errors_1.ElpongError('elesnm', response.data[selector_key] + " != " + selector_value);
+                }
+                collection.buildOrMerge(response.data);
+            }
+        });
+        return promise;
+    }
+    CollectionActions.executeGetOne = executeGetOne;
+    function executeCustom(collection, action_name, action_config, action_options) {
+        if (!action_options) {
+            action_options = {};
+        }
+        var data = action_options.data;
+        var method = action_config.method.toUpperCase();
+        return Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection(collection, { suffix: action_config.path || action_name, params: action_options.params }), method, data, action_options.headers);
+    }
+    CollectionActions.executeCustom = executeCustom;
+})(CollectionActions = exports.CollectionActions || (exports.CollectionActions = {}));
+
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Util_1 = __webpack_require__(1);
+var supportsMap = typeof Map !== 'undefined' && (new Map()).values;
+var FakeMap = /** @class */ (function () {
+    function FakeMap() {
+        // in IE 11, Map#values doesn't exist. Don't bother about that.
+        this.hasRealMap = supportsMap;
+        this.map = supportsMap ? new Map() : {};
+    }
+    FakeMap.prototype.get = function (k) {
+        return supportsMap ? this.map.get(k) : this.map[k];
+    };
+    FakeMap.prototype.set = function (k, v) {
+        if (supportsMap) {
+            this.map.set(k, v);
+        }
+        else {
+            this.map[k] = v;
+        }
+        ;
+        return this;
+    };
+    FakeMap.prototype.has = function (k) {
+        return supportsMap ? this.map.has(k) : !!this.map[k];
+    };
+    FakeMap.prototype.values = function () {
+        // if Map is there, Array.from should also be there
+        return supportsMap ? Array.from(this.map.values()) : Util_1.Util.values(this.map);
+    };
+    FakeMap.prototype.delete = function (k) {
+        if (supportsMap) {
+            this.map.delete(k);
+        }
+        else {
+            delete this.map[k];
+        }
+    };
+    return FakeMap;
+}());
+exports.FakeMap = FakeMap;
+
+
+/***/ }),
 /* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var Elpong_1 = __webpack_require__(7);
-module.exports = Elpong_1.Elpong;
+Object.defineProperty(exports, "__esModule", { value: true });
+var Errors_1 = __webpack_require__(0);
+if (typeof DEBUG === 'undefined') {
+    var DEBUG = true;
+}
+var SchemeConfiguration = /** @class */ (function () {
+    function SchemeConfiguration(preconf) {
+        this.name = preconf.name;
+        if (DEBUG && !this.name) {
+            throw new Errors_1.ElpongError('confnn');
+        }
+        this.selector = preconf.selector;
+        if (DEBUG && !this.selector) {
+            throw new Errors_1.ElpongError('confns', preconf.name);
+        }
+        this.collections = {};
+        for (var collection_name in preconf.collections) {
+            var collection_preconf = preconf.collections[collection_name];
+            var collection_configuration = this.collections[collection_name] = {
+                singular: collection_preconf.singular || collection_name.slice(0, -1)
+            };
+            var props = ['fields', 'relations', 'actions', 'collection_actions'];
+            var relation_types = ['has_many', 'has_one', 'belongs_to'];
+            for (var _i = 0, props_1 = props; _i < props_1.length; _i++) {
+                var prop = props_1[_i];
+                collection_configuration[prop] = collection_preconf[prop] || {};
+            }
+            var relations_conf = void 0;
+            if (relations_conf = collection_preconf.relations) {
+                for (var _a = 0, relation_types_1 = relation_types; _a < relation_types_1.length; _a++) {
+                    var relation_type = relation_types_1[_a];
+                    relations_conf[relation_type] =
+                        collection_preconf.relations[relation_type] || {};
+                }
+            }
+        }
+    }
+    return SchemeConfiguration;
+}());
+exports.SchemeConfiguration = SchemeConfiguration;
 
 
 /***/ })
