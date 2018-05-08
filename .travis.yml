@@ -2,7 +2,7 @@ language: node_js
 node_js:
 - node # latest stable release
 install:
-- npm install -g gulp-cli coffee-script
+- npm install -g gulp-cli coffeescript
 - npm install
 script: gulp test:travis
 addons:

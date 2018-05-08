@@ -1,4 +1,5 @@
 module.exports = {
+  mode: 'production',
   entry: './src/entry',
   output: {
     filename: 'elpong.js',
@@ -11,8 +12,11 @@ module.exports = {
   resolve: {
     extensions: ['.ts']
   },
+  optimization: {
+    minimize: false
+  },
   module: {
-    loaders: [
+    rules: [
       { test: /\.ts$/, loader: 'awesome-typescript-loader' }
     ]
   }

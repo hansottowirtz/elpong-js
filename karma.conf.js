@@ -87,11 +87,12 @@ module.exports = function(config) {
     singleRun: true,
     concurrency: Infinity,
     webpack: {
+      mode: 'development',
       resolve: {
         extensions: ['.ts', '.coffee', '.js', '.json']
       },
       module: {
-        loaders: [
+        rules: [
           { test: /\.coffee$/, loader: 'coffee-loader' },
           { test: /\.ts$/, loader: 'awesome-typescript-loader' },
           { test: /\.json5$/,  loader: 'json5-loader' }
@@ -115,7 +116,7 @@ module.exports = function(config) {
       config.files.unshift('node_modules/angular/angular.js', 'node_modules/angular-mocks/angular-mocks.js');
       break;
     default: // fetch
-      config.files.unshift('node_modules/promise-polyfill/promise.js', 'node_modules/whatwg-fetch/fetch.js', 'node_modules/fetch-mock/es5/client-browserified.js');
+      config.files.unshift('node_modules/promise-polyfill/dist/polyfill.js', 'node_modules/whatwg-fetch/fetch.js', 'node_modules/fetch-mock/dist/es5/client-bundle.js');
   }
   if (process.env.TRAVIS) {
     config.reporters.push('saucelabs')

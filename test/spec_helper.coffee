@@ -1,4 +1,5 @@
 Elpong = require('../src/Elpong').Elpong
+fetchMock = require('fetch-mock')
 
 FRAMEWORK = process.env.FRAMEWORK || 'fetch'
 
@@ -48,7 +49,7 @@ do ->
       # )
 
       afterEach ->
-        # $.mockjax.clear()
+        $.mockjax.clear() # This was uncommented before, which made some tests fail
 
       class HttpBackend
         reply: (method, url, data, status = 200, fn) ->
