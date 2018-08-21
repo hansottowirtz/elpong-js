@@ -138,8 +138,7 @@ the response object.
 
 #### Relations
 
-You can find other elements on the `relations` key. These functions always start
-with `get`.
+You can find other elements on the `relations` key. 
 
 Example:
 ```javascript
@@ -256,7 +255,7 @@ Fork it, then do something like this:
 git clone https://github.com/<you>/elpong-js
 cd elpong-js
 git checkout -b add-a-feature
-npm install -g gulp-cli coffee-script typescript
+npm install -g gulp-cli coffeescript typescript
 npm install
 gulp test
 ```
