@@ -7,7 +7,7 @@
 		exports["elpong"] = factory();
 	else
 		root["elpong"] = factory();
-})(window, function() {
+})(typeof self !== 'undefined' ? self : this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -1810,4 +1810,3 @@ exports.SchemeConfiguration = SchemeConfiguration;
 /***/ })
 /******/ ]);
 });
-//# sourceMappingURL=elpong.js.map

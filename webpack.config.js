@@ -6,9 +6,10 @@ module.exports = {
     path: __dirname + '/dist',
     library: 'elpong',
     libraryTarget: 'umd',
-    umdNamedDefine: true
+    umdNamedDefine: true,
+    // https://github.com/webpack/webpack/issues/6522#issuecomment-366708234
+    globalObject: 'typeof self !== \'undefined\' ? self : this'
   },
-  devtool: 'source-map',
   resolve: {
     extensions: ['.ts']
   },

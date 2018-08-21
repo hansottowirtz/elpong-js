@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "outDir": "./built/",
+    "target": "es5",
+    "module": "commonjs"
+  },
+  "include": [
+    "ts-app.ts"
+  ],
+  "typings": ["elpong"],
+  "compileOnSave": false
+}
