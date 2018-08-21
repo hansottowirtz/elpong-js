@@ -85,9 +85,11 @@ do ->
         reply: (method, url, data, status = 200, fn) ->
           fetchMock.mock matcher: url, method: method, response: (_url, _options) ->
             fn(JSON.parse(_options.body)) if fn && _options.body
-            response_data = JSON.stringify(data)
             response_headers = if status isnt 204 then {'Content-Type': 'application/json'} else {}
-            return {body: response_data, status: status, headers: response_headers}
+            response = {status: status, headers: response_headers}
+            if status isnt 204
+              response.body = JSON.stringify(data)
+            response
         expect: -> @reply.apply(@, arguments)
         flush: (->)
         done: (fn) -> fn()
