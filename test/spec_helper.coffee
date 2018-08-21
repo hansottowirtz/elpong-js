@@ -1,5 +1,6 @@
 Elpong = require('../src/Elpong').Elpong
-fetchMock = require('fetch-mock')
+require('es6-promise').polyfill()
+require('isomorphic-fetch')
 
 FRAMEWORK = process.env.FRAMEWORK || 'fetch'
 
@@ -72,8 +73,6 @@ do ->
         done: (fn) -> fn()
 
     when 'fetch'
-      require('es6-promise').polyfill()
-      fetch = require('whatwg-fetch')
       fetchMock = require('fetch-mock')
 
       fetchMock._mock() # set window.fetch to mock
