@@ -115,8 +115,6 @@ module.exports = function(config) {
     case 'angular':
       config.files.unshift('node_modules/angular/angular.js', 'node_modules/angular-mocks/angular-mocks.js');
       break;
-    default: // fetch
-      config.files.unshift('node_modules/promise-polyfill/dist/polyfill.js', 'node_modules/whatwg-fetch/fetch.js', 'node_modules/fetch-mock/dist/es5/client-bundle.js');
   }
   if (process.env.TRAVIS) {
     config.reporters.push('saucelabs')
