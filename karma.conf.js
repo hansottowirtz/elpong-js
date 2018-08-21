@@ -17,10 +17,10 @@ module.exports = function(config) {
       browserName: 'firefox',
       version: '10'
     },
-    'SL_Firefox_dev': {
+    'SL_Firefox_beta': {
       base: 'SauceLabs',
       browserName: 'firefox',
-      version: 'dev'
+      version: 'beta'
     },
     'SL_Safari_9': {
       base: 'SauceLabs',
