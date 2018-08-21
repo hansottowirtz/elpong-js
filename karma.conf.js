@@ -81,7 +81,7 @@ module.exports = function(config) {
     reporters: ['progress'],
     port: 9876,
     colors: true,
-    logLevel: config.LOG_DEBUG,
+    logLevel: config.LOG_INFO,
     autoWatch: false,
     browsers: Object.keys(customLaunchers), // overridden by certain gulp tasks
     singleRun: true,
@@ -116,7 +116,7 @@ module.exports = function(config) {
       config.files.unshift('node_modules/angular/angular.js', 'node_modules/angular-mocks/angular-mocks.js');
       break;
     default: // fetch
-      config.files.unshift('node_modules/promise-polyfill/promise.js', 'node_modules/whatwg-fetch/fetch.js', 'node_modules/fetch-mock/es5/client-browserified.js');
+      config.files.unshift('node_modules/fetch-mock/es5/client-browserified.js', 'node_modules/promise-polyfill/promise.js', 'node_modules/whatwg-fetch/fetch.js');
   }
   if (process.env.TRAVIS) {
     config.reporters.push('saucelabs')
