@@ -72,6 +72,10 @@ do ->
         done: (fn) -> fn()
 
     when 'fetch'
+      require('es6-promise').polyfill()
+      fetch = require('whatwg-fetch')
+      fetchMock = require('fetch-mock')
+
       fetchMock._mock() # set window.fetch to mock
       Elpong.setAjax(fetch, 'fetch')
 
