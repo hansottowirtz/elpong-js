@@ -80,6 +80,10 @@ module.exports = function(config) {
     browsers: Object.keys(customLaunchers), // overridden by certain gulp tasks
     singleRun: true,
     concurrency: Infinity,
+    mime: {
+      // fix Chrome .ts https://github.com/angular/angular-cli/issues/2125
+			'text/x-typescript': ['ts']
+		},
     webpack: {
       mode: 'development',
       resolve: {
