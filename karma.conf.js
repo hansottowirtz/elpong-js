@@ -17,10 +17,10 @@ module.exports = function(config) {
       browserName: 'firefox',
       version: '10'
     },
-    'SL_Firefox_dev': {
+    'SL_Firefox_beta': {
       base: 'SauceLabs',
       browserName: 'firefox',
-      version: 'dev'
+      version: 'beta'
     },
     'SL_Safari_9': {
       base: 'SauceLabs',
@@ -31,12 +31,6 @@ module.exports = function(config) {
       base: 'SauceLabs',
       browserName: 'safari',
       version: '10'
-    },
-    'SL_IE_9': {
-      base: 'SauceLabs',
-      browserName: 'internet explorer',
-      platform: 'Windows 7',
-      version: '9'
     },
     'SL_IE_11': {
       base: 'SauceLabs',
@@ -87,11 +81,12 @@ module.exports = function(config) {
     singleRun: true,
     concurrency: Infinity,
     webpack: {
+      mode: 'development',
       resolve: {
         extensions: ['.ts', '.coffee', '.js', '.json']
       },
       module: {
-        loaders: [
+        rules: [
           { test: /\.coffee$/, loader: 'coffee-loader' },
           { test: /\.ts$/, loader: 'awesome-typescript-loader' },
           { test: /\.json5$/,  loader: 'json5-loader' }
@@ -114,8 +109,6 @@ module.exports = function(config) {
     case 'angular':
       config.files.unshift('node_modules/angular/angular.js', 'node_modules/angular-mocks/angular-mocks.js');
       break;
-    default: // fetch
-      config.files.unshift('node_modules/promise-polyfill/promise.js', 'node_modules/whatwg-fetch/fetch.js', 'node_modules/fetch-mock/es5/client-browserified.js');
   }
   if (process.env.TRAVIS) {
     config.reporters.push('saucelabs')

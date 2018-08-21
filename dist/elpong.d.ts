@@ -498,6 +498,12 @@ declare module 'elpong/Collection' {
 	}
 
 }
+declare module 'elpong/PreElement' {
+	export interface PreElement {
+	    [prop: string]: any;
+	}
+
+}
 declare module 'elpong/entry' {
 	import { Elpong } from 'elpong/Elpong';
 	export = Elpong;
@@ -512,12 +518,6 @@ declare module 'elpong/main' {
 	export { Snapshot } from 'elpong/Snapshot';
 	export { Util } from 'elpong/Util';
 	export { SchemeConfiguration, PreSchemeConfiguration, CollectionConfiguration, CollectionConfigurationMap, CollectionActionConfiguration, CollectionActionConfigurationMap, CollectionConfigurationWithOptionals, CollectionConfigurationMapWithOptionals, FieldConfiguration, FieldConfigurationMap, RelationConfiguration, RelationConfigurationMaps, HasOneRelationConfiguration, HasManyRelationConfiguration, BelongsToRelationConfiguration, HasOneRelationConfigurationMap, HasManyRelationConfigurationMap, BelongsToRelationConfigurationMap, EmbeddedElementFieldConfiguration, BelongsToRelationConfigurationBase, EmbeddedCollectionFieldConfiguration, RelationConfigurationMapsWithOptionals, ActionConfiguration, ActionConfigurationMap, PolymorphicBelongsToRelationConfiguration, NonPolymorphicBelongsToRelationConfiguration } from 'elpong/Configuration';
-
-}
-declare module 'elpong/PreElement' {
-	export interface PreElement {
-	    [prop: string]: any;
-	}
 
 }
 declare module 'elpong' {
