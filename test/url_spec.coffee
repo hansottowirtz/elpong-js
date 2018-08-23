@@ -1,5 +1,5 @@
 UrlHelper = require('../src/Helpers/UrlHelper').UrlHelper
-Elpong = require('../src/Elpong').Elpong
+elpong = require('../src/main').default
 
 describe 'UrlHelper', ->
   it 'can add params to url', ->

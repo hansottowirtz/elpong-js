@@ -1,4 +1,4 @@
-elpong = require('../src/main').elpong
+elpong = require('../src/main').default
 
 describe 'Elpong', ->
   elements = []

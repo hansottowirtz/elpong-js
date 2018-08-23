@@ -51,12 +51,10 @@ module.exports = function(config) {
     frameworks: ['jasmine'],
     files: [
       'src/**/*.ts',
+      'test/**/*.ts',
       'test/**/*.coffee',
-      'test/**/*.ts'
     ],
-    exclude: [
-      'test/apps/*'
-    ],
+    exclude: [],
     preprocessors: {
       '**/*.ts': ENABLE_SOURCEMAPS ? ['webpack', 'sourcemap'] : ['webpack'],
       '**/*.coffee': ENABLE_SOURCEMAPS ? ['webpack', 'sourcemap'] : ['webpack'],
