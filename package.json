@@ -1,6 +1,6 @@
 {
   "name": "elpong",
-  "version": "1.0.0-beta.9",
+  "version": "1.0.0-beta.10",
   "description": "Elpong for Javascript",
   "main": "./dist/elpong.js",
   "types": "./dist/elpong.d.ts",
