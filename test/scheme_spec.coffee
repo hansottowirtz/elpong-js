@@ -1,12 +1,12 @@
-Elpong = require('../src/Elpong').Elpong
+elpong = require('../src/main').default
 
 describe 'Scheme', ->
   describe 'pulser', ->
     beforeAll ->
-      @scheme = Elpong.add(require('./fixtures/pulser/scheme.json5'))
+      @scheme = elpong.add(require('./fixtures/pulser/scheme.json5'))
 
     it 'should be existing', ->
-      expect(Elpong.get('pulser')).toBeDefined()
+      expect(elpong.get('pulser')).toBeDefined()
 
     it 'should have a data attribute, equal to the creation argument', ->
       expect(@scheme.data).toBe(@pre_scheme)

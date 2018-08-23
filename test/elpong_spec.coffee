@@ -1,4 +1,4 @@
-Elpong = require('../src/Elpong').Elpong
+elpong = require('../src/main').default
 
 describe 'Elpong', ->
   elements = []
@@ -7,16 +7,16 @@ describe 'Elpong', ->
     for e in elements
       e.parentNode.removeChild(e)
     elements = []
-    Elpong.tearDown()
+    elpong.tearDown()
 
   it 'can have autoload enabled', ->
-    Elpong.enableAutoload()
-    expect(Elpong.isAutoloadEnabled()).toBe(true)
+    elpong.enableAutoload()
+    expect(elpong.isAutoloadEnabled()).toBe(true)
 
   it 'autoloads schemes', ->
     return if !document?
 
-    expect(-> Elpong.get('pulser')).toThrow()
+    expect(-> elpong.get('pulser')).toThrow()
 
     head = document.getElementsByTagName('head')[0]
 
@@ -46,11 +46,11 @@ describe 'Elpong', ->
       head.appendChild meta
       elements.push meta
 
-    Elpong.enableAutoload()
+    elpong.enableAutoload()
 
     scheme = null
 
-    expect(-> scheme = Elpong.get('pulser')).not.toThrow()
+    expect(-> scheme = elpong.get('pulser')).not.toThrow()
 
     device = scheme.select('devices').find(1)
     plug2 = scheme.select('plugs').find(2)
@@ -60,9 +60,9 @@ describe 'Elpong', ->
     expect(plug2.relations.block()).toBe(device)
 
   it 'throws if no scheme tags found', ->
-    expect(-> Elpong.load()).toThrow()
+    expect(-> elpong.load()).toThrow()
 
   it 'throws if no collection or element tags found', ->
-    @scheme = Elpong.add(require('./fixtures/pulser/scheme.json5'))
+    @scheme = elpong.add(require('./fixtures/pulser/scheme.json5'))
     @users = @scheme.select('users')
     expect(-> @users.load()).toThrow()

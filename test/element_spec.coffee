@@ -1,10 +1,10 @@
-Elpong = require('../src/Elpong').Elpong
+elpong = require('../src/main').default
 HttpBackend = require('./spec_helper').HttpBackend
 
 describe 'Element', ->
   describe 'stupid farm', ->
     beforeEach ->
-      @scheme = Elpong.add(require('./fixtures/stupid-farm/scheme.json5'))
+      @scheme = elpong.add(require('./fixtures/stupid-farm/scheme.json5'))
 
     it 'should have the right fields', ->
       collection = @scheme.select('geese')
@@ -33,7 +33,7 @@ describe 'Element', ->
 
   describe 'pulser', ->
     beforeEach ->
-      @scheme = Elpong.add(require('./fixtures/pulser/scheme.json5'))
+      @scheme = elpong.add(require('./fixtures/pulser/scheme.json5'))
 
     it 'should have working polymorphic associations', ->
       plugs = @scheme.select('plugs')
@@ -65,7 +65,7 @@ describe 'Element', ->
 
   describe 'clothes', ->
     beforeEach ->
-      @scheme = Elpong.add(require('./fixtures/clothes/scheme.json5'))
+      @scheme = elpong.add(require('./fixtures/clothes/scheme.json5'))
 
     it 'should work', ->
       workers = @scheme.select('workers')

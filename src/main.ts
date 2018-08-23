@@ -1,4 +1,4 @@
-export { Elpong } from './Elpong';
+export { Elpong as default } from './Elpong';
 export {
   Scheme,
   CollectionMap
@@ -15,11 +15,11 @@ export {
 } from './Collection';
 export {
   Element,
-  PreElement,
   SelectorValue,
   Fields, Relations, Actions, Snapshots,
   RelationFunction, ActionFunction
 } from './Element';
+export { PreElement } from './PreElement';
 export { ElpongError } from './Errors';
 export { Snapshot } from './Snapshot';
 export { Util } from './Util';

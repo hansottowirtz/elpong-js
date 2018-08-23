@@ -1,4 +1,4 @@
-Elpong = require('../src/Elpong').Elpong
+elpong = require('../src/main').default
 HttpBackend = require('./spec_helper').HttpBackend
 
 describe 'Element', ->
@@ -8,7 +8,7 @@ describe 'Element', ->
     beforeEach ->
       httpBackend = new HttpBackend()
 
-      @scheme = Elpong.add(require('./fixtures/pulser/scheme.json5'))
+      @scheme = elpong.add(require('./fixtures/pulser/scheme.json5'))
 
       @scheme.setApiUrl('/api/v1')
 
@@ -31,7 +31,7 @@ describe 'Element', ->
       httpBackend.flush()
 
     it 'embedded element should be added', (done) ->
-      scheme = Elpong.add(require('./fixtures/stupid-farm/scheme.json5'))
+      scheme = elpong.add(require('./fixtures/stupid-farm/scheme.json5'))
 
       scheme.setApiUrl('/api/v1')
 

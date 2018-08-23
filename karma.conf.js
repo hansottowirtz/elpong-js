@@ -51,8 +51,8 @@ module.exports = function(config) {
     frameworks: ['jasmine'],
     files: [
       'src/**/*.ts',
+      'test/**/*.ts',
       'test/**/*.coffee',
-      'test/**/*.ts'
     ],
     exclude: [],
     preprocessors: {
@@ -75,7 +75,7 @@ module.exports = function(config) {
     reporters: ['progress'],
     port: 9876,
     colors: true,
-    logLevel: config.LOG_INFO,
+    logLevel: config.LOG_DEBUG,
     autoWatch: false,
     browsers: Object.keys(customLaunchers), // overridden by certain gulp tasks
     singleRun: true,

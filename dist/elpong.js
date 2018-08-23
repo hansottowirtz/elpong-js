@@ -7,7 +7,7 @@
 		exports["elpong"] = factory();
 	else
 		root["elpong"] = factory();
-})(window, function() {
+})(typeof self !== 'undefined' ? self : this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -91,7 +91,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 13);
+/******/ 	return __webpack_require__(__webpack_require__.s = 17);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -351,79 +351,13 @@ var CollectionHelper;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Errors_1 = __webpack_require__(0);
-var UrlHelper;
-(function (UrlHelper) {
-    function createForElement(element, url_options) {
-        var path, url;
-        var collection = element.collection();
-        var scheme = collection.scheme();
-        var api_url = scheme.getApiUrl();
-        if (!api_url) {
-            throw new Errors_1.ElpongError('apinur');
-        }
-        url = api_url + "/" + collection.name;
-        if (!url_options.no_selector) {
-            url = url + "/" + element.selector();
-        }
-        if (url_options.suffix) {
-            url = url + "/" + url_options.suffix;
-        }
-        if (url_options.params) {
-            url = appendParamsToUrl(url, url_options.params);
-        }
-        return url;
-    }
-    UrlHelper.createForElement = createForElement;
-    function createForCollection(collection, url_options) {
-        var api_url = collection.scheme().getApiUrl();
-        if (!api_url) {
-            throw new Errors_1.ElpongError('apinur');
-        }
-        var url = api_url + "/" + collection.name; //HPP.Helpers.Url.createForCollection(, hpe, user_options) # (action_name, element, user_options = {}, suffix)
-        if (url_options.suffix) {
-            url = url + "/" + url_options.suffix;
-        }
-        if (url_options.params) {
-            url = appendParamsToUrl(url, url_options.params);
-        }
-        return url;
-    }
-    UrlHelper.createForCollection = createForCollection;
-    function trimSlashes(s) {
-        return s.replace(/^\/|\/$/g, '');
-    }
-    UrlHelper.trimSlashes = trimSlashes;
-    function isFqdn(s) {
-        return /^https?:\/\//.test(s);
-    }
-    UrlHelper.isFqdn = isFqdn;
-    function appendParamsToUrl(url, params) {
-        url = url + "?";
-        for (var k in params) {
-            url = "" + url + k + "=" + encodeURIComponent(params[k]) + "&";
-        }
-        url = url.slice(0, -1);
-        return url;
-    }
-    UrlHelper.appendParamsToUrl = appendParamsToUrl;
-})(UrlHelper = exports.UrlHelper || (exports.UrlHelper = {}));
-
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
 var Util_1 = __webpack_require__(1);
-var Fields_1 = __webpack_require__(16);
-var Relations_1 = __webpack_require__(17);
-var Actions_1 = __webpack_require__(20);
-var Snapshots_1 = __webpack_require__(21);
-var EmbeddedElement_1 = __webpack_require__(9);
-var EmbeddedCollection_1 = __webpack_require__(10);
+var Fields_1 = __webpack_require__(18);
+var Relations_1 = __webpack_require__(19);
+var Actions_1 = __webpack_require__(22);
+var Snapshots_1 = __webpack_require__(23);
+var EmbeddedElement_1 = __webpack_require__(11);
+var EmbeddedCollection_1 = __webpack_require__(12);
 var Errors_1 = __webpack_require__(0);
 function isSelectorValue(v) {
     return (!!v || v === 0 || v === '') && (typeof v === 'string' || typeof v === 'number');
@@ -522,6 +456,72 @@ var Element = /** @class */ (function () {
     return Element;
 }());
 exports.Element = Element;
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Errors_1 = __webpack_require__(0);
+var UrlHelper;
+(function (UrlHelper) {
+    function createForElement(element, url_options) {
+        var path, url;
+        var collection = element.collection();
+        var scheme = collection.scheme();
+        var api_url = scheme.getApiUrl();
+        if (!api_url) {
+            throw new Errors_1.ElpongError('apinur');
+        }
+        url = api_url + "/" + collection.name;
+        if (!url_options.no_selector) {
+            url = url + "/" + element.selector();
+        }
+        if (url_options.suffix) {
+            url = url + "/" + url_options.suffix;
+        }
+        if (url_options.params) {
+            url = appendParamsToUrl(url, url_options.params);
+        }
+        return url;
+    }
+    UrlHelper.createForElement = createForElement;
+    function createForCollection(collection, url_options) {
+        var api_url = collection.scheme().getApiUrl();
+        if (!api_url) {
+            throw new Errors_1.ElpongError('apinur');
+        }
+        var url = api_url + "/" + collection.name; //HPP.Helpers.Url.createForCollection(, hpe, user_options) # (action_name, element, user_options = {}, suffix)
+        if (url_options.suffix) {
+            url = url + "/" + url_options.suffix;
+        }
+        if (url_options.params) {
+            url = appendParamsToUrl(url, url_options.params);
+        }
+        return url;
+    }
+    UrlHelper.createForCollection = createForCollection;
+    function trimSlashes(s) {
+        return s.replace(/^\/|\/$/g, '');
+    }
+    UrlHelper.trimSlashes = trimSlashes;
+    function isFqdn(s) {
+        return /^https?:\/\//.test(s);
+    }
+    UrlHelper.isFqdn = isFqdn;
+    function appendParamsToUrl(url, params) {
+        url = url + "?";
+        for (var k in params) {
+            url = "" + url + k + "=" + encodeURIComponent(params[k]) + "&";
+        }
+        url = url.slice(0, -1);
+        return url;
+    }
+    UrlHelper.appendParamsToUrl = appendParamsToUrl;
+})(UrlHelper = exports.UrlHelper || (exports.UrlHelper = {}));
 
 
 /***/ }),
@@ -671,7 +671,7 @@ var Ajax;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Scheme_1 = __webpack_require__(14);
+var Scheme_1 = __webpack_require__(8);
 var Errors_1 = __webpack_require__(0);
 var Util_1 = __webpack_require__(1);
 var Ajax_1 = __webpack_require__(6);
@@ -733,244 +733,10 @@ var Elpong;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var UrlHelper_1 = __webpack_require__(3);
-exports.UrlHelper = UrlHelper_1.UrlHelper;
-var CollectionHelper_1 = __webpack_require__(2);
-exports.CollectionHelper = CollectionHelper_1.CollectionHelper;
-
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var SchemeHelper_1 = __webpack_require__(5);
+var Collection_1 = __webpack_require__(9);
+var Configuration_1 = __webpack_require__(16);
 var Errors_1 = __webpack_require__(0);
-var EmbeddedElement;
-(function (EmbeddedElement) {
-    function handle(element, pre_element, field_key, field_config) {
-        var embedded_element_collection;
-        var embedded_pre_element = pre_element[field_key];
-        if (!embedded_pre_element) {
-            return;
-        }
-        var collection = element.collection();
-        var scheme = collection.scheme();
-        if (field_config.collection) {
-            embedded_element_collection = scheme.select(field_config.collection);
-        }
-        else {
-            embedded_element_collection = SchemeHelper_1.SchemeHelper.getCollectionBySingularName(scheme, field_key);
-        }
-        var embedded_element = embedded_element_collection.buildOrMerge(embedded_pre_element);
-        var reference_field_key = field_config.reference_field || field_key + "_" + scheme.configuration().selector;
-        var reference_field_config = collection.configuration().fields[reference_field_key];
-        if (!reference_field_config)
-            return;
-        if (!reference_field_config.reference)
-            return;
-        var selector_value = embedded_element.selector();
-        var reference_field_value = pre_element[reference_field_key];
-        if (reference_field_value !== undefined && (reference_field_value != selector_value)) {
-            throw new Errors_1.ElpongError('eleafw', reference_field_value + " != " + selector_value);
-        }
-        element.fields[reference_field_key] = selector_value;
-    }
-    EmbeddedElement.handle = handle;
-})(EmbeddedElement = exports.EmbeddedElement || (exports.EmbeddedElement = {}));
-
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Element_1 = __webpack_require__(4);
-var Util_1 = __webpack_require__(1);
-var CollectionHelper_1 = __webpack_require__(2);
-var EmbeddedCollection;
-(function (EmbeddedCollection) {
-    function handle(element, pre_element, field_key, field_config) {
-        var embedded_pre_collection;
-        if (!(embedded_pre_collection = pre_element[field_key])) {
-            return;
-        }
-        var collection = element.collection();
-        var scheme = collection.scheme();
-        var embedded_element_collection = scheme.select(field_config.collection || field_key);
-        Util_1.Util.forEach(embedded_pre_collection, function (embedded_pre_element) {
-            var embedded_element = new Element_1.Element(embedded_element_collection, embedded_pre_element);
-            CollectionHelper_1.CollectionHelper.addElement(embedded_element_collection, embedded_element);
-        });
-    }
-    EmbeddedCollection.handle = handle;
-})(EmbeddedCollection = exports.EmbeddedCollection || (exports.EmbeddedCollection = {}));
-
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var CollectionHelper_1 = __webpack_require__(2);
-var Util_1 = __webpack_require__(1);
-var Errors_1 = __webpack_require__(0);
-var HasMany;
-(function (HasMany) {
-    function setup(element, relation_collection_name, relation_settings) {
-        var collection = element.collection();
-        var collection_config = collection.configuration();
-        var relation_collection = collection.scheme().select(relation_settings.collection || relation_collection_name);
-        // let relation_field_settings: FieldConfiguration;
-        // if (relation_field_settings = collection_config.fields[references_field_key]) {
-        //   // throw new Error("Field #{field_key} of collection #{collection.getName()} are not references") if !relation_field_settings.references
-        //   return element.relations[Util.camelize(relation_collection_name)] = (): Element[] =>
-        //     getHasManyRelationArrayThroughReferencesField(element, relation_collection, references_field_key);
-        //
-        // }
-        if (relation_settings.inline) {
-            var references_field_key_1 = relation_settings.inline_field || relation_collection_name + "_" + collection.scheme().configuration().selector + "s"; // dogs_ids, unless specified otherwise
-            return element.relations[Util_1.Util.camelize(relation_collection_name)] = function () {
-                return getHasManyRelationArrayInline(element, relation_collection, references_field_key_1);
-            };
-        }
-        else { // normal has_many relationship
-            return element.relations[Util_1.Util.camelize(relation_collection_name)] =
-                getHasManyRelationFunction(element, collection, relation_settings, relation_collection);
-        }
-    }
-    HasMany.setup = setup;
-    function getHasManyRelationFunction(element, collection, relation_config, relation_collection, limit_to_one) {
-        var has_many_field_key;
-        var collection_singular_name = CollectionHelper_1.CollectionHelper.getSingularName(collection);
-        var relation_collection_settings = relation_collection.configuration();
-        var selector_key = collection.scheme().configuration().selector;
-        if (relation_config.polymorphic) {
-            has_many_field_key = relation_config.as + "_" + selector_key;
-            var has_many_collection_field_key_1 = relation_config.as + "_collection";
-            return function () { return getPolymorphicHasManyRelationArray(element, relation_collection, has_many_field_key, has_many_collection_field_key_1, limit_to_one); };
-        }
-        else {
-            if (relation_config.field) {
-                has_many_field_key = relation_config.field;
-            }
-            else if (relation_config.as) {
-                has_many_field_key = relation_config.as + "_" + selector_key;
-            }
-            else {
-                has_many_field_key = collection_singular_name + "_" + selector_key;
-            }
-            return function () { return getHasManyRelationArray(element, relation_collection, has_many_field_key, limit_to_one); };
-        }
-    }
-    HasMany.getHasManyRelationFunction = getHasManyRelationFunction;
-    function getHasManyRelationArray(element, relation_collection, has_many_field_key, limit_to_one) {
-        var element2_arr = [];
-        var selector_value = element.selector();
-        for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
-            var element2 = _a[_i];
-            if (selector_value === element2.fields[has_many_field_key]) {
-                element2_arr.push(element2);
-                if (limit_to_one) {
-                    return element2_arr;
-                }
-            }
-        }
-        return element2_arr;
-    }
-    function getPolymorphicHasManyRelationArray(element, relation_collection, has_many_field_key, has_many_collection_field_key, limit_to_one) {
-        var element2_arr = [];
-        var selector_value = element.selector();
-        var collection_name = element.collection().name;
-        for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
-            var element2 = _a[_i];
-            if (selector_value === element2.fields[has_many_field_key] && collection_name === element2.fields[has_many_collection_field_key]) {
-                element2_arr.push(element2);
-                if (limit_to_one) {
-                    return element2_arr;
-                }
-            }
-        }
-        return element2_arr;
-    }
-    function getHasManyRelationArrayInline(element, relation_collection, field_key) {
-        var selector_value_arr = element.fields[field_key];
-        if (!Array.isArray(selector_value_arr)) {
-            throw new Errors_1.ElpongError('fldnrf', field_key);
-        }
-        var element2_arr = [];
-        for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
-            var element2 = _a[_i];
-            if (Util_1.Util.includes(selector_value_arr, element2.selector())) {
-                element2_arr.push(element2);
-            }
-        }
-        return element2_arr;
-    }
-})(HasMany = exports.HasMany || (exports.HasMany = {}));
-
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Util_1 = __webpack_require__(1);
-var ElementHelper;
-(function (ElementHelper) {
-    function toData(element, full_duplicate) {
-        var collection = element.collection();
-        var scheme = collection.scheme();
-        var o = {};
-        var object = scheme.configuration().collections[collection.name].fields;
-        for (var field_key in object) {
-            var field_settings = object[field_key];
-            if (field_settings.no_send || field_settings.embedded_collection || field_settings.embedded_element) {
-                continue;
-            }
-            var field_value = element.fields[field_key];
-            if (full_duplicate && (typeof field_value === 'object')) {
-                o[field_key] = Util_1.Util.copyJSON(field_value);
-            }
-            else {
-                o[field_key] = field_value;
-            }
-        }
-        return o;
-    }
-    ElementHelper.toData = toData;
-})(ElementHelper = exports.ElementHelper || (exports.ElementHelper = {}));
-
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var Elpong_1 = __webpack_require__(7);
-module.exports = Elpong_1.Elpong;
-
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Collection_1 = __webpack_require__(15);
-var Configuration_1 = __webpack_require__(25);
-var Errors_1 = __webpack_require__(0);
-var Helpers_1 = __webpack_require__(8);
+var Helpers_1 = __webpack_require__(10);
 var Elpong_1 = __webpack_require__(7);
 var Scheme = /** @class */ (function () {
     function Scheme(preSchemeConfiguration) {
@@ -1018,18 +784,18 @@ exports.Scheme = Scheme;
 
 
 /***/ }),
-/* 15 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Helpers_1 = __webpack_require__(8);
-var Element_1 = __webpack_require__(4);
+var Helpers_1 = __webpack_require__(10);
+var Element_1 = __webpack_require__(3);
 var Util_1 = __webpack_require__(1);
-var CollectionActions_1 = __webpack_require__(23);
+var CollectionActions_1 = __webpack_require__(24);
 var Errors_1 = __webpack_require__(0);
-var FakeThings_1 = __webpack_require__(24);
+var FakeThings_1 = __webpack_require__(25);
 var Collection = /** @class */ (function () {
     function Collection(scheme, name) {
         var _this = this;
@@ -1164,7 +930,337 @@ exports.Collection = Collection;
 
 
 /***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var UrlHelper_1 = __webpack_require__(4);
+exports.UrlHelper = UrlHelper_1.UrlHelper;
+var CollectionHelper_1 = __webpack_require__(2);
+exports.CollectionHelper = CollectionHelper_1.CollectionHelper;
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var SchemeHelper_1 = __webpack_require__(5);
+var Errors_1 = __webpack_require__(0);
+var EmbeddedElement;
+(function (EmbeddedElement) {
+    function handle(element, pre_element, field_key, field_config) {
+        var embedded_element_collection;
+        var embedded_pre_element = pre_element[field_key];
+        if (!embedded_pre_element) {
+            return;
+        }
+        var collection = element.collection();
+        var scheme = collection.scheme();
+        if (field_config.collection) {
+            embedded_element_collection = scheme.select(field_config.collection);
+        }
+        else {
+            embedded_element_collection = SchemeHelper_1.SchemeHelper.getCollectionBySingularName(scheme, field_key);
+        }
+        var embedded_element = embedded_element_collection.buildOrMerge(embedded_pre_element);
+        var reference_field_key = field_config.reference_field || field_key + "_" + scheme.configuration().selector;
+        var reference_field_config = collection.configuration().fields[reference_field_key];
+        if (!reference_field_config)
+            return;
+        if (!reference_field_config.reference)
+            return;
+        var selector_value = embedded_element.selector();
+        var reference_field_value = pre_element[reference_field_key];
+        if (reference_field_value !== undefined && (reference_field_value != selector_value)) {
+            throw new Errors_1.ElpongError('eleafw', reference_field_value + " != " + selector_value);
+        }
+        element.fields[reference_field_key] = selector_value;
+    }
+    EmbeddedElement.handle = handle;
+})(EmbeddedElement = exports.EmbeddedElement || (exports.EmbeddedElement = {}));
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Element_1 = __webpack_require__(3);
+var Util_1 = __webpack_require__(1);
+var CollectionHelper_1 = __webpack_require__(2);
+var EmbeddedCollection;
+(function (EmbeddedCollection) {
+    function handle(element, pre_element, field_key, field_config) {
+        var embedded_pre_collection;
+        if (!(embedded_pre_collection = pre_element[field_key])) {
+            return;
+        }
+        var collection = element.collection();
+        var scheme = collection.scheme();
+        var embedded_element_collection = scheme.select(field_config.collection || field_key);
+        Util_1.Util.forEach(embedded_pre_collection, function (embedded_pre_element) {
+            var embedded_element = new Element_1.Element(embedded_element_collection, embedded_pre_element);
+            CollectionHelper_1.CollectionHelper.addElement(embedded_element_collection, embedded_element);
+        });
+    }
+    EmbeddedCollection.handle = handle;
+})(EmbeddedCollection = exports.EmbeddedCollection || (exports.EmbeddedCollection = {}));
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var CollectionHelper_1 = __webpack_require__(2);
+var Util_1 = __webpack_require__(1);
+var Errors_1 = __webpack_require__(0);
+var HasMany;
+(function (HasMany) {
+    function setup(element, relation_collection_name, relation_settings) {
+        var collection = element.collection();
+        var collection_config = collection.configuration();
+        var relation_collection = collection.scheme().select(relation_settings.collection || relation_collection_name);
+        // let relation_field_settings: FieldConfiguration;
+        // if (relation_field_settings = collection_config.fields[references_field_key]) {
+        //   // throw new Error("Field #{field_key} of collection #{collection.getName()} are not references") if !relation_field_settings.references
+        //   return element.relations[Util.camelize(relation_collection_name)] = (): Element[] =>
+        //     getHasManyRelationArrayThroughReferencesField(element, relation_collection, references_field_key);
+        //
+        // }
+        if (relation_settings.inline) {
+            var references_field_key_1 = relation_settings.inline_field || relation_collection_name + "_" + collection.scheme().configuration().selector + "s"; // dogs_ids, unless specified otherwise
+            return element.relations[Util_1.Util.camelize(relation_collection_name)] = function () {
+                return getHasManyRelationArrayInline(element, relation_collection, references_field_key_1);
+            };
+        }
+        else { // normal has_many relationship
+            return element.relations[Util_1.Util.camelize(relation_collection_name)] =
+                getHasManyRelationFunction(element, collection, relation_settings, relation_collection);
+        }
+    }
+    HasMany.setup = setup;
+    function getHasManyRelationFunction(element, collection, relation_config, relation_collection, limit_to_one) {
+        var has_many_field_key;
+        var collection_singular_name = CollectionHelper_1.CollectionHelper.getSingularName(collection);
+        var relation_collection_settings = relation_collection.configuration();
+        var selector_key = collection.scheme().configuration().selector;
+        if (relation_config.polymorphic) {
+            has_many_field_key = relation_config.as + "_" + selector_key;
+            var has_many_collection_field_key_1 = relation_config.as + "_collection";
+            return function () { return getPolymorphicHasManyRelationArray(element, relation_collection, has_many_field_key, has_many_collection_field_key_1, limit_to_one); };
+        }
+        else {
+            if (relation_config.field) {
+                has_many_field_key = relation_config.field;
+            }
+            else if (relation_config.as) {
+                has_many_field_key = relation_config.as + "_" + selector_key;
+            }
+            else {
+                has_many_field_key = collection_singular_name + "_" + selector_key;
+            }
+            return function () { return getHasManyRelationArray(element, relation_collection, has_many_field_key, limit_to_one); };
+        }
+    }
+    HasMany.getHasManyRelationFunction = getHasManyRelationFunction;
+    function getHasManyRelationArray(element, relation_collection, has_many_field_key, limit_to_one) {
+        var element2_arr = [];
+        var selector_value = element.selector();
+        for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
+            var element2 = _a[_i];
+            if (selector_value === element2.fields[has_many_field_key]) {
+                element2_arr.push(element2);
+                if (limit_to_one) {
+                    return element2_arr;
+                }
+            }
+        }
+        return element2_arr;
+    }
+    function getPolymorphicHasManyRelationArray(element, relation_collection, has_many_field_key, has_many_collection_field_key, limit_to_one) {
+        var element2_arr = [];
+        var selector_value = element.selector();
+        var collection_name = element.collection().name;
+        for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
+            var element2 = _a[_i];
+            if (selector_value === element2.fields[has_many_field_key] && collection_name === element2.fields[has_many_collection_field_key]) {
+                element2_arr.push(element2);
+                if (limit_to_one) {
+                    return element2_arr;
+                }
+            }
+        }
+        return element2_arr;
+    }
+    function getHasManyRelationArrayInline(element, relation_collection, field_key) {
+        var selector_value_arr = element.fields[field_key];
+        if (!Array.isArray(selector_value_arr)) {
+            throw new Errors_1.ElpongError('fldnrf', field_key);
+        }
+        var element2_arr = [];
+        for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
+            var element2 = _a[_i];
+            if (Util_1.Util.includes(selector_value_arr, element2.selector())) {
+                element2_arr.push(element2);
+            }
+        }
+        return element2_arr;
+    }
+})(HasMany = exports.HasMany || (exports.HasMany = {}));
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Util_1 = __webpack_require__(1);
+var ElementHelper;
+(function (ElementHelper) {
+    function toData(element, full_duplicate) {
+        var collection = element.collection();
+        var scheme = collection.scheme();
+        var o = {};
+        var object = scheme.configuration().collections[collection.name].fields;
+        for (var field_key in object) {
+            var field_settings = object[field_key];
+            if (field_settings.no_send || field_settings.embedded_collection || field_settings.embedded_element) {
+                continue;
+            }
+            var field_value = element.fields[field_key];
+            if (full_duplicate && (typeof field_value === 'object')) {
+                o[field_key] = Util_1.Util.copyJSON(field_value);
+            }
+            else {
+                o[field_key] = field_value;
+            }
+        }
+        return o;
+    }
+    ElementHelper.toData = toData;
+})(ElementHelper = exports.ElementHelper || (exports.ElementHelper = {}));
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var ElementHelper_1 = __webpack_require__(14);
+var Snapshot = /** @class */ (function () {
+    function Snapshot(element, tag) {
+        this.element = element;
+        this.tag = tag;
+        this.data = ElementHelper_1.ElementHelper.toData(element, true);
+        this.undone = false;
+        this.time = Date.now();
+        this.index = element.snapshots.list.length;
+        element.snapshots.list.push(this);
+        element.snapshots.current_index = this.index;
+    }
+    Snapshot.prototype.revert = function () {
+        var list = this.element.snapshots.list;
+        this.element.merge(this.data);
+        this.element.snapshots.current_index = this.index;
+        this.undone = false;
+        for (var i = this.index + 1, l = list.length; i < l; i++) {
+            list[i].undone = true;
+        }
+    };
+    return Snapshot;
+}());
+exports.Snapshot = Snapshot;
+
+
+/***/ }),
 /* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Errors_1 = __webpack_require__(0);
+if (typeof DEBUG === 'undefined') {
+    var DEBUG = true;
+}
+var SchemeConfiguration = /** @class */ (function () {
+    function SchemeConfiguration(preconf) {
+        this.name = preconf.name;
+        if (DEBUG && !this.name) {
+            throw new Errors_1.ElpongError('confnn');
+        }
+        this.selector = preconf.selector;
+        if (DEBUG && !this.selector) {
+            throw new Errors_1.ElpongError('confns', preconf.name);
+        }
+        this.collections = {};
+        for (var collection_name in preconf.collections) {
+            var collection_preconf = preconf.collections[collection_name];
+            var collection_configuration = this.collections[collection_name] = {
+                singular: collection_preconf.singular || collection_name.slice(0, -1)
+            };
+            var props = ['fields', 'relations', 'actions', 'collection_actions'];
+            var relation_types = ['has_many', 'has_one', 'belongs_to'];
+            for (var _i = 0, props_1 = props; _i < props_1.length; _i++) {
+                var prop = props_1[_i];
+                collection_configuration[prop] = collection_preconf[prop] || {};
+            }
+            var relations_conf = void 0;
+            if (relations_conf = collection_preconf.relations) {
+                for (var _a = 0, relation_types_1 = relation_types; _a < relation_types_1.length; _a++) {
+                    var relation_type = relation_types_1[_a];
+                    relations_conf[relation_type] =
+                        collection_preconf.relations[relation_type] || {};
+                }
+            }
+        }
+    }
+    return SchemeConfiguration;
+}());
+exports.SchemeConfiguration = SchemeConfiguration;
+
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Elpong_1 = __webpack_require__(7);
+exports.default = Elpong_1.Elpong;
+var Scheme_1 = __webpack_require__(8);
+exports.Scheme = Scheme_1.Scheme;
+var Collection_1 = __webpack_require__(9);
+exports.Collection = Collection_1.Collection;
+var Element_1 = __webpack_require__(3);
+exports.Element = Element_1.Element;
+var Errors_1 = __webpack_require__(0);
+exports.ElpongError = Errors_1.ElpongError;
+var Snapshot_1 = __webpack_require__(15);
+exports.Snapshot = Snapshot_1.Snapshot;
+var Util_1 = __webpack_require__(1);
+exports.Util = Util_1.Util;
+var Configuration_1 = __webpack_require__(16);
+exports.SchemeConfiguration = Configuration_1.SchemeConfiguration;
+
+
+/***/ }),
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1173,8 +1269,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var Util_1 = __webpack_require__(1);
 // import { Scheme } from '../../Scheme';
 // import { ElpongError } from '../../Errors';
-var EmbeddedElement_1 = __webpack_require__(9);
-var EmbeddedCollection_1 = __webpack_require__(10);
+var EmbeddedElement_1 = __webpack_require__(11);
+var EmbeddedCollection_1 = __webpack_require__(12);
 var Fields;
 (function (Fields) {
     function setup(element, fields_config_map, pre_element) {
@@ -1199,16 +1295,16 @@ var Fields;
 
 
 /***/ }),
-/* 17 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Util_1 = __webpack_require__(1);
-var HasMany_1 = __webpack_require__(11);
-var HasOne_1 = __webpack_require__(18);
-var BelongsTo_1 = __webpack_require__(19);
+var HasMany_1 = __webpack_require__(13);
+var HasOne_1 = __webpack_require__(20);
+var BelongsTo_1 = __webpack_require__(21);
 var Relations;
 (function (Relations) {
     function setup(element, relations_config_maps) {
@@ -1227,13 +1323,13 @@ var Relations;
 
 
 /***/ }),
-/* 18 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var HasMany_1 = __webpack_require__(11);
+var HasMany_1 = __webpack_require__(13);
 var SchemeHelper_1 = __webpack_require__(5);
 var Util_1 = __webpack_require__(1);
 var HasOne;
@@ -1258,13 +1354,13 @@ var HasOne;
 
 
 /***/ }),
-/* 19 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Element_1 = __webpack_require__(4);
+var Element_1 = __webpack_require__(3);
 var Util_1 = __webpack_require__(1);
 var SchemeHelper_1 = __webpack_require__(5);
 var BelongsTo;
@@ -1328,7 +1424,7 @@ var BelongsTo;
 
 
 /***/ }),
-/* 20 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1337,8 +1433,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var Ajax_1 = __webpack_require__(6);
 var Util_1 = __webpack_require__(1);
 var Errors_1 = __webpack_require__(0);
-var ElementHelper_1 = __webpack_require__(12);
-var UrlHelper_1 = __webpack_require__(3);
+var ElementHelper_1 = __webpack_require__(14);
+var UrlHelper_1 = __webpack_require__(4);
 var Actions;
 (function (Actions) {
     function setup(element, actions_config) {
@@ -1448,14 +1544,14 @@ var Actions;
 
 
 /***/ }),
-/* 21 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Util_1 = __webpack_require__(1);
-var Snapshot_1 = __webpack_require__(22);
+var Snapshot_1 = __webpack_require__(15);
 var Errors_1 = __webpack_require__(0);
 var Snapshots;
 (function (Snapshots) {
@@ -1616,47 +1712,14 @@ var Snapshots;
 
 
 /***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var ElementHelper_1 = __webpack_require__(12);
-var Snapshot = /** @class */ (function () {
-    function Snapshot(element, tag) {
-        this.element = element;
-        this.tag = tag;
-        this.data = ElementHelper_1.ElementHelper.toData(element, true);
-        this.undone = false;
-        this.time = Date.now();
-        this.index = element.snapshots.list.length;
-        element.snapshots.list.push(this);
-        element.snapshots.current_index = this.index;
-    }
-    Snapshot.prototype.revert = function () {
-        var list = this.element.snapshots.list;
-        this.element.merge(this.data);
-        this.element.snapshots.current_index = this.index;
-        this.undone = false;
-        for (var i = this.index + 1, l = list.length; i < l; i++) {
-            list[i].undone = true;
-        }
-    };
-    return Snapshot;
-}());
-exports.Snapshot = Snapshot;
-
-
-/***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Ajax_1 = __webpack_require__(6);
-var UrlHelper_1 = __webpack_require__(3);
+var UrlHelper_1 = __webpack_require__(4);
 var Errors_1 = __webpack_require__(0);
 var CollectionActions;
 (function (CollectionActions) {
@@ -1712,7 +1775,7 @@ var CollectionActions;
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1759,55 +1822,6 @@ var FakeMap = /** @class */ (function () {
 exports.FakeMap = FakeMap;
 
 
-/***/ }),
-/* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Errors_1 = __webpack_require__(0);
-if (typeof DEBUG === 'undefined') {
-    var DEBUG = true;
-}
-var SchemeConfiguration = /** @class */ (function () {
-    function SchemeConfiguration(preconf) {
-        this.name = preconf.name;
-        if (DEBUG && !this.name) {
-            throw new Errors_1.ElpongError('confnn');
-        }
-        this.selector = preconf.selector;
-        if (DEBUG && !this.selector) {
-            throw new Errors_1.ElpongError('confns', preconf.name);
-        }
-        this.collections = {};
-        for (var collection_name in preconf.collections) {
-            var collection_preconf = preconf.collections[collection_name];
-            var collection_configuration = this.collections[collection_name] = {
-                singular: collection_preconf.singular || collection_name.slice(0, -1)
-            };
-            var props = ['fields', 'relations', 'actions', 'collection_actions'];
-            var relation_types = ['has_many', 'has_one', 'belongs_to'];
-            for (var _i = 0, props_1 = props; _i < props_1.length; _i++) {
-                var prop = props_1[_i];
-                collection_configuration[prop] = collection_preconf[prop] || {};
-            }
-            var relations_conf = void 0;
-            if (relations_conf = collection_preconf.relations) {
-                for (var _a = 0, relation_types_1 = relation_types; _a < relation_types_1.length; _a++) {
-                    var relation_type = relation_types_1[_a];
-                    relations_conf[relation_type] =
-                        collection_preconf.relations[relation_type] || {};
-                }
-            }
-        }
-    }
-    return SchemeConfiguration;
-}());
-exports.SchemeConfiguration = SchemeConfiguration;
-
-
 /***/ })
 /******/ ]);
 });
-//# sourceMappingURL=elpong.js.map

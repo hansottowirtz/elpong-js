@@ -1,13 +1,14 @@
 import { Elpong } from './Elpong';
 import { Scheme } from './Scheme';
 import { CollectionHelper } from './Helpers';
-import { Element, SelectorValue, PreElement } from './Element';
+import { Element, SelectorValue } from './Element';
 import { Util } from './Util';
 import { ActionConfiguration, CollectionConfiguration } from './Configuration';
 import { CollectionActions, CollectionActionOptions } from './Helpers/Collection/CollectionActions';
 import { AjaxPromise } from './Ajax';
 import { ElpongError } from './Errors';
 import { FakeMap } from './FakeThings';
+import { PreElement } from './PreElement';
 
 export type ElementMap = FakeMap;
 

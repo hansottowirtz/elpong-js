@@ -1,9 +1,9 @@
-Elpong = require('../src/Elpong').Elpong
+elpong = require('../src/main').default
 HttpBackend = require('./spec_helper').HttpBackend
 
 describe 'Animal Farm', ->
   beforeEach ->
-    @scheme = Elpong.add(require('./fixtures/animal-farm/scheme.json5'))
+    @scheme = elpong.add(require('./fixtures/animal-farm/scheme.json5'))
 
     @pigs = @scheme.select('pigs')
     @humans = @scheme.select('humans')

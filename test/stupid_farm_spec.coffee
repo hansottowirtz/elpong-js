@@ -1,9 +1,9 @@
-Elpong = require('../src/Elpong').Elpong
+elpong = require('../src/main').default
 HttpBackend = require('./spec_helper').HttpBackend
 
 describe 'Stupid Farm', ->
   beforeEach ->
-    @scheme = Elpong.add(require('./fixtures/stupid-farm/scheme.json5'))
+    @scheme = elpong.add(require('./fixtures/stupid-farm/scheme.json5'))
 
     @apples = @scheme.select('apples')
     @apple_stems = @scheme.select('apple_stems')

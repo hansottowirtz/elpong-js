@@ -7,8 +7,8 @@
     "strictNullChecks": true,
     "noImplicitAny" : true,
     "suppressImplicitAnyIndexErrors": true,
-    "declaration": true,
-    "types": ["isomorphic-fetch", "es6-promise"]
+    "types": ["isomorphic-fetch", "es6-promise"],
+    "declaration": true
   },
   "include": [
     "src/**/*.ts"
