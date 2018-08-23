@@ -3,14 +3,16 @@
   <head>
     <meta name="elpong-scheme" scheme="test-app" content='{"name": "test-app", "selector": "id", "collections": {"pigs": {"fields": {"id": {}, "name": {}}}}}'>
     <meta name="elpong-element" scheme="test-app" collection="pigs" content='{"id": 3, "name": "Bob"}'>
-    <script src="../../../dist/elpong.js"></script>
+    <script src="../../dist/elpong.js"></script>
     <script>
-      elpong.default.enableAutoload();
-      var pig = elpong.default.get('test-app').select('pigs').find(3);
+      elpong = elpong.default;
+
+      elpong.enableAutoload();
+      var pig = elpong.get('test-app').select('pigs').find(3);
       document.write(pig.fields.name);
     </script>
   </head>
   <body>
-    
+
   </body>
 </html>
