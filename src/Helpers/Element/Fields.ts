@@ -1,4 +1,4 @@
-import { Element, PreElement } from '../../Element';
+import { Element } from '../../Element';
 import { Util } from '../../Util';
 // import { SchemeHelper } from '../SchemeHelper';
 import { FieldConfigurationMap, FieldConfiguration, EmbeddedElementFieldConfiguration, EmbeddedCollectionFieldConfiguration } from '../../Configuration';
@@ -8,6 +8,7 @@ import { Collection } from '../../Collection';
 // import { ElpongError } from '../../Errors';
 import { EmbeddedElement } from './Fields/EmbeddedElement';
 import { EmbeddedCollection } from './Fields/EmbeddedCollection';
+import { PreElement } from '../../PreElement';
 
 export namespace Fields {
   export function setup(element: Element, fields_config_map: FieldConfigurationMap, pre_element: PreElement): void {

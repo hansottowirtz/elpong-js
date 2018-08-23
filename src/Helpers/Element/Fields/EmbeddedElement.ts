@@ -1,7 +1,8 @@
-import { Element, PreElement } from '../../../Element';
+import { Element } from '../../../Element';
 import { SchemeHelper } from '../../SchemeHelper';
 import { EmbeddedElementFieldConfiguration } from '../../../Configuration';
 import { ElpongError } from '../../../Errors';
+import { PreElement } from '../../../PreElement';
 
 export namespace EmbeddedElement {
   export function handle(element: Element, pre_element: PreElement, field_key: string, field_config: EmbeddedElementFieldConfiguration): void {

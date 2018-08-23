@@ -1,9 +1,10 @@
 import { Collection } from '../../Collection';
 import { Ajax, AjaxResponse, AjaxData, AjaxHeaders, AjaxPromise } from '../../Ajax';
 import { UrlHelper, UrlOptions, UrlHelperOptions } from '../UrlHelper';
-import { SelectorValue, PreElement } from '../../Element';
+import { SelectorValue } from '../../Element';
 import { CollectionActionConfiguration } from '../../Configuration';
 import { ElpongError } from '../../Errors';
+import { PreElement } from '../../PreElement';
 
 export interface CollectionActionOptions {
   data?: AjaxData;

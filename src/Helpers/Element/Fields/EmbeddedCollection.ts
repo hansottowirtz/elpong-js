@@ -1,10 +1,11 @@
-import { Element, PreElement } from '../../../Element';
+import { Element } from '../../../Element';
 import { EmbeddedCollectionFieldConfiguration } from '../../../Configuration';
 import { ElpongError } from '../../../Errors';
 import { Collection } from '../../../Collection';
 import { Scheme } from '../../../Scheme';
 import { Util } from '../../../Util';
 import { CollectionHelper } from '../../CollectionHelper';
+import { PreElement } from '../../../PreElement';
 
 export namespace EmbeddedCollection {
   export function handle(element: Element, pre_element: PreElement, field_key: string, field_config: EmbeddedCollectionFieldConfiguration): void {

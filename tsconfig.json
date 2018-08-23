@@ -7,7 +7,6 @@
     "strictNullChecks": true,
     "noImplicitAny" : true,
     "suppressImplicitAnyIndexErrors": true,
-    "declaration": true,
     "types": ["isomorphic-fetch", "es6-promise"]
   },
   "include": [

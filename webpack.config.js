@@ -1,6 +1,6 @@
 module.exports = {
   mode: 'production',
-  entry: './src/entry',
+  entry: './src/main',
   output: {
     filename: 'elpong.js',
     path: __dirname + '/dist',

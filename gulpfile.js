@@ -38,15 +38,16 @@ gulp.task('build:dts', (done) => {
   require('dts-generator').default({
 		name: 'elpong',
 		project: '.',
-		out: './dist/elpong.d.ts',
-    main: 'elpong/main'
+		out: './dist/elpong.generated.d.ts',
+    main: 'elpong',
+    eol: '\n'
   }).then(() => {
     done();
   });
-})
+});
 
-gulp.task('build', gulp.series('build:webpack', 'build:uglify', 'build:tsc', 'build:dts'));
-gulp.task('build:ts', gulp.series('build:tsc', 'build:dts'));
+gulp.task('build', gulp.series('build:webpack', 'build:uglify', 'build:tsc'));
+gulp.task('build:ts', gulp.series('build:tsc'));
 
 gulp.task('lint', () => {
   return gulp.src('src/**/*.ts')

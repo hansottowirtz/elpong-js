@@ -1,0 +1,6 @@
+{
+  "name": "node-app",
+  "dependencies": {
+    "elpong": "file:../../.."
+  }
+}

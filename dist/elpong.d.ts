@@ -218,6 +218,12 @@ declare module 'elpong/Snapshot' {
 	}
 
 }
+declare module 'elpong/PreElement' {
+	export interface PreElement {
+	    [prop: string]: any;
+	}
+
+}
 declare module 'elpong/Helpers/CollectionHelper' {
 	import { Element } from 'elpong/Element';
 	import { Collection } from 'elpong/Collection';
@@ -238,24 +244,27 @@ declare module 'elpong/Helpers/SchemeHelper' {
 
 }
 declare module 'elpong/Helpers/Element/Fields/EmbeddedElement' {
-	import { Element, PreElement } from 'elpong/Element';
+	import { Element } from 'elpong/Element';
 	import { EmbeddedElementFieldConfiguration } from 'elpong/Configuration';
+	import { PreElement } from 'elpong/PreElement';
 	export namespace EmbeddedElement {
 	    function handle(element: Element, pre_element: PreElement, field_key: string, field_config: EmbeddedElementFieldConfiguration): void;
 	}
 
 }
 declare module 'elpong/Helpers/Element/Fields/EmbeddedCollection' {
-	import { Element, PreElement } from 'elpong/Element';
+	import { Element } from 'elpong/Element';
 	import { EmbeddedCollectionFieldConfiguration } from 'elpong/Configuration';
+	import { PreElement } from 'elpong/PreElement';
 	export namespace EmbeddedCollection {
 	    function handle(element: Element, pre_element: PreElement, field_key: string, field_config: EmbeddedCollectionFieldConfiguration): void;
 	}
 
 }
 declare module 'elpong/Helpers/Element/Fields' {
-	import { Element, PreElement } from 'elpong/Element';
+	import { Element } from 'elpong/Element';
 	import { FieldConfigurationMap } from 'elpong/Configuration';
+	import { PreElement } from 'elpong/PreElement';
 	export namespace Fields {
 	    function setup(element: Element, fields_config_map: FieldConfigurationMap, pre_element: PreElement): void;
 	}
@@ -323,6 +332,7 @@ declare module 'elpong/Element' {
 	import { Collection } from 'elpong/Collection';
 	import { AjaxPromise } from 'elpong/Ajax';
 	import { Snapshot } from 'elpong/Snapshot';
+	import { PreElement } from 'elpong/PreElement';
 	import { ActionOptions } from 'elpong/Helpers/Element/Actions';
 	export type SelectorValue = string | number;
 	export function isSelectorValue(v: any): v is SelectorValue;
@@ -367,9 +377,6 @@ declare module 'elpong/Element' {
 	    save(): AjaxPromise;
 	    isNew(): boolean;
 	    merge(pre_element: PreElement): this;
-	}
-	export interface PreElement {
-	    [prop: string]: any;
 	}
 
 }
@@ -456,11 +463,12 @@ declare module 'elpong/Helpers/Collection/CollectionActions' {
 }
 declare module 'elpong/Collection' {
 	import { Scheme } from 'elpong/Scheme';
-	import { Element, SelectorValue, PreElement } from 'elpong/Element';
+	import { Element, SelectorValue } from 'elpong/Element';
 	import { CollectionConfiguration } from 'elpong/Configuration';
 	import { CollectionActionOptions } from 'elpong/Helpers/Collection/CollectionActions';
 	import { AjaxPromise } from 'elpong/Ajax';
 	import { FakeMap } from 'elpong/FakeThings';
+	import { PreElement } from 'elpong/PreElement';
 	export type ElementMap = FakeMap;
 	export type GetAllCollectionActionFunction = (action_options?: CollectionActionOptions) => AjaxPromise;
 	export type GetOneCollectionActionFunction = (selector_value?: SelectorValue, action_options?: CollectionActionOptions) => AjaxPromise;
@@ -498,29 +506,14 @@ declare module 'elpong/Collection' {
 	}
 
 }
-declare module 'elpong/PreElement' {
-	export interface PreElement {
-	    [prop: string]: any;
-	}
-
-}
-declare module 'elpong/entry' {
-	import { Elpong } from 'elpong/Elpong';
-	export = Elpong;
-
-}
-declare module 'elpong/main' {
-	export { Elpong } from 'elpong/Elpong';
+declare module 'elpong' {
+	export { Elpong as default } from 'elpong/Elpong';
 	export { Scheme, CollectionMap } from 'elpong/Scheme';
 	export { Collection, CollectionActions, GetAllCollectionActionFunction, GetOneCollectionActionFunction, CustomCollectionActionFunction, CollectionArrayOptions, CollectionFindByOptions, FieldsKeyValueMap } from 'elpong/Collection';
-	export { Element, PreElement, SelectorValue, Fields, Relations, Actions, Snapshots, RelationFunction, ActionFunction } from 'elpong/Element';
+	export { Element, SelectorValue, Fields, Relations, Actions, Snapshots, RelationFunction, ActionFunction } from 'elpong/Element';
+	export { PreElement } from 'elpong/PreElement';
 	export { ElpongError } from 'elpong/Errors';
 	export { Snapshot } from 'elpong/Snapshot';
 	export { Util } from 'elpong/Util';
 	export { SchemeConfiguration, PreSchemeConfiguration, CollectionConfiguration, CollectionConfigurationMap, CollectionActionConfiguration, CollectionActionConfigurationMap, CollectionConfigurationWithOptionals, CollectionConfigurationMapWithOptionals, FieldConfiguration, FieldConfigurationMap, RelationConfiguration, RelationConfigurationMaps, HasOneRelationConfiguration, HasManyRelationConfiguration, BelongsToRelationConfiguration, HasOneRelationConfigurationMap, HasManyRelationConfigurationMap, BelongsToRelationConfigurationMap, EmbeddedElementFieldConfiguration, BelongsToRelationConfigurationBase, EmbeddedCollectionFieldConfiguration, RelationConfigurationMapsWithOptionals, ActionConfiguration, ActionConfigurationMap, PolymorphicBelongsToRelationConfiguration, NonPolymorphicBelongsToRelationConfiguration } from 'elpong/Configuration';
-
-}
-declare module 'elpong' {
-	import main = require('elpong/main');
-	export = main;
 }

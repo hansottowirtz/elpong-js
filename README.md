@@ -11,28 +11,36 @@
 ## Getting started
 
 ```bash
-npm install elpong --save
+npm install elpong
 ```
-```bash
-bower install elpong --save
+
+Using ES6 modules, Typescript or bundlers like Webpack is recommended:
+
+```javascript
+import elpong, { Scheme, Element, Collection } from 'elpong';
 ```
-or download it [here](https://github.com/hansottowirtz/elpong-js/archive/master.zip)
+
+```javascript
+const elpong = require('elpong').default;
+```
+
 ```html
 <script src="/scripts/elpong/dist/elpong.js"></script>
-<!-- or -->
-<script src="/scripts/elpong/dist/elpong.min.js"></script>
+<script>
+  elpong = elpong.default;
+</script>
 ```
 
 ```javascript
 // Choose one of these:
-Elpong.setAjax(window.fetch, 'fetch') // built-in in modern browsers
-Elpong.setAjax($http, 'angular') // if you use AngularJS
-Elpong.setAjax($.ajax, 'jquery') // if you use jQuery
-Elpong.setAjax(http, 'angular2') // if you use Angular, http: instance of Http or HttpClient
+elpong.setAjax(window.fetch, 'fetch') // built-in in modern browsers
+elpong.setAjax($http, 'angular') // if you use AngularJS
+elpong.setAjax($.ajax, 'jquery') // if you use jQuery
+elpong.setAjax(http, 'angular2') // if you use Angular, http: instance of Http or HttpClient
 
-Elpong.enableAutoload(); // when using preloading
+elpong.enableAutoload(); // when using preloading
 // or
-var scheme = Elpong.add(scheme_config); // if you have the scheme in javascript
+var scheme = elpong.add(scheme_config); // if you have the scheme in javascript
 
 scheme.setApiUrl('/api');
 var pigs = scheme.select('pigs'); // select the pigs collection
@@ -45,20 +53,15 @@ promise.then(function(response) {
 })
 ```
 
-If you use Typescript or ES6 modules:
-```javascript
-import { Elpong, Scheme, Element, Collection } from 'elpong';
-```
-
 ## Schemes
 
 You can create a scheme in two ways:
 
-`Elpong.add(scheme_config)`
+`elpong.add(scheme_config)`
 
 or by preloading it, see [Preloading](#preloading)
 
-A scheme can be retrieved with `Elpong.get(scheme_name)`
+A scheme can be retrieved with `elpong.get(scheme_name)`
 
 ## Collections
 
@@ -138,7 +141,7 @@ the response object.
 
 #### Relations
 
-You can find other elements on the `relations` key. 
+You can find other elements on the `relations` key.
 
 Example:
 ```javascript
@@ -212,10 +215,10 @@ To preload data, create a meta tag with
 To preload a single element, create a meta tag with
 `name="elpong-element"`, <code>scheme=<i>scheme_name</i></code>, <code>content=<i>element</i></code> and <code>collection=<i>collection_name</i></code>.
 
-Then you can use `Elpong.load()` and `collection.load()` to load schemes and
-collections, respectively, or you can use `Elpong.enableAutoload()` and it will take
+Then you can use `elpong.load()` and `collection.load()` to load schemes and
+collections, respectively, or you can use `elpong.enableAutoload()` and it will take
 care of it when it reads the scheme. Make sure to put the `meta` tags *above*
-the `script` tags when you do this. `Elpong.enableAutoload()` might give some problems
+the `script` tags when you do this. `elpong.enableAutoload()` might give some problems
 because it is synchronous.
 
 ### Examples
@@ -240,10 +243,10 @@ The `then` and `catch` functions should return a response object with a
 If you don't work with AngularJS, Angular, or jQuery, you can use [window.fetch](fetch).
 
 ```javascript
-Elpong.setAjax(window.fetch, 'fetch') // built-in in modern browsers
-Elpong.setAjax($http, 'angular') // if you use AngularJS
-Elpong.setAjax($.ajax, 'jquery') // if you use jQuery
-Elpong.setAjax(http, 'angular2') // if you use Angular, http: instance of Http or HttpClient
+elpong.setAjax(window.fetch, 'fetch') // built-in in modern browsers
+elpong.setAjax($http, 'angular') // if you use AngularJS
+elpong.setAjax($.ajax, 'jquery') // if you use jQuery
+elpong.setAjax(http, 'angular2') // if you use Angular, http: instance of Http or HttpClient
 ```
 
 ### Contributing

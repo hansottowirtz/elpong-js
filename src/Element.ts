@@ -2,6 +2,7 @@ import { Collection } from './Collection';
 import { Util } from './Util';
 import { AjaxPromise } from './Ajax';
 import { Snapshot } from './Snapshot';
+import { PreElement } from './PreElement';
 
 import { Fields } from './Helpers/Element/Fields';
 import { Relations } from './Helpers/Element/Relations';
@@ -153,8 +154,4 @@ export class Element {
   //   }
   //   return true;
   // }
-}
-
-export interface PreElement {
-  [prop: string]: any;
 }
