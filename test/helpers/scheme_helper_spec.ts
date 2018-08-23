@@ -1,11 +1,11 @@
 import { SchemeHelper } from '../../src/Helpers/SchemeHelper';
-import { Elpong } from '../../src/Elpong';
+import elpong from '../../src/main';
 
 declare const require: Function;
 
 describe('SchemeHelper', () => {
   beforeEach(() => {
-    this.scheme = Elpong.add(require('../fixtures/stupid-farm/scheme.json5'));
+    this.scheme = elpong.add(require('../fixtures/stupid-farm/scheme.json5'));
   });
   it('finds schemes by their singular names', () => {
     expect(SchemeHelper.getCollectionBySingularName(this.scheme, 'boss').name).toBe('bosses');

@@ -1,4 +1,4 @@
-Elpong = require('../src/Elpong').Elpong
+elpong = require('../src/main').default
 require('es6-promise').polyfill()
 require('isomorphic-fetch')
 
@@ -7,7 +7,7 @@ FRAMEWORK = process.env.FRAMEWORK || 'fetch'
 console.log('Testing ' + FRAMEWORK)
 
 afterEach ->
-  Elpong._schemes = {}
+  elpong._schemes = {}
 
 HttpBackend = null
 
@@ -20,7 +20,7 @@ do ->
       beforeEach inject ($injector) ->
         $httpBackend = $injector.get('$httpBackend')
         $http = $injector.get('$http')
-        Elpong.setAjax($http, 'angular')
+        elpong.setAjax($http, 'angular')
 
       afterEach ->
         $httpBackend.verifyNoOutstandingExpectation()
@@ -54,7 +54,7 @@ do ->
 
       class HttpBackend
         reply: (method, url, data, status = 200, fn) ->
-          Elpong.setAjax(window.jQuery.ajax, 'jquery')
+          elpong.setAjax(window.jQuery.ajax, 'jquery')
           json = JSON.stringify(data)
           # console.log("Will respond to #{method} #{url} with #{json}")
           response_data = if status isnt 204 then json else ''
@@ -76,7 +76,7 @@ do ->
       fetchMock = require('fetch-mock')
 
       fetchMock._mock() # set window.fetch to mock
-      Elpong.setAjax(fetch, 'fetch')
+      elpong.setAjax(fetch, 'fetch')
 
       afterEach ->
         fetchMock.restore()

@@ -54,7 +54,9 @@ module.exports = function(config) {
       'test/**/*.coffee',
       'test/**/*.ts'
     ],
-    exclude: [],
+    exclude: [
+      'test/apps/*'
+    ],
     preprocessors: {
       '**/*.ts': ENABLE_SOURCEMAPS ? ['webpack', 'sourcemap'] : ['webpack'],
       '**/*.coffee': ENABLE_SOURCEMAPS ? ['webpack', 'sourcemap'] : ['webpack'],

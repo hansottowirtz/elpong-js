@@ -1,4 +1,4 @@
-Elpong = require('../src/Elpong').Elpong
+elpong = require('../src/main').default
 HttpBackend = require('./spec_helper').HttpBackend
 
 describe 'Element', ->
@@ -8,7 +8,7 @@ describe 'Element', ->
     beforeEach ->
       httpBackend = new HttpBackend()
 
-      @scheme = Elpong.add(require('./fixtures/animal-farm/scheme.json5'))
+      @scheme = elpong.add(require('./fixtures/animal-farm/scheme.json5'))
       @scheme.setApiUrl('/api/v1')
 
       httpBackend.reply 'POST', '/api/v1/humans', {id: 1, name: 'Bob'}

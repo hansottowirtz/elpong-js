@@ -1,12 +1,12 @@
 /// <reference types="node"/>
 /// <reference types="jasmine"/>
 
-import { Elpong, Scheme, Element, Collection, SchemeConfiguration } from '../src/main';
+import elpong from '../src/main';
 const HttpBackend = require('./spec_helper').HttpBackend;
 
 describe('Abstract', () => {
   it('can have collection names on embedded collections', (done) => {
-    const scheme = Elpong.add(require('./fixtures/abstract/scheme.json5'));
+    const scheme = elpong.add(require('./fixtures/abstract/scheme.json5'));
     scheme.setApiUrl('/api');
 
     const httpBackend = new HttpBackend();
@@ -41,7 +41,7 @@ describe('Abstract', () => {
   });
 
   it('can pass ajax data to actions', (done) => {
-    const scheme = Elpong.add(require('./fixtures/abstract/scheme.json5'));
+    const scheme = elpong.add(require('./fixtures/abstract/scheme.json5'));
     scheme.setApiUrl('/api');
 
     const httpBackend = new HttpBackend();

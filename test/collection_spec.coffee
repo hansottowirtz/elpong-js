@@ -1,9 +1,9 @@
-Elpong = require('../src/Elpong').Elpong
+elpong = require('../src/main').default
 
 describe 'Collection', ->
   describe 'pulser', ->
     beforeEach ->
-      @scheme = Elpong.add(require('./fixtures/pulser/scheme.json5'))
+      @scheme = elpong.add(require('./fixtures/pulser/scheme.json5'))
       @users = @scheme.select('users')
       @plugs = @scheme.select('plugs')
 
@@ -13,7 +13,7 @@ describe 'Collection', ->
 
   describe 'stupid farm', ->
     beforeEach ->
-      @scheme = Elpong.add(require('./fixtures/stupid-farm/scheme.json5'))
+      @scheme = elpong.add(require('./fixtures/stupid-farm/scheme.json5'))
       @geese = @scheme.select('geese')
 
     it 'should have the right name', ->

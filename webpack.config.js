@@ -16,6 +16,7 @@ module.exports = {
   optimization: {
     minimize: false
   },
+  // devtool: 'source-map',
   module: {
     rules: [
       { test: /\.ts$/, loader: 'awesome-typescript-loader' }

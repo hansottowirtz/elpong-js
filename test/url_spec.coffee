@@ -7,7 +7,7 @@ describe 'UrlHelper', ->
     expect(u).toBe('http://x.com?a=b&txt=lol%20xp')
 
   it 'can create appropriate urls for elements', ->
-    @scheme = Elpong.add(require('./fixtures/animal-farm/scheme.json5'))
+    @scheme = elpong.add(require('./fixtures/animal-farm/scheme.json5'))
     @scheme.setApiUrl('/api')
     pigs = @scheme.select('pigs')
     bob = pigs.build({id: 1, name: 'Bob'})
@@ -18,7 +18,7 @@ describe 'UrlHelper', ->
 
 
    it 'can create appropriate urls for collections', ->
-    @scheme = Elpong.add(require('./fixtures/animal-farm/scheme.json5'))
+    @scheme = elpong.add(require('./fixtures/animal-farm/scheme.json5'))
     @scheme.setApiUrl('/api')
     pigs = @scheme.select('pigs')
 

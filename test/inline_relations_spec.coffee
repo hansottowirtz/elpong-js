@@ -1,9 +1,9 @@
-Elpong = require('../src/Elpong').Elpong
+elpong = require('../src/main').default
 
 describe 'Relations', ->
   describe 'inline', ->
     beforeEach ->
-      @scheme = Elpong.add(require('./fixtures/gallery/scheme.json5'))
+      @scheme = elpong.add(require('./fixtures/gallery/scheme.json5'))
 
     it 'should have the right fields', ->
       categories = @scheme.select('categories')
