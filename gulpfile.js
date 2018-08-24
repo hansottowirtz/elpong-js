@@ -1,7 +1,6 @@
 const gulp = require('gulp');
 const uglify = require('gulp-uglify');
 const rename = require('gulp-rename');
-const size = require('gulp-size');
 const tslint = require('gulp-tslint');
 const webpack = require('webpack-stream');
 const karma = require('karma').Server;
@@ -17,13 +16,7 @@ gulp.task('build:webpack', () => {
 
 gulp.task('build:uglify', () => {
   return gulp.src('dist/elpong.js')
-    .pipe(uglify({
-      compress: {
-        global_defs: {
-          DEBUG: false
-        }
-      }
-    }))
+    .pipe(uglify())
     .pipe(rename('elpong.min.js'))
     .pipe(gulp.dest('dist/'));
 });
@@ -54,7 +47,7 @@ gulp.task('lint', () => {
     .pipe(tslint({
       formatter: 'verbose'
     }))
-    .pipe(tslint.report())
+    .pipe(tslint.report());
 });
 
 testWithFramework = (framework, done) => {
@@ -107,6 +100,11 @@ gulp.task('test:karma:debug', (done) => {
   }, done).start();
 });
 
+gulp.task('test:examples:node', (done) => {
+  require('./examples/node-app');
+  done();
+});
+
 gulp.task('test:travis', gulp.parallel('test:frameworks', 'test:saucelabs'));
 
 gulp.task('ensure-built', (done) => {
@@ -117,13 +115,13 @@ gulp.task('ensure-built', (done) => {
 
   let mtimes = (f) => fs.statSync(f).mtime;
 
-  let dist_mtime = Math.min.apply(null, dist_files.map(mtimes))
-  let src_mtime = Math.max.apply(null, src_files.map(mtimes))
+  let dist_mtime = Math.min.apply(null, dist_files.map(mtimes));
+  let src_mtime = Math.max.apply(null, src_files.map(mtimes));
 
   console.log(dist_mtime, src_mtime);
 
   if (dist_mtime < src_mtime - 100) {
     throw new Error('Dist outdated, run `gulp build`');
   }
-  done()
+  done();
 });

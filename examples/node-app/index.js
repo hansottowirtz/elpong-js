@@ -1,4 +1,5 @@
 const elpong = require('elpong').default;
+const assert = require('assert');
 
 const obj = {"name": "test-app", "selector": "id", "collections": {"pigs": {"fields": {"id": {}, "name": {}}}}};
 
@@ -9,3 +10,4 @@ const pig = elpong.get('test-app').select('pigs').find(3);
 
 console.log(pig.fields.name);
 
+assert.equal(pig.fields.name, 'Bob');
