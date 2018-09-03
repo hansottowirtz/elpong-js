@@ -4,6 +4,47 @@ declare module 'elpong/Errors' {
 	}
 
 }
+declare module 'elpong/FakeThings' {
+	export type FakeMapKey = string | number;
+	export class FakeMap {
+	    readonly hasRealMap: boolean;
+	    readonly map: any;
+	    constructor();
+	    get(k: FakeMapKey): any;
+	    set(k: FakeMapKey, v: any): this;
+	    has(k: FakeMapKey): boolean;
+	    values(): any[];
+	    delete(k: FakeMapKey): void;
+	}
+	export interface FakeString {
+	    startsWith(searchString: string, position?: number): boolean;
+	    endsWith(searchString: string, endPosition?: number): boolean;
+	}
+	export interface FakeArrayConstructor {
+	    from<T>(arrayLike: ArrayLike<T>): Array<T>;
+	}
+
+}
+declare module 'elpong/Util' {
+	export const Util: {
+	    capitalize: (string: string) => string;
+	    camelize: (string: string) => string;
+	    removeFromArray: (array: any[], element: any) => boolean;
+	    isInteger: (value: any) => value is number;
+	    isNumber: (value: any) => value is number;
+	    isString: (value: any) => value is string;
+	    isRegExp: (value: any) => value is RegExp;
+	    forEach: (o: Object, fn: (v: any, k: string) => void) => void;
+	    endsWith: (string: string, search: string) => boolean;
+	    startsWith: (string: string, search: string) => boolean;
+	    arrayFromHTML: (node_list: NodeListOf<HTMLElement>) => HTMLElement[];
+	    values: (obj: Object) => any[];
+	    includes: (a: any[], b: any) => boolean;
+	    equalsJSON: (a: any, b: any) => boolean;
+	    copyJSON: (o: any) => any;
+	};
+
+}
 declare module 'elpong/Ajax' {
 	export type AjaxPromiseThenOnResolveFunction = (response: AjaxResponse) => void;
 	export type AjaxPromiseThenFunction = (resolve_fn: AjaxPromiseThenOnResolveFunction) => any;
@@ -26,9 +67,16 @@ declare module 'elpong/Ajax' {
 	export interface AjaxHeaders {
 	    [name: string]: string;
 	}
+	export enum AjaxAdapterType {
+	    FETCH = 0,
+	    ANGULAR = 1,
+	    ANGULARJS = 2,
+	    JQUERY = 3
+	}
+	export type AjaxAdapterTypeString = 'fetch' | 'angular' | 'angularjs' | 'jquery';
 	export namespace Ajax {
 	    function executeRequest(url: string, method: string, data?: AjaxData, headers?: AjaxHeaders): Promise<AjaxResponse>;
-	    function setAjaxFunction(fn: AjaxExternalFunction, type?: string): void;
+	    function setAjaxFunction(fn: AjaxExternalFunction, adapter_type?: AjaxAdapterType | AjaxAdapterTypeString): void;
 	}
 
 }
@@ -154,47 +202,6 @@ declare module 'elpong/Configuration' {
 	    readonly no_selector?: boolean;
 	    readonly path?: string;
 	}
-
-}
-declare module 'elpong/FakeThings' {
-	export type FakeMapKey = string | number;
-	export class FakeMap {
-	    readonly hasRealMap: boolean;
-	    readonly map: any;
-	    constructor();
-	    get(k: FakeMapKey): any;
-	    set(k: FakeMapKey, v: any): this;
-	    has(k: FakeMapKey): boolean;
-	    values(): any[];
-	    delete(k: FakeMapKey): void;
-	}
-	export interface FakeString {
-	    startsWith(searchString: string, position?: number): boolean;
-	    endsWith(searchString: string, endPosition?: number): boolean;
-	}
-	export interface FakeArrayConstructor {
-	    from<T>(arrayLike: ArrayLike<T>): Array<T>;
-	}
-
-}
-declare module 'elpong/Util' {
-	export const Util: {
-	    capitalize: (string: string) => string;
-	    camelize: (string: string) => string;
-	    removeFromArray: (array: any[], element: any) => boolean;
-	    isInteger: (value: any) => value is number;
-	    isNumber: (value: any) => value is number;
-	    isString: (value: any) => value is string;
-	    isRegExp: (value: any) => value is RegExp;
-	    forEach: (o: Object, fn: (v: any, k: string) => void) => void;
-	    endsWith: (string: string, search: string) => boolean;
-	    startsWith: (string: string, search: string) => boolean;
-	    arrayFromHTML: (node_list: NodeListOf<HTMLElement>) => HTMLElement[];
-	    values: (obj: Object) => any[];
-	    includes: (a: any[], b: any) => boolean;
-	    equalsJSON: (a: any, b: any) => boolean;
-	    copyJSON: (o: any) => any;
-	};
 
 }
 declare module 'elpong/Helpers/ElementHelper' {
@@ -432,12 +439,12 @@ declare module 'elpong/Scheme' {
 declare module 'elpong/Elpong' {
 	import { Scheme } from 'elpong/Scheme';
 	import { PreSchemeConfiguration } from 'elpong/Configuration';
-	import { AjaxExternalFunction } from 'elpong/Ajax';
+	import { AjaxExternalFunction, AjaxAdapterType, AjaxAdapterTypeString } from 'elpong/Ajax';
 	export namespace Elpong {
 	    function add(scheme_config: PreSchemeConfiguration): Scheme;
 	    function get(name: string): Scheme;
 	    function load(ignore_empty: boolean): void;
-	    function setAjax(fn: AjaxExternalFunction, type?: string): void;
+	    function setAjax(fn: AjaxExternalFunction, type?: AjaxAdapterType | AjaxAdapterTypeString): void;
 	    function enableAutoload(): void;
 	    function isAutoloadEnabled(): boolean;
 	    function tearDown(): void;
@@ -516,4 +523,6 @@ declare module 'elpong' {
 	export { Snapshot } from 'elpong/Snapshot';
 	export { Util } from 'elpong/Util';
 	export { SchemeConfiguration, PreSchemeConfiguration, CollectionConfiguration, CollectionConfigurationMap, CollectionActionConfiguration, CollectionActionConfigurationMap, CollectionConfigurationWithOptionals, CollectionConfigurationMapWithOptionals, FieldConfiguration, FieldConfigurationMap, RelationConfiguration, RelationConfigurationMaps, HasOneRelationConfiguration, HasManyRelationConfiguration, BelongsToRelationConfiguration, HasOneRelationConfigurationMap, HasManyRelationConfigurationMap, BelongsToRelationConfigurationMap, EmbeddedElementFieldConfiguration, BelongsToRelationConfigurationBase, EmbeddedCollectionFieldConfiguration, RelationConfigurationMapsWithOptionals, ActionConfiguration, ActionConfigurationMap, PolymorphicBelongsToRelationConfiguration, NonPolymorphicBelongsToRelationConfiguration } from 'elpong/Configuration';
+	export { AjaxAdapterType } from 'elpong/Ajax';
+	
 }
