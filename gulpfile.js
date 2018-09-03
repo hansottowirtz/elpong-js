@@ -75,7 +75,7 @@ gulp.task('test:saucelabs', (done) => {
 });
 
 gulp.task('test:frameworks', (done) => {
-  let frameworks = ['angular', 'jquery', 'fetch'];
+  let frameworks = ['angularjs', 'jquery', 'fetch'];
   let i = 0;
   let partlyDone = function(exitcode){
     if (exitcode) {

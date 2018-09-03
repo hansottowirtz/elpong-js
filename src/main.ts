@@ -51,3 +51,6 @@ export {
   PolymorphicBelongsToRelationConfiguration,
   NonPolymorphicBelongsToRelationConfiguration
 } from './Configuration';
+export {
+  AjaxAdapterType
+} from './Ajax'

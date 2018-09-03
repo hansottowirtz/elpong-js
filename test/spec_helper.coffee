@@ -13,14 +13,14 @@ HttpBackend = null
 
 do ->
   switch FRAMEWORK
-    when 'angular'
+    when 'angularjs'
       $httpBackend = null
       $http = null
 
       beforeEach inject ($injector) ->
         $httpBackend = $injector.get('$httpBackend')
         $http = $injector.get('$http')
-        elpong.setAjax($http, 'angular')
+        elpong.setAjax($http, 'angularjs')
 
       afterEach ->
         $httpBackend.verifyNoOutstandingExpectation()

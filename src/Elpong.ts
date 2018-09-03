@@ -3,7 +3,7 @@ import { Collection } from './Collection';
 import { SchemeConfiguration, PreSchemeConfiguration } from './Configuration';
 import { ElpongError } from './Errors';
 import { Util } from './Util';
-import { Ajax, AjaxExternalFunction } from './Ajax';
+import { Ajax, AjaxExternalFunction, AjaxAdapterType, AjaxAdapterTypeString } from './Ajax';
 
 declare let DEBUG: boolean;
 
@@ -47,7 +47,7 @@ export namespace Elpong {
     }
   }
 
-  export function setAjax(fn: AjaxExternalFunction, type?: string): void {
+  export function setAjax(fn: AjaxExternalFunction, type?: AjaxAdapterType|AjaxAdapterTypeString): void {
     Ajax.setAjaxFunction(fn, type);
   }
 
