@@ -34,9 +34,9 @@ const elpong = require('elpong').default;
 ```javascript
 // Choose one of these:
 elpong.setAjax(window.fetch, 'fetch') // built-in in modern browsers
-elpong.setAjax($http, 'angular') // if you use AngularJS
+elpong.setAjax($http, 'angularjs') // if you use AngularJS
 elpong.setAjax($.ajax, 'jquery') // if you use jQuery
-elpong.setAjax(http, 'angular2') // if you use Angular, http: instance of Http or HttpClient
+elpong.setAjax(http, 'angular') // if you use Angular, http: instance of Http or HttpClient
 
 elpong.enableAutoload(); // when using preloading
 // or
@@ -244,9 +244,9 @@ If you don't work with AngularJS, Angular, or jQuery, you can use [window.fetch]
 
 ```javascript
 elpong.setAjax(window.fetch, 'fetch') // built-in in modern browsers
-elpong.setAjax($http, 'angular') // if you use AngularJS
+elpong.setAjax($http, 'angularjs') // if you use AngularJS
 elpong.setAjax($.ajax, 'jquery') // if you use jQuery
-elpong.setAjax(http, 'angular2') // if you use Angular, http: instance of Http or HttpClient
+elpong.setAjax(http, 'angular') // if you use Angular, http: instance of Http or HttpClient
 ```
 
 ### Contributing

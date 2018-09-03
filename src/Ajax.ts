@@ -2,6 +2,7 @@
 /// <reference types="angular"/>
 
 import { ElpongError } from './Errors';
+import { Util } from './Util';
 
 export type AjaxPromiseThenOnResolveFunction = (response: AjaxResponse) => void;
 export type AjaxPromiseThenFunction = (resolve_fn: AjaxPromiseThenOnResolveFunction) => any;
@@ -31,6 +32,15 @@ export type AjaxData = any;
 export interface AjaxHeaders {
   [name: string]: string;
 }
+
+export enum AjaxAdapterType {
+  FETCH = 0,
+  ANGULAR = 1,
+  ANGULARJS = 2,
+  JQUERY = 3
+}
+
+export type AjaxAdapterTypeString = 'fetch'|'angular'|'angularjs'|'jquery';
 
 export namespace Ajax {
   let ajaxFunction: AjaxFunction;
@@ -72,16 +82,10 @@ export namespace Ajax {
   // @note Like $http or jQuery.ajax or http.request or fetch
   // @param {Function} fn The function.
   // @param {string} type The function.
-  export function setAjaxFunction(fn: AjaxExternalFunction, type?: string) {
-    if (typeof type === 'undefined') {
-      if ((typeof jQuery !== 'undefined') && (fn === jQuery.ajax))
-        type = 'jquery';
-      else if ((typeof fetch !== 'undefined') && (fn === fetch))
-        type = 'fetch';
-    }
-
+  export function setAjaxFunction(fn: AjaxExternalFunction, adapter_type?: AjaxAdapterType|AjaxAdapterTypeString) {
+    const type = convertAjaxAdapterTypeStringToType(adapter_type);
     switch (type) {
-      case 'jquery':
+      case AjaxAdapterType.JQUERY:
         ajaxFunction = (url: string, instruction: AjaxInstruction) => {
           let deferred = jQuery.Deferred();
           let ajax = (fn as Function)(url, instruction);
@@ -92,7 +96,7 @@ export namespace Ajax {
           return deferred.promise() as any as Promise<any>;
         }
         break;
-      case 'fetch':
+      case AjaxAdapterType.FETCH:
         ajaxFunction = (url: string, instruction: AjaxInstruction) => {
           return new Promise((resolve, reject) => {
             // Request with GET/HEAD method cannot have body
@@ -116,7 +120,7 @@ export namespace Ajax {
           });
         }
         break;
-      case 'angular2':
+      case AjaxAdapterType.ANGULAR:
         ajaxFunction = (url: string, instruction: AjaxInstruction) => {
           return new Promise<AjaxResponse>((resolve, reject) => {
             instruction.responseType = undefined;
@@ -138,6 +142,23 @@ export namespace Ajax {
         // Default is AngularJS behavior, a promise that resolves to a response
         // object with the payload in the data field.
         ajaxFunction = (url: string, instruction: AjaxInstruction) => (fn as Function)(instruction);
+    }
+  }
+
+  function convertAjaxAdapterTypeStringToType(type?: AjaxAdapterType|AjaxAdapterTypeString): AjaxAdapterType {
+    if (!Util.isInteger(type)) {
+      switch (type) {
+        case 'angular':
+          return AjaxAdapterType.ANGULAR;
+        case 'angularjs':
+          return AjaxAdapterType.ANGULARJS;
+        case 'jquery':
+          return AjaxAdapterType.JQUERY;
+        default:
+          return AjaxAdapterType.FETCH;
+      }
+    } else {
+      return type;
     }
   }
 }

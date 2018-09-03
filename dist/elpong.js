@@ -100,73 +100,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 "use strict";
 
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    }
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-if (typeof DEBUG === 'undefined') {
-    var DEBUG = true;
-}
-if (DEBUG) {
-    var error_text_map = {
-        'schmnf': 'Scheme not found',
-        'collnf': 'Collection not found',
-        'collnf:s': 'Collection not found by singular name',
-        'collex': 'Collection with name already exists in scheme',
-        'elpgns': 'No scheme tags found',
-        'elpnce': 'No collection or element tags found',
-        'elndoc': 'No document',
-        'confns': 'Configuration has no selector',
-        'confnn': 'Configuration has no name',
-        'elenew': 'Element is new',
-        'elesna': 'Element has a selector value but is in new_elements array',
-        'elense': 'Element has no selector value but is in elements object',
-        'apinur': 'Api url has not yet been set',
-        'fldnsa': 'Field should be an array of selectors',
-        'elesch': 'Element selector changed',
-        'elesnf': 'Snapshot not found',
-        'elesti': 'Invalid snapshot identifier: must be number <= list.length, string or RegExp',
-        'eleafw': 'Pre element has an reference field that does not match the embedded element selector',
-        'elesnm': 'Selector is not matching get one request selector',
-        'elenos': 'No selector value given in getOne action',
-        'ajahct': 'Content-Type header not set to application/json',
-        'acgtda': 'GET request can\'t have data. Use params'
-    };
-}
-var ElpongError = /** @class */ (function (_super) {
-    __extends(ElpongError, _super);
-    function ElpongError(message, argument) {
-        var _this = this;
-        var actual_message = DEBUG ? error_text_map[message] : message;
-        if (argument) {
-            _this = _super.call(this, actual_message + ": " + argument) || this;
-        }
-        else {
-            _this = _super.call(this, actual_message) || this;
-        }
-        return _this;
-    }
-    return ElpongError;
-}(Error));
-exports.ElpongError = ElpongError;
-
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Util = {
     // BREAK: new Object(),
@@ -315,6 +248,73 @@ exports.Util = {
 
 
 /***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    }
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+if (typeof DEBUG === 'undefined') {
+    var DEBUG = true;
+}
+if (DEBUG) {
+    var error_text_map = {
+        'schmnf': 'Scheme not found',
+        'collnf': 'Collection not found',
+        'collnf:s': 'Collection not found by singular name',
+        'collex': 'Collection with name already exists in scheme',
+        'elpgns': 'No scheme tags found',
+        'elpnce': 'No collection or element tags found',
+        'elndoc': 'No document',
+        'confns': 'Configuration has no selector',
+        'confnn': 'Configuration has no name',
+        'elenew': 'Element is new',
+        'elesna': 'Element has a selector value but is in new_elements array',
+        'elense': 'Element has no selector value but is in elements object',
+        'apinur': 'Api url has not yet been set',
+        'fldnsa': 'Field should be an array of selectors',
+        'elesch': 'Element selector changed',
+        'elesnf': 'Snapshot not found',
+        'elesti': 'Invalid snapshot identifier: must be number <= list.length, string or RegExp',
+        'eleafw': 'Pre element has an reference field that does not match the embedded element selector',
+        'elesnm': 'Selector is not matching get one request selector',
+        'elenos': 'No selector value given in getOne action',
+        'ajahct': 'Content-Type header not set to application/json',
+        'acgtda': 'GET request can\'t have data. Use params'
+    };
+}
+var ElpongError = /** @class */ (function (_super) {
+    __extends(ElpongError, _super);
+    function ElpongError(message, argument) {
+        var _this = this;
+        var actual_message = DEBUG ? error_text_map[message] : message;
+        if (argument) {
+            _this = _super.call(this, actual_message + ": " + argument) || this;
+        }
+        else {
+            _this = _super.call(this, actual_message) || this;
+        }
+        return _this;
+    }
+    return ElpongError;
+}(Error));
+exports.ElpongError = ElpongError;
+
+
+/***/ }),
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -351,14 +351,14 @@ var CollectionHelper;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Util_1 = __webpack_require__(1);
+var Util_1 = __webpack_require__(0);
 var Fields_1 = __webpack_require__(18);
 var Relations_1 = __webpack_require__(19);
 var Actions_1 = __webpack_require__(22);
 var Snapshots_1 = __webpack_require__(23);
 var EmbeddedElement_1 = __webpack_require__(11);
 var EmbeddedCollection_1 = __webpack_require__(12);
-var Errors_1 = __webpack_require__(0);
+var Errors_1 = __webpack_require__(1);
 function isSelectorValue(v) {
     return (!!v || v === 0 || v === '') && (typeof v === 'string' || typeof v === 'number');
 }
@@ -465,7 +465,7 @@ exports.Element = Element;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Errors_1 = __webpack_require__(0);
+var Errors_1 = __webpack_require__(1);
 var UrlHelper;
 (function (UrlHelper) {
     function createForElement(element, url_options) {
@@ -531,7 +531,7 @@ var UrlHelper;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Errors_1 = __webpack_require__(0);
+var Errors_1 = __webpack_require__(1);
 var CollectionHelper_1 = __webpack_require__(2);
 var SchemeHelper;
 (function (SchemeHelper) {
@@ -557,7 +557,15 @@ var SchemeHelper;
 /// <reference types="jquery"/>
 /// <reference types="angular"/>
 Object.defineProperty(exports, "__esModule", { value: true });
-var Errors_1 = __webpack_require__(0);
+var Errors_1 = __webpack_require__(1);
+var Util_1 = __webpack_require__(0);
+var AjaxAdapterType;
+(function (AjaxAdapterType) {
+    AjaxAdapterType[AjaxAdapterType["FETCH"] = 0] = "FETCH";
+    AjaxAdapterType[AjaxAdapterType["ANGULAR"] = 1] = "ANGULAR";
+    AjaxAdapterType[AjaxAdapterType["ANGULARJS"] = 2] = "ANGULARJS";
+    AjaxAdapterType[AjaxAdapterType["JQUERY"] = 3] = "JQUERY";
+})(AjaxAdapterType = exports.AjaxAdapterType || (exports.AjaxAdapterType = {}));
 var Ajax;
 (function (Ajax) {
     var ajaxFunction;
@@ -589,15 +597,10 @@ var Ajax;
     // @note Like $http or jQuery.ajax or http.request or fetch
     // @param {Function} fn The function.
     // @param {string} type The function.
-    function setAjaxFunction(fn, type) {
-        if (typeof type === 'undefined') {
-            if ((typeof jQuery !== 'undefined') && (fn === jQuery.ajax))
-                type = 'jquery';
-            else if ((typeof fetch !== 'undefined') && (fn === fetch))
-                type = 'fetch';
-        }
+    function setAjaxFunction(fn, adapter_type) {
+        var type = convertAjaxAdapterTypeStringToType(adapter_type);
         switch (type) {
-            case 'jquery':
+            case AjaxAdapterType.JQUERY:
                 ajaxFunction = function (url, instruction) {
                     var deferred = jQuery.Deferred();
                     var ajax = fn(url, instruction);
@@ -608,7 +611,7 @@ var Ajax;
                     return deferred.promise();
                 };
                 break;
-            case 'fetch':
+            case AjaxAdapterType.FETCH:
                 ajaxFunction = function (url, instruction) {
                     return new Promise(function (resolve, reject) {
                         // Request with GET/HEAD method cannot have body
@@ -634,7 +637,7 @@ var Ajax;
                     });
                 };
                 break;
-            case 'angular2':
+            case AjaxAdapterType.ANGULAR:
                 ajaxFunction = function (url, instruction) {
                     return new Promise(function (resolve, reject) {
                         instruction.responseType = undefined;
@@ -661,6 +664,23 @@ var Ajax;
         }
     }
     Ajax.setAjaxFunction = setAjaxFunction;
+    function convertAjaxAdapterTypeStringToType(type) {
+        if (!Util_1.Util.isInteger(type)) {
+            switch (type) {
+                case 'angular':
+                    return AjaxAdapterType.ANGULAR;
+                case 'angularjs':
+                    return AjaxAdapterType.ANGULARJS;
+                case 'jquery':
+                    return AjaxAdapterType.JQUERY;
+                default:
+                    return AjaxAdapterType.FETCH;
+            }
+        }
+        else {
+            return type;
+        }
+    }
 })(Ajax = exports.Ajax || (exports.Ajax = {}));
 
 
@@ -672,8 +692,8 @@ var Ajax;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Scheme_1 = __webpack_require__(8);
-var Errors_1 = __webpack_require__(0);
-var Util_1 = __webpack_require__(1);
+var Errors_1 = __webpack_require__(1);
+var Util_1 = __webpack_require__(0);
 var Ajax_1 = __webpack_require__(6);
 var schemes = {};
 var autoload = false;
@@ -735,7 +755,7 @@ var Elpong;
 Object.defineProperty(exports, "__esModule", { value: true });
 var Collection_1 = __webpack_require__(9);
 var Configuration_1 = __webpack_require__(16);
-var Errors_1 = __webpack_require__(0);
+var Errors_1 = __webpack_require__(1);
 var Helpers_1 = __webpack_require__(10);
 var Elpong_1 = __webpack_require__(7);
 var Scheme = /** @class */ (function () {
@@ -792,9 +812,9 @@ exports.Scheme = Scheme;
 Object.defineProperty(exports, "__esModule", { value: true });
 var Helpers_1 = __webpack_require__(10);
 var Element_1 = __webpack_require__(3);
-var Util_1 = __webpack_require__(1);
+var Util_1 = __webpack_require__(0);
 var CollectionActions_1 = __webpack_require__(24);
-var Errors_1 = __webpack_require__(0);
+var Errors_1 = __webpack_require__(1);
 var FakeThings_1 = __webpack_require__(25);
 var Collection = /** @class */ (function () {
     function Collection(scheme, name) {
@@ -950,7 +970,7 @@ exports.CollectionHelper = CollectionHelper_1.CollectionHelper;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var SchemeHelper_1 = __webpack_require__(5);
-var Errors_1 = __webpack_require__(0);
+var Errors_1 = __webpack_require__(1);
 var EmbeddedElement;
 (function (EmbeddedElement) {
     function handle(element, pre_element, field_key, field_config) {
@@ -993,7 +1013,7 @@ var EmbeddedElement;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Element_1 = __webpack_require__(3);
-var Util_1 = __webpack_require__(1);
+var Util_1 = __webpack_require__(0);
 var CollectionHelper_1 = __webpack_require__(2);
 var EmbeddedCollection;
 (function (EmbeddedCollection) {
@@ -1022,8 +1042,8 @@ var EmbeddedCollection;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var CollectionHelper_1 = __webpack_require__(2);
-var Util_1 = __webpack_require__(1);
-var Errors_1 = __webpack_require__(0);
+var Util_1 = __webpack_require__(0);
+var Errors_1 = __webpack_require__(1);
 var HasMany;
 (function (HasMany) {
     function setup(element, relation_collection_name, relation_settings) {
@@ -1126,7 +1146,7 @@ var HasMany;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Util_1 = __webpack_require__(1);
+var Util_1 = __webpack_require__(0);
 var ElementHelper;
 (function (ElementHelper) {
     function toData(element, full_duplicate) {
@@ -1193,7 +1213,7 @@ exports.Snapshot = Snapshot;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Errors_1 = __webpack_require__(0);
+var Errors_1 = __webpack_require__(1);
 if (typeof DEBUG === 'undefined') {
     var DEBUG = true;
 }
@@ -1249,11 +1269,11 @@ var Collection_1 = __webpack_require__(9);
 exports.Collection = Collection_1.Collection;
 var Element_1 = __webpack_require__(3);
 exports.Element = Element_1.Element;
-var Errors_1 = __webpack_require__(0);
+var Errors_1 = __webpack_require__(1);
 exports.ElpongError = Errors_1.ElpongError;
 var Snapshot_1 = __webpack_require__(15);
 exports.Snapshot = Snapshot_1.Snapshot;
-var Util_1 = __webpack_require__(1);
+var Util_1 = __webpack_require__(0);
 exports.Util = Util_1.Util;
 var Configuration_1 = __webpack_require__(16);
 exports.SchemeConfiguration = Configuration_1.SchemeConfiguration;
@@ -1266,7 +1286,7 @@ exports.SchemeConfiguration = Configuration_1.SchemeConfiguration;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Util_1 = __webpack_require__(1);
+var Util_1 = __webpack_require__(0);
 // import { Scheme } from '../../Scheme';
 // import { ElpongError } from '../../Errors';
 var EmbeddedElement_1 = __webpack_require__(11);
@@ -1301,7 +1321,7 @@ var Fields;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Util_1 = __webpack_require__(1);
+var Util_1 = __webpack_require__(0);
 var HasMany_1 = __webpack_require__(13);
 var HasOne_1 = __webpack_require__(20);
 var BelongsTo_1 = __webpack_require__(21);
@@ -1331,7 +1351,7 @@ var Relations;
 Object.defineProperty(exports, "__esModule", { value: true });
 var HasMany_1 = __webpack_require__(13);
 var SchemeHelper_1 = __webpack_require__(5);
-var Util_1 = __webpack_require__(1);
+var Util_1 = __webpack_require__(0);
 var HasOne;
 (function (HasOne) {
     function setup(element, relation_collection_singular_name, relation_config) {
@@ -1361,7 +1381,7 @@ var HasOne;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Element_1 = __webpack_require__(3);
-var Util_1 = __webpack_require__(1);
+var Util_1 = __webpack_require__(0);
 var SchemeHelper_1 = __webpack_require__(5);
 var BelongsTo;
 (function (BelongsTo) {
@@ -1431,8 +1451,8 @@ var BelongsTo;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Ajax_1 = __webpack_require__(6);
-var Util_1 = __webpack_require__(1);
-var Errors_1 = __webpack_require__(0);
+var Util_1 = __webpack_require__(0);
+var Errors_1 = __webpack_require__(1);
 var ElementHelper_1 = __webpack_require__(14);
 var UrlHelper_1 = __webpack_require__(4);
 var Actions;
@@ -1550,9 +1570,9 @@ var Actions;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Util_1 = __webpack_require__(1);
+var Util_1 = __webpack_require__(0);
 var Snapshot_1 = __webpack_require__(15);
-var Errors_1 = __webpack_require__(0);
+var Errors_1 = __webpack_require__(1);
 var Snapshots;
 (function (Snapshots) {
     function setup(element) {
@@ -1720,7 +1740,7 @@ var Snapshots;
 Object.defineProperty(exports, "__esModule", { value: true });
 var Ajax_1 = __webpack_require__(6);
 var UrlHelper_1 = __webpack_require__(4);
-var Errors_1 = __webpack_require__(0);
+var Errors_1 = __webpack_require__(1);
 var CollectionActions;
 (function (CollectionActions) {
     function executeGetAll(collection, action_options) {
@@ -1781,7 +1801,7 @@ var CollectionActions;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Util_1 = __webpack_require__(1);
+var Util_1 = __webpack_require__(0);
 var supportsMap = typeof Map !== 'undefined' && (new Map()).values;
 var FakeMap = /** @class */ (function () {
     function FakeMap() {
@@ -1825,3 +1845,4 @@ exports.FakeMap = FakeMap;
 /***/ })
 /******/ ]);
 });
+//# sourceMappingURL=elpong.js.map
