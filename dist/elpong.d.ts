@@ -68,10 +68,10 @@ declare module 'elpong/Ajax' {
 	    [name: string]: string;
 	}
 	export enum AjaxAdapterType {
-	    FETCH = 0,
-	    ANGULAR = 1,
-	    ANGULARJS = 2,
-	    JQUERY = 3
+	    Fetch = 0,
+	    Angular = 1,
+	    AngularJS = 2,
+	    JQuery = 3
 	}
 	export type AjaxAdapterTypeString = 'fetch' | 'angular' | 'angularjs' | 'jquery';
 	export namespace Ajax {

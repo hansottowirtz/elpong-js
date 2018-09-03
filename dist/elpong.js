@@ -464,6 +464,142 @@ exports.Element = Element;
 
 "use strict";
 
+/// <reference types="jquery"/>
+/// <reference types="angular"/>
+Object.defineProperty(exports, "__esModule", { value: true });
+var Errors_1 = __webpack_require__(1);
+var Util_1 = __webpack_require__(0);
+var AjaxAdapterType;
+(function (AjaxAdapterType) {
+    AjaxAdapterType[AjaxAdapterType["Fetch"] = 0] = "Fetch";
+    AjaxAdapterType[AjaxAdapterType["Angular"] = 1] = "Angular";
+    AjaxAdapterType[AjaxAdapterType["AngularJS"] = 2] = "AngularJS";
+    AjaxAdapterType[AjaxAdapterType["JQuery"] = 3] = "JQuery";
+})(AjaxAdapterType = exports.AjaxAdapterType || (exports.AjaxAdapterType = {}));
+var Ajax;
+(function (Ajax) {
+    var ajaxFunction;
+    function executeRequest(url, method, data, headers) {
+        if (!headers) {
+            headers = {};
+        }
+        headers['Accept'] = headers['Content-Type'] = 'application/json';
+        var serialized_data = JSON.stringify(data === undefined ? {} : data);
+        var options = {
+            method: method,
+            type: method,
+            url: url,
+            data: serialized_data,
+            body: serialized_data,
+            headers: headers,
+            dataType: 'json',
+            responseType: 'json'
+        };
+        return ajaxFunction(options.url, options);
+    }
+    Ajax.executeRequest = executeRequest;
+    // Set the http function used for requests
+    // The function should accept one object with keys
+    // method, url, params, headers
+    // and return a promise-like object
+    // with then and catch
+    //
+    // @note Like $http or jQuery.ajax or http.request or fetch
+    // @param {Function} fn The function.
+    // @param {string} type The function.
+    function setAjaxFunction(fn, adapter_type) {
+        var type = convertAjaxAdapterTypeStringToType(adapter_type);
+        switch (type) {
+            case AjaxAdapterType.JQuery:
+                ajaxFunction = function (url, instruction) {
+                    var deferred = jQuery.Deferred();
+                    var ajax = fn(url, instruction);
+                    ajax.then(function (data, status, jqxhr) { return deferred.resolve({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
+                    ajax.catch(function (data, status, jqxhr) { return deferred.reject({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
+                    // Convert to Promise, as Typescript users are probably not using jQuery
+                    // and if so, they won't have a lot of trouble with the differences.
+                    return deferred.promise();
+                };
+                break;
+            case AjaxAdapterType.Fetch:
+                ajaxFunction = function (url, instruction) {
+                    return new Promise(function (resolve, reject) {
+                        // Request with GET/HEAD method cannot have body
+                        instruction.body = (instruction.method === 'GET') ? undefined : instruction.data;
+                        var http_promise = fn(url, instruction);
+                        http_promise.then(function (response) {
+                            if (response.status === 204) {
+                                resolve(response);
+                            }
+                            else {
+                                var contentType = response.headers.get('content-type');
+                                if (!contentType || contentType.indexOf('json') < 0)
+                                    throw new Errors_1.ElpongError('ajahct');
+                                var json_promise = response.json();
+                                json_promise.then(function (json) {
+                                    response.data = json;
+                                    resolve(response);
+                                });
+                                json_promise.catch(reject);
+                            }
+                        });
+                        http_promise.catch(reject);
+                    });
+                };
+                break;
+            case AjaxAdapterType.Angular:
+                ajaxFunction = function (url, instruction) {
+                    return new Promise(function (resolve, reject) {
+                        instruction.responseType = undefined;
+                        fn.request.bind(fn)(url, instruction).subscribe(function (response) {
+                            if (response.status === 204) {
+                                resolve(response);
+                            }
+                            else {
+                                var contentType = response.headers.get('content-type');
+                                if (!contentType || contentType.indexOf('json') < 0)
+                                    throw new Error('ajahct');
+                                var json = response.json();
+                                response.data = json;
+                                resolve(response);
+                            }
+                        }, function (httpErrorResponse) { reject(httpErrorResponse); });
+                    });
+                };
+                break;
+            default:
+                // Default is AngularJS behavior, a promise that resolves to a response
+                // object with the payload in the data field.
+                ajaxFunction = function (url, instruction) { return fn(instruction); };
+        }
+    }
+    Ajax.setAjaxFunction = setAjaxFunction;
+    function convertAjaxAdapterTypeStringToType(type) {
+        if (!Util_1.Util.isInteger(type)) {
+            switch (type) {
+                case 'angular':
+                    return AjaxAdapterType.Angular;
+                case 'angularjs':
+                    return AjaxAdapterType.AngularJS;
+                case 'jquery':
+                    return AjaxAdapterType.JQuery;
+                default:
+                    return AjaxAdapterType.Fetch;
+            }
+        }
+        else {
+            return type;
+        }
+    }
+})(Ajax = exports.Ajax || (exports.Ajax = {}));
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 Object.defineProperty(exports, "__esModule", { value: true });
 var Errors_1 = __webpack_require__(1);
 var UrlHelper;
@@ -525,7 +661,7 @@ var UrlHelper;
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -549,142 +685,6 @@ var SchemeHelper;
 
 
 /***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-/// <reference types="jquery"/>
-/// <reference types="angular"/>
-Object.defineProperty(exports, "__esModule", { value: true });
-var Errors_1 = __webpack_require__(1);
-var Util_1 = __webpack_require__(0);
-var AjaxAdapterType;
-(function (AjaxAdapterType) {
-    AjaxAdapterType[AjaxAdapterType["FETCH"] = 0] = "FETCH";
-    AjaxAdapterType[AjaxAdapterType["ANGULAR"] = 1] = "ANGULAR";
-    AjaxAdapterType[AjaxAdapterType["ANGULARJS"] = 2] = "ANGULARJS";
-    AjaxAdapterType[AjaxAdapterType["JQUERY"] = 3] = "JQUERY";
-})(AjaxAdapterType = exports.AjaxAdapterType || (exports.AjaxAdapterType = {}));
-var Ajax;
-(function (Ajax) {
-    var ajaxFunction;
-    function executeRequest(url, method, data, headers) {
-        if (!headers) {
-            headers = {};
-        }
-        headers['Accept'] = headers['Content-Type'] = 'application/json';
-        var serialized_data = JSON.stringify(data === undefined ? {} : data);
-        var options = {
-            method: method,
-            type: method,
-            url: url,
-            data: serialized_data,
-            body: serialized_data,
-            headers: headers,
-            dataType: 'json',
-            responseType: 'json'
-        };
-        return ajaxFunction(options.url, options);
-    }
-    Ajax.executeRequest = executeRequest;
-    // Set the http function used for requests
-    // The function should accept one object with keys
-    // method, url, params, headers
-    // and return a promise-like object
-    // with then and catch
-    //
-    // @note Like $http or jQuery.ajax or http.request or fetch
-    // @param {Function} fn The function.
-    // @param {string} type The function.
-    function setAjaxFunction(fn, adapter_type) {
-        var type = convertAjaxAdapterTypeStringToType(adapter_type);
-        switch (type) {
-            case AjaxAdapterType.JQUERY:
-                ajaxFunction = function (url, instruction) {
-                    var deferred = jQuery.Deferred();
-                    var ajax = fn(url, instruction);
-                    ajax.then(function (data, status, jqxhr) { return deferred.resolve({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
-                    ajax.catch(function (data, status, jqxhr) { return deferred.reject({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
-                    // Convert to Promise, as Typescript users are probably not using jQuery
-                    // and if so, they won't have a lot of trouble with the differences.
-                    return deferred.promise();
-                };
-                break;
-            case AjaxAdapterType.FETCH:
-                ajaxFunction = function (url, instruction) {
-                    return new Promise(function (resolve, reject) {
-                        // Request with GET/HEAD method cannot have body
-                        instruction.body = (instruction.method === 'GET') ? undefined : instruction.data;
-                        var http_promise = fn(url, instruction);
-                        http_promise.then(function (response) {
-                            if (response.status === 204) {
-                                resolve(response);
-                            }
-                            else {
-                                var contentType = response.headers.get('content-type');
-                                if (!contentType || contentType.indexOf('json') < 0)
-                                    throw new Errors_1.ElpongError('ajahct');
-                                var json_promise = response.json();
-                                json_promise.then(function (json) {
-                                    response.data = json;
-                                    resolve(response);
-                                });
-                                json_promise.catch(reject);
-                            }
-                        });
-                        http_promise.catch(reject);
-                    });
-                };
-                break;
-            case AjaxAdapterType.ANGULAR:
-                ajaxFunction = function (url, instruction) {
-                    return new Promise(function (resolve, reject) {
-                        instruction.responseType = undefined;
-                        fn.request.bind(fn)(url, instruction).subscribe(function (response) {
-                            if (response.status === 204) {
-                                resolve(response);
-                            }
-                            else {
-                                var contentType = response.headers.get('content-type');
-                                if (!contentType || contentType.indexOf('json') < 0)
-                                    throw new Error('ajahct');
-                                var json = response.json();
-                                response.data = json;
-                                resolve(response);
-                            }
-                        }, function (httpErrorResponse) { reject(httpErrorResponse); });
-                    });
-                };
-                break;
-            default:
-                // Default is AngularJS behavior, a promise that resolves to a response
-                // object with the payload in the data field.
-                ajaxFunction = function (url, instruction) { return fn(instruction); };
-        }
-    }
-    Ajax.setAjaxFunction = setAjaxFunction;
-    function convertAjaxAdapterTypeStringToType(type) {
-        if (!Util_1.Util.isInteger(type)) {
-            switch (type) {
-                case 'angular':
-                    return AjaxAdapterType.ANGULAR;
-                case 'angularjs':
-                    return AjaxAdapterType.ANGULARJS;
-                case 'jquery':
-                    return AjaxAdapterType.JQUERY;
-                default:
-                    return AjaxAdapterType.FETCH;
-            }
-        }
-        else {
-            return type;
-        }
-    }
-})(Ajax = exports.Ajax || (exports.Ajax = {}));
-
-
-/***/ }),
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -694,7 +694,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var Scheme_1 = __webpack_require__(8);
 var Errors_1 = __webpack_require__(1);
 var Util_1 = __webpack_require__(0);
-var Ajax_1 = __webpack_require__(6);
+var Ajax_1 = __webpack_require__(4);
 var schemes = {};
 var autoload = false;
 var Elpong;
@@ -956,7 +956,7 @@ exports.Collection = Collection;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var UrlHelper_1 = __webpack_require__(4);
+var UrlHelper_1 = __webpack_require__(5);
 exports.UrlHelper = UrlHelper_1.UrlHelper;
 var CollectionHelper_1 = __webpack_require__(2);
 exports.CollectionHelper = CollectionHelper_1.CollectionHelper;
@@ -969,7 +969,7 @@ exports.CollectionHelper = CollectionHelper_1.CollectionHelper;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var SchemeHelper_1 = __webpack_require__(5);
+var SchemeHelper_1 = __webpack_require__(6);
 var Errors_1 = __webpack_require__(1);
 var EmbeddedElement;
 (function (EmbeddedElement) {
@@ -1277,6 +1277,8 @@ var Util_1 = __webpack_require__(0);
 exports.Util = Util_1.Util;
 var Configuration_1 = __webpack_require__(16);
 exports.SchemeConfiguration = Configuration_1.SchemeConfiguration;
+var Ajax_1 = __webpack_require__(4);
+exports.AjaxAdapterType = Ajax_1.AjaxAdapterType;
 
 
 /***/ }),
@@ -1350,7 +1352,7 @@ var Relations;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var HasMany_1 = __webpack_require__(13);
-var SchemeHelper_1 = __webpack_require__(5);
+var SchemeHelper_1 = __webpack_require__(6);
 var Util_1 = __webpack_require__(0);
 var HasOne;
 (function (HasOne) {
@@ -1382,7 +1384,7 @@ var HasOne;
 Object.defineProperty(exports, "__esModule", { value: true });
 var Element_1 = __webpack_require__(3);
 var Util_1 = __webpack_require__(0);
-var SchemeHelper_1 = __webpack_require__(5);
+var SchemeHelper_1 = __webpack_require__(6);
 var BelongsTo;
 (function (BelongsTo) {
     function setup(element, relation_collection_singular_name, relation_config) {
@@ -1450,11 +1452,11 @@ var BelongsTo;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Ajax_1 = __webpack_require__(6);
+var Ajax_1 = __webpack_require__(4);
 var Util_1 = __webpack_require__(0);
 var Errors_1 = __webpack_require__(1);
 var ElementHelper_1 = __webpack_require__(14);
-var UrlHelper_1 = __webpack_require__(4);
+var UrlHelper_1 = __webpack_require__(5);
 var Actions;
 (function (Actions) {
     function setup(element, actions_config) {
@@ -1738,8 +1740,8 @@ var Snapshots;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Ajax_1 = __webpack_require__(6);
-var UrlHelper_1 = __webpack_require__(4);
+var Ajax_1 = __webpack_require__(4);
+var UrlHelper_1 = __webpack_require__(5);
 var Errors_1 = __webpack_require__(1);
 var CollectionActions;
 (function (CollectionActions) {

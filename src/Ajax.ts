@@ -34,10 +34,10 @@ export interface AjaxHeaders {
 }
 
 export enum AjaxAdapterType {
-  FETCH = 0,
-  ANGULAR = 1,
-  ANGULARJS = 2,
-  JQUERY = 3
+  Fetch = 0,
+  Angular = 1,
+  AngularJS = 2,
+  JQuery = 3
 }
 
 export type AjaxAdapterTypeString = 'fetch'|'angular'|'angularjs'|'jquery';
@@ -85,7 +85,7 @@ export namespace Ajax {
   export function setAjaxFunction(fn: AjaxExternalFunction, adapter_type?: AjaxAdapterType|AjaxAdapterTypeString) {
     const type = convertAjaxAdapterTypeStringToType(adapter_type);
     switch (type) {
-      case AjaxAdapterType.JQUERY:
+      case AjaxAdapterType.JQuery:
         ajaxFunction = (url: string, instruction: AjaxInstruction) => {
           let deferred = jQuery.Deferred();
           let ajax = (fn as Function)(url, instruction);
@@ -96,7 +96,7 @@ export namespace Ajax {
           return deferred.promise() as any as Promise<any>;
         }
         break;
-      case AjaxAdapterType.FETCH:
+      case AjaxAdapterType.Fetch:
         ajaxFunction = (url: string, instruction: AjaxInstruction) => {
           return new Promise((resolve, reject) => {
             // Request with GET/HEAD method cannot have body
@@ -120,7 +120,7 @@ export namespace Ajax {
           });
         }
         break;
-      case AjaxAdapterType.ANGULAR:
+      case AjaxAdapterType.Angular:
         ajaxFunction = (url: string, instruction: AjaxInstruction) => {
           return new Promise<AjaxResponse>((resolve, reject) => {
             instruction.responseType = undefined;
@@ -149,13 +149,13 @@ export namespace Ajax {
     if (!Util.isInteger(type)) {
       switch (type) {
         case 'angular':
-          return AjaxAdapterType.ANGULAR;
+          return AjaxAdapterType.Angular;
         case 'angularjs':
-          return AjaxAdapterType.ANGULARJS;
+          return AjaxAdapterType.AngularJS;
         case 'jquery':
-          return AjaxAdapterType.JQUERY;
+          return AjaxAdapterType.JQuery;
         default:
-          return AjaxAdapterType.FETCH;
+          return AjaxAdapterType.Fetch;
       }
     } else {
       return type;

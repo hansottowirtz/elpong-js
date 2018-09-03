@@ -53,6 +53,12 @@ promise.then(function(response) {
 })
 ```
 
+Alternatively, you can use the `AjaxAdapterType` enum in Typescript:
+
+```javascript
+elpong.setAjax(window.fetch, AjaxAdapterType.Fetch);
+```
+
 ## Schemes
 
 You can create a scheme in two ways:
