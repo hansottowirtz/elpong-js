@@ -1,5 +1,6 @@
 var webpack = require('webpack');
-var ENABLE_SOURCEMAPS = false;
+var ENABLE_SOURCEMAPS = process.env.ENABLE_SOURCEMAPS || false;
+
 module.exports = function(config) {
   var customLaunchers = {
     'SL_Chrome_26': {
@@ -110,7 +111,7 @@ module.exports = function(config) {
     case 'jquery':
       config.files.unshift('node_modules/jquery/dist/jquery.js', 'node_modules/jquery-mockjax/dist/jquery.mockjax.js');
       break;
-    case 'angular':
+    case 'angularjs':
       config.files.unshift('node_modules/angular/angular.js', 'node_modules/angular-mocks/angular-mocks.js');
       break;
   }
