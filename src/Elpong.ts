@@ -1,7 +1,7 @@
 import { Scheme } from './Scheme';
 import { Collection } from './Collection';
 import { SchemeConfiguration, PreSchemeConfiguration } from './Configuration';
-import { ElpongError } from './Errors';
+import { ElpongError, ElpongErrorType } from './Errors';
 import { Util } from './Util';
 import { Ajax, AjaxExternalFunction, AjaxAdapterType, AjaxAdapterTypeString } from './Ajax';
 
@@ -29,7 +29,7 @@ export namespace Elpong {
     if (scheme = schemes[name]) {
       return scheme;
     }
-    throw new ElpongError('schmnf', name); // Scheme not found
+    throw new ElpongError(ElpongErrorType.SCHNFO, name); // Scheme not found
   }
 
   export function load(ignore_empty: boolean): void {
@@ -39,7 +39,7 @@ export namespace Elpong {
       document.querySelectorAll('meta[name=elpong-scheme]') as NodeListOf<HTMLMetaElement>;
 
     if (!ignore_empty && !scheme_tags.length) {
-      throw new ElpongError('elpgns');
+      throw new ElpongError(ElpongErrorType.ELPNST);
     }
 
     for (let scheme_tag of Util.arrayFromHTML(scheme_tags) as HTMLMetaElement[]) {

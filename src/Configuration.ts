@@ -1,4 +1,4 @@
-import { ElpongError } from './Errors'
+import { ElpongError, ElpongErrorType } from './Errors'
 
 declare var DEBUG: boolean;
 if (typeof DEBUG === 'undefined') {
@@ -13,11 +13,11 @@ export class SchemeConfiguration implements PreSchemeConfiguration {
   constructor(preconf: PreSchemeConfiguration) {
     this.name = preconf.name;
     if (DEBUG && !this.name) {
-      throw new ElpongError('confnn');
+      throw new ElpongError(ElpongErrorType.CNFNNA);
     }
     this.selector = preconf.selector;
     if (DEBUG && !this.selector) {
-      throw new ElpongError('confns', preconf.name);
+      throw new ElpongError(ElpongErrorType.CNFNSL, preconf.name);
     }
     this.collections = {} as CollectionConfigurationMap;
 

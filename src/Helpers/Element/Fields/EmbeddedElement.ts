@@ -1,7 +1,7 @@
 import { Element } from '../../../Element';
 import { SchemeHelper } from '../../SchemeHelper';
 import { EmbeddedElementFieldConfiguration } from '../../../Configuration';
-import { ElpongError } from '../../../Errors';
+import { ElpongError, ElpongErrorType } from '../../../Errors';
 import { PreElement } from '../../../PreElement';
 
 export namespace EmbeddedElement {
@@ -30,7 +30,7 @@ export namespace EmbeddedElement {
 
     const reference_field_value = pre_element[reference_field_key];
     if (reference_field_value !== undefined && (reference_field_value != selector_value)) {
-      throw new ElpongError('eleafw', `${reference_field_value} != ${selector_value}`);
+      throw new ElpongError(ElpongErrorType.ELEAFW, `${reference_field_value} != ${selector_value}`);
     }
     element.fields[reference_field_key] = selector_value;
   }

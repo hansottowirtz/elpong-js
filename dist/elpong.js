@@ -267,34 +267,35 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+var _a;
 if (typeof DEBUG === 'undefined') {
     var DEBUG = true;
 }
 if (DEBUG) {
-    var error_text_map = {
-        'schmnf': 'Scheme not found',
-        'collnf': 'Collection not found',
-        'collnf:s': 'Collection not found by singular name',
-        'collex': 'Collection with name already exists in scheme',
-        'elpgns': 'No scheme tags found',
-        'elpnce': 'No collection or element tags found',
-        'elndoc': 'No document',
-        'confns': 'Configuration has no selector',
-        'confnn': 'Configuration has no name',
-        'elenew': 'Element is new',
-        'elesna': 'Element has a selector value but is in new_elements array',
-        'elense': 'Element has no selector value but is in elements object',
-        'apinur': 'Api url has not yet been set',
-        'fldnsa': 'Field should be an array of selectors',
-        'elesch': 'Element selector changed',
-        'elesnf': 'Snapshot not found',
-        'elesti': 'Invalid snapshot identifier: must be number <= list.length, string or RegExp',
-        'eleafw': 'Pre element has an reference field that does not match the embedded element selector',
-        'elesnm': 'Selector is not matching get one request selector',
-        'elenos': 'No selector value given in getOne action',
-        'ajahct': 'Content-Type header not set to application/json',
-        'acgtda': 'GET request can\'t have data. Use params'
-    };
+    var error_text_map = (_a = {},
+        _a[0 /* SCHNFO */] = 'Scheme not found',
+        _a[1 /* COLNFO */] = 'Collection not found',
+        _a[2 /* COLNFS */] = 'Collection not found by singular name',
+        _a[3 /* COLEXI */] = 'Collection with name already exists in scheme',
+        _a[4 /* ELPNST */] = 'No scheme tags found',
+        _a[5 /* ELPNCE */] = 'No collection or element tags found',
+        _a[6 /* ELPNDC */] = 'No document',
+        _a[7 /* CNFNSL */] = 'Configuration has no selector',
+        _a[8 /* CNFNNA */] = 'Configuration has no name',
+        _a[9 /* ELENEW */] = 'Element is new',
+        _a[10 /* ELESNA */] = 'Element has a selector value but is in new_elements array',
+        _a[2 /* COLNFS */] = 'Element has no selector value but is in elements object',
+        _a[12 /* APINUR */] = 'Api url has not yet been set',
+        _a[13 /* FLDNSA */] = 'Field should be an array of selectors',
+        _a[14 /* ELESCH */] = 'Element selector changed',
+        _a[15 /* ELESNF */] = 'Snapshot not found',
+        _a[16 /* ELESTI */] = 'Invalid snapshot identifier: must be number <= list.length, string or RegExp',
+        _a[17 /* ELEAFW */] = 'Pre element has an reference field that does not match the embedded element selector',
+        _a[18 /* ELESNM */] = 'Selector is not matching get one request selector',
+        _a[19 /* ELENOS */] = 'No selector value given in getOne action',
+        _a[20 /* AJXHCT */] = 'Content-Type header not set to application/json',
+        _a[21 /* AJXGDA */] = 'GET request can\'t have data. Use params',
+        _a);
 }
 var ElpongError = /** @class */ (function (_super) {
     __extends(ElpongError, _super);
@@ -411,7 +412,7 @@ var Element = /** @class */ (function () {
     Element.prototype.isNew = function () {
         if (Util_1.Util.includes(this.collection().new_elements, this)) {
             if (this.selector()) {
-                throw new Errors_1.ElpongError('elesna');
+                throw new Errors_1.ElpongError(10 /* ELESNA */);
             }
             else {
                 return true;
@@ -419,7 +420,7 @@ var Element = /** @class */ (function () {
         }
         else {
             if (!this.selector()) {
-                throw new Errors_1.ElpongError('elense');
+                throw new Errors_1.ElpongError(11 /* ELESNE */);
             }
             else {
                 return false;
@@ -442,7 +443,7 @@ var Element = /** @class */ (function () {
                 else if (field_key === selector_key) {
                     var selector_value = _this.fields[field_key];
                     if ((selector_value !== field_value) && isSelectorValue(selector_value) && isSelectorValue(field_value)) {
-                        throw new Errors_1.ElpongError('elesch', selector_value + " -> " + field_value);
+                        throw new Errors_1.ElpongError(14 /* ELESCH */, selector_value + " -> " + field_value);
                     }
                     _this.fields[field_key] = field_value;
                 }
@@ -474,7 +475,7 @@ var UrlHelper;
         var scheme = collection.scheme();
         var api_url = scheme.getApiUrl();
         if (!api_url) {
-            throw new Errors_1.ElpongError('apinur');
+            throw new Errors_1.ElpongError(12 /* APINUR */);
         }
         url = api_url + "/" + collection.name;
         if (!url_options.no_selector) {
@@ -492,7 +493,7 @@ var UrlHelper;
     function createForCollection(collection, url_options) {
         var api_url = collection.scheme().getApiUrl();
         if (!api_url) {
-            throw new Errors_1.ElpongError('apinur');
+            throw new Errors_1.ElpongError(12 /* APINUR */);
         }
         var url = api_url + "/" + collection.name; //HPP.Helpers.Url.createForCollection(, hpe, user_options) # (action_name, element, user_options = {}, suffix)
         if (url_options.suffix) {
@@ -542,7 +543,7 @@ var SchemeHelper;
                 return collection;
             }
         }
-        throw new Errors_1.ElpongError('collnf:s', singular_name);
+        throw new Errors_1.ElpongError(2 /* COLNFS */, singular_name);
     }
     SchemeHelper.getCollectionBySingularName = getCollectionBySingularName;
 })(SchemeHelper = exports.SchemeHelper || (exports.SchemeHelper = {}));
@@ -617,7 +618,7 @@ var Ajax;
                             else {
                                 var contentType = response.headers.get('content-type');
                                 if (!contentType || contentType.indexOf('json') < 0)
-                                    throw new Errors_1.ElpongError('ajahct');
+                                    throw new Errors_1.ElpongError(20 /* AJXHCT */);
                                 var json_promise = response.json();
                                 json_promise.then(function (json) {
                                     response.data = json;
@@ -695,7 +696,7 @@ var Elpong;
         if (scheme = schemes[name]) {
             return scheme;
         }
-        throw new Errors_1.ElpongError('schmnf', name); // Scheme not found
+        throw new Errors_1.ElpongError(0 /* SCHNFO */, name); // Scheme not found
     }
     Elpong.get = get;
     function load(ignore_empty) {
@@ -703,7 +704,7 @@ var Elpong;
             return;
         var scheme_tags = document.querySelectorAll('meta[name=elpong-scheme]');
         if (!ignore_empty && !scheme_tags.length) {
-            throw new Errors_1.ElpongError('elpgns');
+            throw new Errors_1.ElpongError(4 /* ELPNST */);
         }
         for (var _i = 0, _a = Util_1.Util.arrayFromHTML(scheme_tags); _i < _a.length; _i++) {
             var scheme_tag = _a[_i];
@@ -771,7 +772,7 @@ var Scheme = /** @class */ (function () {
             return collection;
         }
         else {
-            throw new Errors_1.ElpongError('collnf', name);
+            throw new Errors_1.ElpongError(1 /* COLNFO */, name);
         }
     };
     Scheme.prototype.setApiUrl = function (url) {
@@ -823,7 +824,7 @@ var Collection = /** @class */ (function () {
             },
             getOne: function (selector_value, action_options) {
                 if (selector_value === undefined) {
-                    throw new Errors_1.ElpongError('elenos');
+                    throw new Errors_1.ElpongError(19 /* ELENOS */);
                 }
                 return CollectionActions_1.CollectionActions.executeGetOne(_this, selector_value, action_options);
             }
@@ -841,11 +842,11 @@ var Collection = /** @class */ (function () {
     Collection.prototype.load = function (ignore_empty) {
         var _this = this;
         if (typeof document === 'undefined')
-            throw new Errors_1.ElpongError('elndoc');
+            throw new Errors_1.ElpongError(6 /* ELPNDC */);
         var collection_tags = document.querySelectorAll("meta[name=elpong-collection][collection='" + this.name + "'][scheme='" + this.scheme().name + "']");
         var element_tags = document.querySelectorAll("meta[name=elpong-element][collection='" + this.name + "'][scheme='" + this.scheme().name + "']");
         if (!ignore_empty && !collection_tags.length && !element_tags.length) {
-            throw new Errors_1.ElpongError('elpnce');
+            throw new Errors_1.ElpongError(5 /* ELPNCE */);
         }
         for (var _i = 0, _a = Util_1.Util.arrayFromHTML(collection_tags); _i < _a.length; _i++) {
             var collection_tag = _a[_i];
@@ -983,7 +984,7 @@ var EmbeddedElement;
         var selector_value = embedded_element.selector();
         var reference_field_value = pre_element[reference_field_key];
         if (reference_field_value !== undefined && (reference_field_value != selector_value)) {
-            throw new Errors_1.ElpongError('eleafw', reference_field_value + " != " + selector_value);
+            throw new Errors_1.ElpongError(17 /* ELEAFW */, reference_field_value + " != " + selector_value);
         }
         element.fields[reference_field_key] = selector_value;
     }
@@ -1111,7 +1112,7 @@ var HasMany;
     function getHasManyRelationArrayInline(element, relation_collection, field_key) {
         var selector_value_arr = element.fields[field_key];
         if (!Array.isArray(selector_value_arr)) {
-            throw new Errors_1.ElpongError('fldnrf', field_key);
+            throw new Errors_1.ElpongError(13 /* FLDNSA */, field_key);
         }
         var element2_arr = [];
         for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
@@ -1207,11 +1208,11 @@ var SchemeConfiguration = /** @class */ (function () {
     function SchemeConfiguration(preconf) {
         this.name = preconf.name;
         if (DEBUG && !this.name) {
-            throw new Errors_1.ElpongError('confnn');
+            throw new Errors_1.ElpongError(8 /* CNFNNA */);
         }
         this.selector = preconf.selector;
         if (DEBUG && !this.selector) {
-            throw new Errors_1.ElpongError('confns', preconf.name);
+            throw new Errors_1.ElpongError(7 /* CNFNSL */, preconf.name);
         }
         this.collections = {};
         for (var collection_name in preconf.collections) {
@@ -1456,7 +1457,7 @@ var Actions;
         Util_1.Util.forEach(actions_config, function (action_config, action_name) {
             element.actions[Util_1.Util.camelize(action_name)] = function (action_options) {
                 if (element.isNew() && !action_config.no_selector) {
-                    throw new Errors_1.ElpongError('elenew');
+                    throw new Errors_1.ElpongError(9 /* ELENEW */);
                 }
                 return executeCustom(element, action_name, action_config, action_options);
             };
@@ -1472,7 +1473,7 @@ var Actions;
                 data = action_options.data;
             }
             else {
-                throw new Errors_1.ElpongError('acgtda');
+                throw new Errors_1.ElpongError(21 /* AJXGDA */);
             }
         }
         else if (method !== 'GET') {
@@ -1517,7 +1518,7 @@ var Actions;
                 data = action_options.data;
             }
             else {
-                throw new Errors_1.ElpongError('acgtda');
+                throw new Errors_1.ElpongError(21 /* AJXGDA */);
             }
         }
         else if (!action_config.no_data) {
@@ -1619,7 +1620,7 @@ var Snapshots;
             if (Util_1.Util.isInteger(id)) {
                 var list = element.snapshots.list;
                 if (id < 0 || id > list.length) {
-                    throw new Errors_1.ElpongError('elesti', "" + id);
+                    throw new Errors_1.ElpongError(16 /* ELESTI */, "" + id);
                 }
                 else {
                     var snapshot = list[element.snapshots.current_index - id];
@@ -1632,7 +1633,7 @@ var Snapshots;
                     snapshot.revert();
                 }
                 else {
-                    throw new Errors_1.ElpongError('elesnf', "" + id);
+                    throw new Errors_1.ElpongError(15 /* ELESNF */, "" + id);
                 }
             }
             return element;
@@ -1735,7 +1736,7 @@ var CollectionActions;
             action_options = {};
         }
         if (action_options.data) {
-            throw new Errors_1.ElpongError('acgtda');
+            throw new Errors_1.ElpongError(21 /* AJXGDA */);
         }
         var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection(collection, { params: action_options.params || {} }), 'GET', undefined, action_options.headers);
         promise.then(function (response) {
@@ -1749,7 +1750,7 @@ var CollectionActions;
     function executeGetOne(collection, selector_value, action_options) {
         if (action_options === void 0) { action_options = {}; }
         if (action_options.data) {
-            throw new Errors_1.ElpongError('acgtda');
+            throw new Errors_1.ElpongError(21 /* AJXGDA */);
         }
         var url_options = {
             suffix: selector_value,
@@ -1760,7 +1761,7 @@ var CollectionActions;
             if (response.data) {
                 var selector_key = collection.scheme().configuration().selector;
                 if (response.data[selector_key] !== selector_value) {
-                    throw new Errors_1.ElpongError('elesnm', response.data[selector_key] + " != " + selector_value);
+                    throw new Errors_1.ElpongError(18 /* ELESNM */, response.data[selector_key] + " != " + selector_value);
                 }
                 collection.buildOrMerge(response.data);
             }

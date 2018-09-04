@@ -1,7 +1,7 @@
 /// <reference types="jquery"/>
 /// <reference types="angular"/>
 
-import { ElpongError } from './Errors';
+import { ElpongError, ElpongErrorType } from './Errors';
 import { Util } from './Util';
 
 export type AjaxPromiseThenOnResolveFunction = (response: AjaxResponse) => void;
@@ -107,7 +107,7 @@ export namespace Ajax {
                 resolve(response);
               } else {
                 const contentType = response.headers.get('content-type');
-                if (!contentType || contentType.indexOf('json') < 0) throw new ElpongError('ajahct');
+                if (!contentType || contentType.indexOf('json') < 0) throw new ElpongError(ElpongErrorType.AJXHCT);
                 let json_promise = response.json();
                 json_promise.then((json: string) => {
                   (response as any).data = json;

@@ -2,7 +2,7 @@ import { Util } from '../../Util';
 import { Snapshot } from '../../Snapshot';
 import { Element } from '../../Element';
 import { ElementHelper } from '../ElementHelper';
-import { ElpongError } from '../../Errors';
+import { ElpongError, ElpongErrorType } from '../../Errors';
 
 export namespace Snapshots {
   export function setup(element: Element) {
@@ -67,7 +67,7 @@ export namespace Snapshots {
       if (Util.isInteger(id)) {
         let list = element.snapshots.list;
         if (id < 0 || id > list.length) {
-          throw new ElpongError('elesti', `${id}`);
+          throw new ElpongError(ElpongErrorType.ELESTI, `${id}`);
         } else {
           let snapshot = list[element.snapshots.current_index - id];
           snapshot.revert();
@@ -77,7 +77,7 @@ export namespace Snapshots {
         if (snapshot = snapshots.lastWithTag(id)) {
           snapshot.revert();
         } else {
-          throw new ElpongError('elesnf', `${id}`);
+          throw new ElpongError(ElpongErrorType.ELESNF, `${id}`);
         }
       }
       return element;

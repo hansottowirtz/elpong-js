@@ -3,35 +3,60 @@ if (typeof DEBUG === 'undefined') {
   var DEBUG = true;
 }
 
+export const enum ElpongErrorType {
+  SCHNFO,
+  COLNFO,
+  COLNFS,
+  COLEXI,
+  ELPNST,
+  ELPNCE,
+  ELPNDC,
+  CNFNSL,
+  CNFNNA,
+  ELENEW,
+  ELESNA,
+  ELESNE,
+  APINUR,
+  FLDNSA,
+  ELESCH,
+  ELESNF,
+  ELESTI,
+  ELEAFW,
+  ELESNM,
+  ELENOS,
+  AJXHCT,
+  AJXGDA
+}
+
 if (DEBUG) {
-  var error_text_map: Object = {
-    'schmnf': 'Scheme not found',
-    'collnf': 'Collection not found',
-    'collnf:s': 'Collection not found by singular name',
-    'collex': 'Collection with name already exists in scheme',
-    'elpgns': 'No scheme tags found',
-    'elpnce': 'No collection or element tags found',
-    'elndoc': 'No document',
-    'confns': 'Configuration has no selector',
-    'confnn': 'Configuration has no name',
-    'elenew': 'Element is new',
-    'elesna': 'Element has a selector value but is in new_elements array',
-    'elense': 'Element has no selector value but is in elements object',
-    'apinur': 'Api url has not yet been set',
-    'fldnsa': 'Field should be an array of selectors',
-    'elesch': 'Element selector changed',
-    'elesnf': 'Snapshot not found',
-    'elesti': 'Invalid snapshot identifier: must be number <= list.length, string or RegExp',
-    'eleafw': 'Pre element has an reference field that does not match the embedded element selector',
-    'elesnm': 'Selector is not matching get one request selector',
-    'elenos': 'No selector value given in getOne action',
-    'ajahct': 'Content-Type header not set to application/json',
-    'acgtda': 'GET request can\'t have data. Use params'
+  var error_text_map = {
+    [ElpongErrorType.SCHNFO]: 'Scheme not found',
+    [ElpongErrorType.COLNFO]: 'Collection not found',
+    [ElpongErrorType.COLNFS]: 'Collection not found by singular name',
+    [ElpongErrorType.COLEXI]: 'Collection with name already exists in scheme',
+    [ElpongErrorType.ELPNST]: 'No scheme tags found',
+    [ElpongErrorType.ELPNCE]: 'No collection or element tags found',
+    [ElpongErrorType.ELPNDC]: 'No document',
+    [ElpongErrorType.CNFNSL]: 'Configuration has no selector',
+    [ElpongErrorType.CNFNNA]: 'Configuration has no name',
+    [ElpongErrorType.ELENEW]: 'Element is new',
+    [ElpongErrorType.ELESNA]: 'Element has a selector value but is in new_elements array',
+    [ElpongErrorType.COLNFS]: 'Element has no selector value but is in elements object',
+    [ElpongErrorType.APINUR]: 'Api url has not yet been set',
+    [ElpongErrorType.FLDNSA]: 'Field should be an array of selectors',
+    [ElpongErrorType.ELESCH]: 'Element selector changed',
+    [ElpongErrorType.ELESNF]: 'Snapshot not found',
+    [ElpongErrorType.ELESTI]: 'Invalid snapshot identifier: must be number <= list.length, string or RegExp',
+    [ElpongErrorType.ELEAFW]: 'Pre element has an reference field that does not match the embedded element selector',
+    [ElpongErrorType.ELESNM]: 'Selector is not matching get one request selector',
+    [ElpongErrorType.ELENOS]: 'No selector value given in getOne action',
+    [ElpongErrorType.AJXHCT]: 'Content-Type header not set to application/json',
+    [ElpongErrorType.AJXGDA]: 'GET request can\'t have data. Use params'
   }
 }
 
 export class ElpongError extends Error {
-  constructor(message: string, argument?: string) {
+  constructor(message: ElpongErrorType, argument?: string) {
     let actual_message = DEBUG ? error_text_map[message] : message;
     if (argument) {
       super(`${actual_message}: ${argument}`);

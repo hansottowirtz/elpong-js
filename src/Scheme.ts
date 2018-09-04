@@ -1,6 +1,6 @@
 import { Collection } from './Collection';
 import { SchemeConfiguration, PreSchemeConfiguration } from './Configuration';
-import { ElpongError } from './Errors';
+import { ElpongError, ElpongErrorType } from './Errors';
 import { UrlHelper } from './Helpers';
 import { Elpong } from './Elpong';
 
@@ -43,7 +43,7 @@ export class Scheme {
     if (collection = this._collections[name]) {
       return collection;
     } else {
-      throw new ElpongError('collnf', name);
+      throw new ElpongError(ElpongErrorType.COLNFO, name);
     }
   }
 

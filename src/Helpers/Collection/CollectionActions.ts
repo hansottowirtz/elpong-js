@@ -3,7 +3,7 @@ import { Ajax, AjaxResponse, AjaxData, AjaxHeaders, AjaxPromise } from '../../Aj
 import { UrlHelper, UrlOptions, UrlHelperOptions } from '../UrlHelper';
 import { SelectorValue } from '../../Element';
 import { CollectionActionConfiguration } from '../../Configuration';
-import { ElpongError } from '../../Errors';
+import { ElpongError, ElpongErrorType } from '../../Errors';
 import { PreElement } from '../../PreElement';
 
 export interface CollectionActionOptions {
@@ -16,7 +16,7 @@ export namespace CollectionActions {
   export function executeGetAll(collection: Collection, action_options: CollectionActionOptions = {}): AjaxPromise {
     if (!action_options) { action_options = {}; }
     if (action_options.data) {
-      throw new ElpongError('acgtda');
+      throw new ElpongError(ElpongErrorType.AJXGDA);
     }
 
     let promise = Ajax.executeRequest(
@@ -35,7 +35,7 @@ export namespace CollectionActions {
 
   export function executeGetOne(collection: Collection, selector_value: SelectorValue, action_options: CollectionActionOptions = {}) {
     if (action_options.data) {
-      throw new ElpongError('acgtda');
+      throw new ElpongError(ElpongErrorType.AJXGDA);
     }
 
     const url_options: UrlHelperOptions = {
@@ -53,7 +53,7 @@ export namespace CollectionActions {
       if (response.data) {
         let selector_key = collection.scheme().configuration().selector;
         if (response.data[selector_key] !== selector_value) {
-          throw new ElpongError('elesnm', `${response.data[selector_key]} != ${selector_value}`)
+          throw new ElpongError(ElpongErrorType.ELESNM, `${response.data[selector_key]} != ${selector_value}`)
         }
         collection.buildOrMerge(response.data);
       }

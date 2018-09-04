@@ -6,7 +6,7 @@ import { Util } from './Util';
 import { ActionConfiguration, CollectionConfiguration } from './Configuration';
 import { CollectionActions, CollectionActionOptions } from './Helpers/Collection/CollectionActions';
 import { AjaxPromise } from './Ajax';
-import { ElpongError } from './Errors';
+import { ElpongError, ElpongErrorType } from './Errors';
 import { FakeMap } from './FakeThings';
 import { PreElement } from './PreElement';
 
@@ -65,7 +65,7 @@ export class Collection {
         return CollectionActions.executeGetAll(this, action_options);
       },
       getOne: (selector_value?: SelectorValue, action_options?: CollectionActionOptions) => {
-        if (selector_value === undefined) { throw new ElpongError('elenos'); }
+        if (selector_value === undefined) { throw new ElpongError(ElpongErrorType.ELENOS); }
         return CollectionActions.executeGetOne(this, selector_value, action_options);
       }
     };
@@ -80,7 +80,7 @@ export class Collection {
   }
 
   load(ignore_empty: boolean): void {
-    if (typeof document === 'undefined') throw new ElpongError('elndoc');
+    if (typeof document === 'undefined') throw new ElpongError(ElpongErrorType.ELPNDC);
 
     let collection_tags: NodeListOf<HTMLMetaElement> =
       document.querySelectorAll(`meta[name=elpong-collection][collection='${this.name}'][scheme='${this.scheme().name}']`) as NodeListOf<HTMLMetaElement>;
@@ -88,7 +88,7 @@ export class Collection {
       document.querySelectorAll(`meta[name=elpong-element][collection='${this.name}'][scheme='${this.scheme().name}']`) as NodeListOf<HTMLMetaElement>;
 
     if (!ignore_empty && !collection_tags.length && !element_tags.length) {
-      throw new ElpongError('elpnce');
+      throw new ElpongError(ElpongErrorType.ELPNCE);
     }
 
     for (let collection_tag of Util.arrayFromHTML(collection_tags) as HTMLMetaElement[]) {

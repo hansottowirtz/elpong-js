@@ -12,7 +12,7 @@ import { Snapshots } from './Helpers/Element/Snapshots';
 import { EmbeddedElement } from './Helpers/Element/Fields/EmbeddedElement';
 import { EmbeddedCollection } from './Helpers/Element/Fields/EmbeddedCollection';
 
-import { ElpongError } from './Errors';
+import { ElpongError, ElpongErrorType } from './Errors';
 import { FieldConfiguration, EmbeddedElementFieldConfiguration, EmbeddedCollectionFieldConfiguration } from './Configuration';
 
 export type SelectorValue = string|number;
@@ -107,13 +107,13 @@ export class Element {
   isNew(): boolean {
     if (Util.includes(this.collection().new_elements, this)) {
       if (this.selector()) {
-        throw new ElpongError('elesna');
+        throw new ElpongError(ElpongErrorType.ELESNA);
       } else {
         return true;
       }
     } else {
       if (!this.selector()) {
-        throw new ElpongError('elense');
+        throw new ElpongError(ElpongErrorType.ELESNE);
       } else {
         return false;
       }
@@ -133,7 +133,7 @@ export class Element {
         } else if (field_key === selector_key) {
           let selector_value = this.fields[field_key];
           if ((selector_value !== field_value) && isSelectorValue(selector_value) && isSelectorValue(field_value)) {
-            throw new ElpongError('elesch', `${selector_value} -> ${field_value}`);
+            throw new ElpongError(ElpongErrorType.ELESCH, `${selector_value} -> ${field_value}`);
           }
           this.fields[field_key] = field_value;
         } else {

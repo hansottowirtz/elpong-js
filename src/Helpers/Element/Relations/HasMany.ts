@@ -3,7 +3,7 @@ import { Collection, CollectionFindByOptions } from '../../../Collection';
 import { CollectionHelper } from '../../CollectionHelper';
 import { Util } from '../../../Util';
 import { HasManyRelationConfiguration, HasOneRelationConfiguration, FieldConfiguration } from '../../../Configuration';
-import { ElpongError } from '../../../Errors';
+import { ElpongError, ElpongErrorType } from '../../../Errors';
 
 export type HasManyRelationFunction = () => Element[];
 
@@ -92,7 +92,7 @@ export namespace HasMany {
 
   function getHasManyRelationArrayInline(element: Element, relation_collection: Collection, field_key: string): Element[] {
     let selector_value_arr = element.fields[field_key];
-    if (!Array.isArray(selector_value_arr)) { throw new ElpongError('fldnrf', field_key); }
+    if (!Array.isArray(selector_value_arr)) { throw new ElpongError(ElpongErrorType.FLDNSA, field_key); }
     let element2_arr: Element[] = [];
     for (let element2 of relation_collection.array()) {
       if (Util.includes(selector_value_arr, element2.selector())) { element2_arr.push(element2); }

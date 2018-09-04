@@ -2,7 +2,7 @@ import { Ajax, AjaxResponse, AjaxData, AjaxHeaders, AjaxPromise } from '../../Aj
 import { ActionConfigurationMap, ActionConfiguration } from '../../Configuration';
 import { Element, SelectorValue } from '../../Element';
 import { Util } from '../../Util';
-import { ElpongError } from '../../Errors';
+import { ElpongError, ElpongErrorType } from '../../Errors';
 import { ElementHelper } from '../ElementHelper';
 import { UrlHelper, UrlOptions, UrlHelperElementOptions } from '../UrlHelper';
 
@@ -22,7 +22,7 @@ export namespace Actions {
 
     Util.forEach(actions_config, (action_config: ActionConfiguration, action_name: string) => {
       element.actions[Util.camelize(action_name)] = (action_options: ActionOptions) => {
-        if (element.isNew() && !action_config.no_selector) { throw new ElpongError('elenew'); }
+        if (element.isNew() && !action_config.no_selector) { throw new ElpongError(ElpongErrorType.ELENEW); }
         return executeCustom(element, action_name, action_config, action_options);
       }
     });
@@ -36,7 +36,7 @@ export namespace Actions {
       if (method !== 'GET') {
         data = action_options.data;
       } else {
-        throw new ElpongError('acgtda');
+        throw new ElpongError(ElpongErrorType.AJXGDA);
       }
     } else if (method !== 'GET') {
       data = ElementHelper.toData(element);
@@ -85,7 +85,7 @@ export namespace Actions {
       if (method !== 'GET') {
         data = action_options.data;
       } else {
-        throw new ElpongError('acgtda');
+        throw new ElpongError(ElpongErrorType.AJXGDA);
       }
     } else if (!action_config.no_data) {
       data = ElementHelper.toData(element);

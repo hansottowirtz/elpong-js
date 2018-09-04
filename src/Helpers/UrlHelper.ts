@@ -1,7 +1,7 @@
 import { ActionConfiguration } from '../Configuration';
 import { Element } from '../Element';
 import { Collection } from '../Collection';
-import { ElpongError } from '../Errors';
+import { ElpongError, ElpongErrorType } from '../Errors';
 
 export interface UrlHelperOptions extends UrlOptions {
   suffix?: string;
@@ -25,7 +25,7 @@ export namespace UrlHelper {
     let collection = element.collection();
     let scheme = collection.scheme();
     let api_url = scheme.getApiUrl();
-    if (!api_url) { throw new ElpongError('apinur'); }
+    if (!api_url) { throw new ElpongError(ElpongErrorType.APINUR); }
 
     url = `${api_url}/${collection.name}`;
     if (!url_options.no_selector) {
@@ -39,7 +39,7 @@ export namespace UrlHelper {
 
   export function createForCollection(collection: Collection, url_options: UrlHelperOptions): string {
     let api_url = collection.scheme().getApiUrl();
-    if (!api_url) { throw new ElpongError('apinur'); }
+    if (!api_url) { throw new ElpongError(ElpongErrorType.APINUR); }
 
     let url = `${api_url}/${collection.name}`; //HPP.Helpers.Url.createForCollection(, hpe, user_options) # (action_name, element, user_options = {}, suffix)
     if (url_options.suffix) { url = `${url}/${url_options.suffix}`; }
