@@ -33,7 +33,7 @@ export interface AjaxHeaders {
   [name: string]: string;
 }
 
-export enum AjaxAdapterType {
+export const enum AjaxAdapterType {
   Fetch = 0,
   Angular = 1,
   AngularJS = 2,
