@@ -110,7 +110,7 @@ gulp.task('test:travis', gulp.parallel('test:frameworks', 'test:saucelabs'));
 gulp.task('ensure-built', (done) => {
   let dir_files = (dir) => fs.readdirSync(dir).map((f) => path.join(dir, f));
 
-  let dist_files = dir_files('./dist');
+  let dist_files = dir_files('./dist').filter(f => !f.endsWith('.d.ts'));
   let src_files = dir_files('./src');
 
   let mtimes = (f) => fs.statSync(f).mtime;
