@@ -67,7 +67,7 @@ declare module 'elpong/Ajax' {
 	export interface AjaxHeaders {
 	    [name: string]: string;
 	}
-	export enum AjaxAdapterType {
+	export const enum AjaxAdapterType {
 	    Fetch = 0,
 	    Angular = 1,
 	    AngularJS = 2,
@@ -77,6 +77,7 @@ declare module 'elpong/Ajax' {
 	export namespace Ajax {
 	    function executeRequest(url: string, method: string, data?: AjaxData, headers?: AjaxHeaders): Promise<AjaxResponse>;
 	    function setAjaxFunction(fn: AjaxExternalFunction, adapter_type?: AjaxAdapterType | AjaxAdapterTypeString): void;
+	    function convertAjaxAdapterTypeStringToType(type: AjaxAdapterType | AjaxAdapterTypeString): AjaxAdapterType;
 	}
 
 }
@@ -524,5 +525,5 @@ declare module 'elpong' {
 	export { Util } from 'elpong/Util';
 	export { SchemeConfiguration, PreSchemeConfiguration, CollectionConfiguration, CollectionConfigurationMap, CollectionActionConfiguration, CollectionActionConfigurationMap, CollectionConfigurationWithOptionals, CollectionConfigurationMapWithOptionals, FieldConfiguration, FieldConfigurationMap, RelationConfiguration, RelationConfigurationMaps, HasOneRelationConfiguration, HasManyRelationConfiguration, BelongsToRelationConfiguration, HasOneRelationConfigurationMap, HasManyRelationConfigurationMap, BelongsToRelationConfigurationMap, EmbeddedElementFieldConfiguration, BelongsToRelationConfigurationBase, EmbeddedCollectionFieldConfiguration, RelationConfigurationMapsWithOptionals, ActionConfiguration, ActionConfigurationMap, PolymorphicBelongsToRelationConfiguration, NonPolymorphicBelongsToRelationConfiguration } from 'elpong/Configuration';
 	export { AjaxAdapterType } from 'elpong/Ajax';
-	
+
 }

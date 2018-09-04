@@ -83,7 +83,7 @@ export namespace Ajax {
   // @param {Function} fn The function.
   // @param {string} type The function.
   export function setAjaxFunction(fn: AjaxExternalFunction, adapter_type?: AjaxAdapterType|AjaxAdapterTypeString) {
-    const type = convertAjaxAdapterTypeStringToType(adapter_type);
+    const type = adapter_type ? convertAjaxAdapterTypeStringToType(adapter_type) : undefined;
     switch (type) {
       case AjaxAdapterType.JQuery:
         ajaxFunction = (url: string, instruction: AjaxInstruction) => {
@@ -145,18 +145,10 @@ export namespace Ajax {
     }
   }
 
-  function convertAjaxAdapterTypeStringToType(type?: AjaxAdapterType|AjaxAdapterTypeString): AjaxAdapterType {
+  export function convertAjaxAdapterTypeStringToType(type: AjaxAdapterType|AjaxAdapterTypeString): AjaxAdapterType {
     if (!Util.isInteger(type)) {
-      switch (type) {
-        case 'angular':
-          return AjaxAdapterType.Angular;
-        case 'angularjs':
-          return AjaxAdapterType.AngularJS;
-        case 'jquery':
-          return AjaxAdapterType.JQuery;
-        default:
-          return AjaxAdapterType.Fetch;
-      }
+      const i = ['fetch', 'angular', 'angularjs', 'jquery'].indexOf(type);
+      return i > -1 ? i : 0;
     } else {
       return type;
     }
