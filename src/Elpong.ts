@@ -16,7 +16,7 @@ interface CollectionMap {
 let schemes: SchemeMap = {};
 let autoload: boolean = false;
 
-export const elpong = {
+const elpong = {
   add: (schemeConfig: PreSchemeConfiguration): Scheme => {
     const scheme = new Scheme(schemeConfig);
     return schemes[scheme.name] = scheme;
@@ -54,3 +54,5 @@ export const elpong = {
     schemes = {};
   }
 };
+
+export { elpong };
