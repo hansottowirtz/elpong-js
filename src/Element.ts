@@ -51,10 +51,12 @@ export interface Snapshots {
 
 export class Element {
   readonly _collection: Collection;
-  readonly fields: Fields = {} as Fields;
-  readonly relations: Relations = {} as Relations;
+  readonly fields: Fields = {};
+  readonly relations: Relations = {};
+  /* tslint:disable:no-object-literal-type-assertion */
   readonly actions: Actions = {} as Actions;
   readonly snapshots: Snapshots = {} as Snapshots;
+  /* tslint:enable:no-object-literal-type-assertion */
 
   constructor(collection: Collection, preElement: PreElement) {
     this._collection = collection;

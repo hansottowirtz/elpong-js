@@ -200,7 +200,7 @@ function removeFromArray(array, element) {
         return false;
     }
     else {
-        array.splice(i, i + 1);
+        array.splice(i, 1);
         return true;
     }
 }
@@ -350,9 +350,11 @@ function isSelectorValue(v) {
 }
 exports.isSelectorValue = isSelectorValue;
 var Element = /** @class */ (function () {
+    /* tslint:enable:no-object-literal-type-assertion */
     function Element(collection, preElement) {
         this.fields = {};
         this.relations = {};
+        /* tslint:disable:no-object-literal-type-assertion */
         this.actions = {};
         this.snapshots = {};
         this._collection = collection;
@@ -508,9 +510,9 @@ exports.executeRequest = executeRequest;
 // and return a promise-like object
 // with then and catch
 //
-// @note Like $http or jQuery.ajax or http.request or fetch
-// @param {Function} fn The function.
-// @param {string} type The function.
+// @note Like $http or jQuery.ajax or HttpClient or fetch
+// @param {Function} fn               The function.
+// @param {adapterType} [adapterType] The type of the function.
 function setAjaxFunction(fn, adapterType) {
     var type = convertAjaxAdapterTypeStringToType(adapterType);
     switch (type) {
@@ -532,7 +534,6 @@ function setAjaxFunction(fn, adapterType) {
                 return new Promise(function (resolve, reject) {
                     // Request with GET/HEAD method cannot have body
                     instruction.body = (instruction.method === 'GET') ? undefined : instruction.data;
-                    // TODO: check fn types
                     var httpPromise = fn(url, instruction);
                     httpPromise.then(function (response) {
                         if (response.status === 204) {
@@ -579,7 +580,6 @@ function setAjaxFunction(fn, adapterType) {
         default:
             // Default is AngularJS behavior, a promise that resolves to a response
             // object with the payload in the data field.
-            // TODO: check fn types
             ajaxFunction = function (url, instruction) { return fn(instruction); };
     }
 }
@@ -1190,6 +1190,7 @@ var SchemeConfiguration = /** @class */ (function () {
         this.collections = {};
         for (var collectionName in preconf.collections) {
             var collectionPreconf = preconf.collections[collectionName];
+            /* tslint:disable-next-line:no-object-literal-type-assertion */
             var collectionConfiguration = this.collections[collectionName] = {
                 singular: collectionPreconf.singular || collectionName.slice(0, -1)
             };
@@ -1457,11 +1458,11 @@ var getBelongsToElement = function (element, relationCollection, fieldKey) {
 };
 // Gets the polymorphic belongs_to element
 //
-// @param {Element} hpe              The element to which the other element belongs
-// @param {string} field_key                The foreign key, e.g. parent_id.
-// @param {string} collection_field_key     The field name of the other collection, required, e.g. parent_collection.
-// @param {string} collection_selector_field The selector name of the other collection, if it was specified, e.g. id. (Will not be looked at if field_key is present)
-// @param {string} collection_singular_name  e.g. parent
+// @param {Element} hpe                    The element to which the other element belongs
+// @param {string} fieldKey                The foreign key, e.g. parent_id.
+// @param {string} collectionFieldKey      The field name of the other collection, required, e.g. parent_collection.
+// @param {string} collectionSelectorField The selector name of the other collection, if it was specified, e.g. id. (Will not be looked at if fieldKey is present)
+// @param {string} collectionSingularName  e.g. parent
 //
 // @return {Element|null}            The related element.
 var getPolymorphicBelongsToElement = function (element, fieldKey, collectionFieldKey, collectionSingularName) {

@@ -24,7 +24,7 @@ export function removeFromArray(array: any[], element: any): boolean {
   if (i === -1) {
     return false;
   } else {
-    array.splice(i, i + 1);
+    array.splice(i, 1);
     return true;
   }
 }

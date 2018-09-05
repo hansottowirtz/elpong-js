@@ -39,11 +39,11 @@ const getBelongsToElement = (element: Element, relationCollection: Collection, f
 
 // Gets the polymorphic belongs_to element
 //
-// @param {Element} hpe              The element to which the other element belongs
-// @param {string} field_key                The foreign key, e.g. parent_id.
-// @param {string} collection_field_key     The field name of the other collection, required, e.g. parent_collection.
-// @param {string} collection_selector_field The selector name of the other collection, if it was specified, e.g. id. (Will not be looked at if field_key is present)
-// @param {string} collection_singular_name  e.g. parent
+// @param {Element} hpe                    The element to which the other element belongs
+// @param {string} fieldKey                The foreign key, e.g. parent_id.
+// @param {string} collectionFieldKey      The field name of the other collection, required, e.g. parent_collection.
+// @param {string} collectionSelectorField The selector name of the other collection, if it was specified, e.g. id. (Will not be looked at if fieldKey is present)
+// @param {string} collectionSingularName  e.g. parent
 //
 // @return {Element|null}            The related element.
 const getPolymorphicBelongsToElement = (element: Element, fieldKey: string, collectionFieldKey: string, collectionSingularName: string) => {

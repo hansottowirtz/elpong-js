@@ -36,7 +36,7 @@ const elpong = require('elpong').default;
 elpong.setAjax(window.fetch, 'fetch') // built-in in modern browsers
 elpong.setAjax($http, 'angularjs') // if you use AngularJS
 elpong.setAjax($.ajax, 'jquery') // if you use jQuery
-elpong.setAjax(http, 'angular') // if you use Angular, http: instance of Http or HttpClient
+elpong.setAjax(httpClient, 'angular') // if you use Angular
 
 elpong.enableAutoload(); // when using preloading
 // or
@@ -67,13 +67,13 @@ You can create a scheme in two ways:
 
 or by preloading it, see [Preloading](#preloading)
 
-A scheme can be retrieved with `elpong.get(scheme_name)`
+A scheme can be retrieved with `elpong.get(schemeName)`
 
 ## Collections
 
 When a scheme is created, it immediately creates the defined collections.
 
-They can be retrieved with `scheme.select(collection_name)`
+They can be retrieved with `scheme.select(collectionName)`
 
 You can get an array of the elements in a collection with `collection.array()`
 
@@ -88,12 +88,12 @@ or `collection.actions.getOne(id)`. To preload it, see [Preloading](#preloading)
 If you are using Rails, check out [this library][rails].
 
 To make a new element, use `collection.build({name: 'Bob'})`.<br/>
-This element will be stored in the `new_elements` array, and when it is
+This element will be stored in the `newElements` array, and when it is
 `POST`ed, and thus gets a selector value (`id` gets a value), it will end
 up in the `elements` object.
 
-You shouldn't access the `new_elements` and `elements` attributes directly,
-just use `array()` or `array({without_new: true})` for that.
+You shouldn't access the `newElements` and `elements` attributes directly,
+just use `array()` or `array({noNew: true})` for that.
 
 #### Collection actions
 
@@ -175,7 +175,7 @@ Under the `snapshots` key:
 with a `tag`, `time`, `data` and `revert` key.
 If you call `revert`, the element fields will revert themselves to that snapshot.
 
-`undo(tag_or_steps)`:
+`undo(tagOrSteps)`:
 - When passed in a tag, will revert itself to the
 last snapshot with that tag. The snapshot with tag `creation` is made after
 `build`. Snapshots with tags <code>before_<i>action</i></code> and <code>after_<i>action</i></code>
@@ -245,14 +245,14 @@ It should return a Promise-like object that catches when the response status is
 not between 200 and 299, and on other network errors.<br/>
 The `then` and `catch` functions should return a response object with a
 `data` key, that holds the parsed JSON object.
-`$http`, `Http`, and `jQuery.ajax` are supported out of the box.<br/>
+`$http`, `HttpClient`, and `jQuery.ajax` are supported out of the box.<br/>
 If you don't work with AngularJS, Angular, or jQuery, you can use [window.fetch](fetch).
 
 ```javascript
 elpong.setAjax(window.fetch, 'fetch') // built-in in modern browsers
 elpong.setAjax($http, 'angularjs') // if you use AngularJS
 elpong.setAjax($.ajax, 'jquery') // if you use jQuery
-elpong.setAjax(http, 'angular') // if you use Angular, http: instance of Http or HttpClient
+elpong.setAjax(httpClient, 'angular') // if you use Angular
 ```
 
 ### Contributing

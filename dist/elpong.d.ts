@@ -75,7 +75,7 @@ declare module 'elpong/Ajax' {
 	export interface AjaxResponse extends Response {
 	    data?: any;
 	}
-	export type AjaxExternalFunction = () => any | object;
+	export type AjaxExternalFunction = (...args: any[]) => any | object;
 	export type AjaxFunction = (url: string, instruction: AjaxInstruction) => AjaxPromise;
 	export interface AjaxObject {
 	    data: {};

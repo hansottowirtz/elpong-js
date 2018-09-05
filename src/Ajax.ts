@@ -13,7 +13,7 @@ export interface AjaxResponse extends Response {
   data?: any;
 }
 
-export type AjaxExternalFunction = () => any | object;
+export type AjaxExternalFunction = (...args: any[]) => any | object;
 export type AjaxFunction = (url: string, instruction: AjaxInstruction) => AjaxPromise;
 
 export interface AjaxObject {
@@ -78,9 +78,9 @@ export function executeRequest(url: string, method: string, data?: AjaxData, hea
 // and return a promise-like object
 // with then and catch
 //
-// @note Like $http or jQuery.ajax or http.request or fetch
-// @param {Function} fn The function.
-// @param {string} type The function.
+// @note Like $http or jQuery.ajax or HttpClient or fetch
+// @param {Function} fn               The function.
+// @param {adapterType} [adapterType] The type of the function.
 export function setAjaxFunction(fn: AjaxExternalFunction, adapterType?: AjaxAdapterType | AjaxAdapterTypeString) {
   const type = convertAjaxAdapterTypeStringToType(adapterType);
   switch (type) {
@@ -103,8 +103,7 @@ export function setAjaxFunction(fn: AjaxExternalFunction, adapterType?: AjaxAdap
           // Request with GET/HEAD method cannot have body
           (instruction as any).body = (instruction.method === 'GET') ? undefined : instruction.data;
 
-          // TODO: check fn types
-          const httpPromise = (fn as (url: string, instruction: object) => any)(url, instruction) as Promise<Response>;
+          const httpPromise = fn(url, instruction) as Promise<Response>;
           httpPromise.then((response: Response) => {
             if (response.status === 204) {
               resolve(response);
@@ -145,8 +144,7 @@ export function setAjaxFunction(fn: AjaxExternalFunction, adapterType?: AjaxAdap
       // Default is AngularJS behavior, a promise that resolves to a response
       // object with the payload in the data field.
 
-      // TODO: check fn types
-      ajaxFunction = (url: string, instruction: AjaxInstruction) => (fn as (instruction: object) => any)(instruction);
+      ajaxFunction = (url: string, instruction: AjaxInstruction) => fn(instruction);
   }
 }
 

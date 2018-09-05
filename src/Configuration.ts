@@ -14,11 +14,12 @@ export class SchemeConfiguration implements PreSchemeConfiguration {
     if (!this.selector) {
       throw new ElpongError(ElpongErrorType.CNFNSL, preconf.name);
     }
-    this.collections = {} as CollectionConfigurationMap;
+    this.collections = {};
 
     for (const collectionName in preconf.collections) {
       const collectionPreconf = preconf.collections[collectionName];
 
+      /* tslint:disable-next-line:no-object-literal-type-assertion */
       const collectionConfiguration: CollectionConfiguration = this.collections[collectionName] = {
         singular: collectionPreconf.singular || collectionName.slice(0, -1)
       } as CollectionConfiguration;

@@ -1,7 +1,7 @@
 /// <reference types="node"/>
 /// <reference types="jasmine"/>
 
-import { camelize, equalsJSON, forEach } from '../src/Util';
+import { camelize, equalsJSON, forEach, removeFromArray } from '../src/Util';
 
 describe('Util', () => {
   it('should camelize right', () =>
@@ -23,8 +23,8 @@ describe('Util', () => {
 
   it('checks if objects are equal, limited to JSON data types', () => {
     expect(equalsJSON(
-      {a: 1, b: {c: 'd', e: 'f'}},
-      {b: {e: 'f', c: 'd'}, a: 1}
+      {a: 1, b: {c: '', e: 'f'}},
+      {b: {e: 'f', c: ''}, a: 1}
     )).toBe(true);
     expect(equalsJSON(
       {a: 1, b: {c: 'd', e: 'f'}},
@@ -37,5 +37,13 @@ describe('Util', () => {
     const a = [1, 2, 3, 4];
     forEach(a, (v) => last = v);
     expect(last).toBe(4);
+  });
+
+  it('should remove things from arrays', () => {
+    const a = [1, 2, 3, 4];
+    removeFromArray(a, 3);
+    expect(a).toEqual([1, 2, 4]);
+    removeFromArray(a, 1);
+    expect(a).toEqual([2, 4]);
   });
 });
