@@ -1,8 +1,8 @@
+import { elpong } from './elpong';
 import { Collection } from './Collection';
 import { SchemeConfiguration, PreSchemeConfiguration } from './Configuration';
 import { ElpongError, ElpongErrorType } from './Errors';
 import { UrlHelper } from './Helpers';
-import { Elpong } from './Elpong';
 
 export interface CollectionMap {
   [name: string]: Collection;
@@ -27,7 +27,7 @@ export class Scheme {
       this._collections[collection_name] = collection;
     }
 
-    if (Elpong.isAutoloadEnabled()) {
+    if (elpong.isAutoloadEnabled()) {
       for (let collection_name in sc.collections) {
         this._collections[collection_name].load(true);
       }

@@ -1,6 +1,31 @@
 declare module 'elpong/Errors' {
+	export const enum ElpongErrorType {
+	    SCHNFO = 0,
+	    COLNFO = 1,
+	    COLNFS = 2,
+	    COLEXI = 3,
+	    ELPNST = 4,
+	    ELPNCE = 5,
+	    ELPNDC = 6,
+	    CNFNSL = 7,
+	    CNFNNA = 8,
+	    ELENEW = 9,
+	    ELENNW = 10,
+	    ELESNA = 11,
+	    ELESNE = 12,
+	    APINUR = 13,
+	    FLDNSA = 14,
+	    ELESCH = 15,
+	    ELESNF = 16,
+	    ELESTI = 17,
+	    ELEAFW = 18,
+	    ELESNM = 19,
+	    ELENOS = 20,
+	    AJXHCT = 21,
+	    AJXGDA = 22
+	}
 	export class ElpongError extends Error {
-	    constructor(message: string, argument?: string);
+	    constructor(message: ElpongErrorType, argument?: string);
 	}
 
 }
@@ -68,16 +93,16 @@ declare module 'elpong/Ajax' {
 	    [name: string]: string;
 	}
 	export const enum AjaxAdapterType {
-	    Fetch = 0,
-	    Angular = 1,
-	    AngularJS = 2,
+	    AngularJS = 0,
+	    Fetch = 1,
+	    Angular = 2,
 	    JQuery = 3
 	}
 	export type AjaxAdapterTypeString = 'fetch' | 'angular' | 'angularjs' | 'jquery';
 	export namespace Ajax {
 	    function executeRequest(url: string, method: string, data?: AjaxData, headers?: AjaxHeaders): Promise<AjaxResponse>;
 	    function setAjaxFunction(fn: AjaxExternalFunction, adapter_type?: AjaxAdapterType | AjaxAdapterTypeString): void;
-	    function convertAjaxAdapterTypeStringToType(type: AjaxAdapterType | AjaxAdapterTypeString): AjaxAdapterType;
+	    function convertAjaxAdapterTypeStringToType(type?: AjaxAdapterType | AjaxAdapterTypeString): AjaxAdapterType;
 	}
 
 }
@@ -202,6 +227,21 @@ declare module 'elpong/Configuration' {
 	    readonly no_data?: boolean;
 	    readonly no_selector?: boolean;
 	    readonly path?: string;
+	}
+
+}
+declare module 'elpong/elpong' {
+	import { Scheme } from 'elpong/Scheme';
+	import { PreSchemeConfiguration } from 'elpong/Configuration';
+	import { AjaxExternalFunction, AjaxAdapterType, AjaxAdapterTypeString } from 'elpong/Ajax';
+	export namespace elpong {
+	    function add(scheme_config: PreSchemeConfiguration): Scheme;
+	    function get(name: string): Scheme;
+	    function load(ignore_empty: boolean): void;
+	    function setAjax(fn: AjaxExternalFunction, type?: AjaxAdapterType | AjaxAdapterTypeString): void;
+	    function enableAutoload(): void;
+	    function isAutoloadEnabled(): boolean;
+	    function tearDown(): void;
 	}
 
 }
@@ -437,21 +477,6 @@ declare module 'elpong/Scheme' {
 	}
 
 }
-declare module 'elpong/Elpong' {
-	import { Scheme } from 'elpong/Scheme';
-	import { PreSchemeConfiguration } from 'elpong/Configuration';
-	import { AjaxExternalFunction, AjaxAdapterType, AjaxAdapterTypeString } from 'elpong/Ajax';
-	export namespace Elpong {
-	    function add(scheme_config: PreSchemeConfiguration): Scheme;
-	    function get(name: string): Scheme;
-	    function load(ignore_empty: boolean): void;
-	    function setAjax(fn: AjaxExternalFunction, type?: AjaxAdapterType | AjaxAdapterTypeString): void;
-	    function enableAutoload(): void;
-	    function isAutoloadEnabled(): boolean;
-	    function tearDown(): void;
-	}
-
-}
 declare module 'elpong/Helpers/Collection/CollectionActions' {
 	import { Collection } from 'elpong/Collection';
 	import { AjaxResponse, AjaxData, AjaxHeaders, AjaxPromise } from 'elpong/Ajax';
@@ -515,7 +540,7 @@ declare module 'elpong/Collection' {
 
 }
 declare module 'elpong' {
-	export { Elpong as default } from 'elpong/Elpong';
+	export { elpong as default } from 'elpong/elpong';
 	export { Scheme, CollectionMap } from 'elpong/Scheme';
 	export { Collection, CollectionActions, GetAllCollectionActionFunction, GetOneCollectionActionFunction, CustomCollectionActionFunction, CollectionArrayOptions, CollectionFindByOptions, FieldsKeyValueMap } from 'elpong/Collection';
 	export { Element, SelectorValue, Fields, Relations, Actions, Snapshots, RelationFunction, ActionFunction } from 'elpong/Element';

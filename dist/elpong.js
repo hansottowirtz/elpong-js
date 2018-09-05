@@ -283,18 +283,19 @@ if (DEBUG) {
         _a[7 /* CNFNSL */] = 'Configuration has no selector',
         _a[8 /* CNFNNA */] = 'Configuration has no name',
         _a[9 /* ELENEW */] = 'Element is new',
-        _a[10 /* ELESNA */] = 'Element has a selector value but is in new_elements array',
+        _a[10 /* ELENNW */] = 'Element is not new',
+        _a[11 /* ELESNA */] = 'Element has a selector value but is in new_elements array',
         _a[2 /* COLNFS */] = 'Element has no selector value but is in elements object',
-        _a[12 /* APINUR */] = 'Api url has not yet been set',
-        _a[13 /* FLDNSA */] = 'Field should be an array of selectors',
-        _a[14 /* ELESCH */] = 'Element selector changed',
-        _a[15 /* ELESNF */] = 'Snapshot not found',
-        _a[16 /* ELESTI */] = 'Invalid snapshot identifier: must be number <= list.length, string or RegExp',
-        _a[17 /* ELEAFW */] = 'Pre element has an reference field that does not match the embedded element selector',
-        _a[18 /* ELESNM */] = 'Selector is not matching get one request selector',
-        _a[19 /* ELENOS */] = 'No selector value given in getOne action',
-        _a[20 /* AJXHCT */] = 'Content-Type header not set to application/json',
-        _a[21 /* AJXGDA */] = 'GET request can\'t have data. Use params',
+        _a[13 /* APINUR */] = 'Api url has not yet been set',
+        _a[14 /* FLDNSA */] = 'Field should be an array of selectors',
+        _a[15 /* ELESCH */] = 'Element selector changed',
+        _a[16 /* ELESNF */] = 'Snapshot not found',
+        _a[17 /* ELESTI */] = 'Invalid snapshot identifier: must be number <= list.length, string or RegExp',
+        _a[18 /* ELEAFW */] = 'Pre element has an reference field that does not match the embedded element selector',
+        _a[19 /* ELESNM */] = 'Selector is not matching get one request selector',
+        _a[20 /* ELENOS */] = 'No selector value given in getOne action',
+        _a[21 /* AJXHCT */] = 'Content-Type header not set to application/json',
+        _a[22 /* AJXGDA */] = 'GET request can\'t have data. Use params',
         _a);
 }
 var ElpongError = /** @class */ (function (_super) {
@@ -412,7 +413,7 @@ var Element = /** @class */ (function () {
     Element.prototype.isNew = function () {
         if (Util_1.Util.includes(this.collection().new_elements, this)) {
             if (this.selector()) {
-                throw new Errors_1.ElpongError(10 /* ELESNA */);
+                throw new Errors_1.ElpongError(11 /* ELESNA */);
             }
             else {
                 return true;
@@ -420,7 +421,7 @@ var Element = /** @class */ (function () {
         }
         else {
             if (!this.selector()) {
-                throw new Errors_1.ElpongError(11 /* ELESNE */);
+                throw new Errors_1.ElpongError(12 /* ELESNE */);
             }
             else {
                 return false;
@@ -443,7 +444,7 @@ var Element = /** @class */ (function () {
                 else if (field_key === selector_key) {
                     var selector_value = _this.fields[field_key];
                     if ((selector_value !== field_value) && isSelectorValue(selector_value) && isSelectorValue(field_value)) {
-                        throw new Errors_1.ElpongError(14 /* ELESCH */, selector_value + " -> " + field_value);
+                        throw new Errors_1.ElpongError(15 /* ELESCH */, selector_value + " -> " + field_value);
                     }
                     _this.fields[field_key] = field_value;
                 }
@@ -475,7 +476,7 @@ var UrlHelper;
         var scheme = collection.scheme();
         var api_url = scheme.getApiUrl();
         if (!api_url) {
-            throw new Errors_1.ElpongError(12 /* APINUR */);
+            throw new Errors_1.ElpongError(13 /* APINUR */);
         }
         url = api_url + "/" + collection.name;
         if (!url_options.no_selector) {
@@ -493,7 +494,7 @@ var UrlHelper;
     function createForCollection(collection, url_options) {
         var api_url = collection.scheme().getApiUrl();
         if (!api_url) {
-            throw new Errors_1.ElpongError(12 /* APINUR */);
+            throw new Errors_1.ElpongError(13 /* APINUR */);
         }
         var url = api_url + "/" + collection.name; //HPP.Helpers.Url.createForCollection(, hpe, user_options) # (action_name, element, user_options = {}, suffix)
         if (url_options.suffix) {
@@ -592,20 +593,21 @@ var Ajax;
     // @param {Function} fn The function.
     // @param {string} type The function.
     function setAjaxFunction(fn, adapter_type) {
-        var type = adapter_type ? convertAjaxAdapterTypeStringToType(adapter_type) : undefined;
+        var type = convertAjaxAdapterTypeStringToType(adapter_type);
         switch (type) {
             case 3 /* JQuery */:
-                ajaxFunction = function (url, instruction) {
-                    var deferred = jQuery.Deferred();
-                    var ajax = fn(url, instruction);
-                    ajax.then(function (data, status, jqxhr) { return deferred.resolve({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
-                    ajax.catch(function (data, status, jqxhr) { return deferred.reject({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
-                    // Convert to Promise, as Typescript users are probably not using jQuery
-                    // and if so, they won't have a lot of trouble with the differences.
-                    return deferred.promise();
-                };
+                if (window.jQuery)
+                    ajaxFunction = function (url, instruction) {
+                        var deferred = jQuery.Deferred();
+                        var ajax = fn(url, instruction);
+                        ajax.then(function (data, status, jqxhr) { return deferred.resolve({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
+                        ajax.catch(function (data, status, jqxhr) { return deferred.reject({ data: data, status: jqxhr.statusCode().status, headers: jqxhr.getAllResponseHeaders() }); });
+                        // Convert to Promise, as Typescript users are probably not using jQuery
+                        // and if so, they won't have a lot of trouble with the differences.
+                        return deferred.promise();
+                    };
                 break;
-            case 0 /* Fetch */:
+            case 1 /* Fetch */:
                 ajaxFunction = function (url, instruction) {
                     return new Promise(function (resolve, reject) {
                         // Request with GET/HEAD method cannot have body
@@ -618,7 +620,7 @@ var Ajax;
                             else {
                                 var contentType = response.headers.get('content-type');
                                 if (!contentType || contentType.indexOf('json') < 0)
-                                    throw new Errors_1.ElpongError(20 /* AJXHCT */);
+                                    throw new Errors_1.ElpongError(21 /* AJXHCT */);
                                 var json_promise = response.json();
                                 json_promise.then(function (json) {
                                     response.data = json;
@@ -631,7 +633,7 @@ var Ajax;
                     });
                 };
                 break;
-            case 1 /* Angular */:
+            case 2 /* Angular */:
                 ajaxFunction = function (url, instruction) {
                     return new Promise(function (resolve, reject) {
                         instruction.responseType = undefined;
@@ -642,7 +644,7 @@ var Ajax;
                             else {
                                 var contentType = response.headers.get('content-type');
                                 if (!contentType || contentType.indexOf('json') < 0)
-                                    throw new Error('ajahct');
+                                    throw new Errors_1.ElpongError(21 /* AJXHCT */);
                                 var json = response.json();
                                 response.data = json;
                                 resolve(response);
@@ -659,12 +661,12 @@ var Ajax;
     }
     Ajax.setAjaxFunction = setAjaxFunction;
     function convertAjaxAdapterTypeStringToType(type) {
-        if (!Util_1.Util.isInteger(type)) {
-            var i = ['fetch', 'angular', 'angularjs', 'jquery'].indexOf(type);
-            return i > -1 ? i : 0;
+        if (Util_1.Util.isInteger(type) || !type) {
+            return type || 0;
         }
         else {
-            return type;
+            var i = ['angularjs', 'fetch', 'angular', 'jquery'].indexOf(type);
+            return i > -1 ? i : 0;
         }
     }
     Ajax.convertAjaxAdapterTypeStringToType = convertAjaxAdapterTypeStringToType;
@@ -684,13 +686,13 @@ var Util_1 = __webpack_require__(0);
 var Ajax_1 = __webpack_require__(6);
 var schemes = {};
 var autoload = false;
-var Elpong;
-(function (Elpong) {
+var elpong;
+(function (elpong) {
     function add(scheme_config) {
         var scheme = new Scheme_1.Scheme(scheme_config);
         return schemes[scheme.name] = scheme;
     }
-    Elpong.add = add;
+    elpong.add = add;
     function get(name) {
         var scheme;
         if (scheme = schemes[name]) {
@@ -698,7 +700,7 @@ var Elpong;
         }
         throw new Errors_1.ElpongError(0 /* SCHNFO */, name); // Scheme not found
     }
-    Elpong.get = get;
+    elpong.get = get;
     function load(ignore_empty) {
         if (typeof document === 'undefined')
             return;
@@ -708,29 +710,29 @@ var Elpong;
         }
         for (var _i = 0, _a = Util_1.Util.arrayFromHTML(scheme_tags); _i < _a.length; _i++) {
             var scheme_tag = _a[_i];
-            var scheme = Elpong.add(JSON.parse(scheme_tag.content));
+            var scheme = elpong.add(JSON.parse(scheme_tag.content));
         }
     }
-    Elpong.load = load;
+    elpong.load = load;
     function setAjax(fn, type) {
         Ajax_1.Ajax.setAjaxFunction(fn, type);
     }
-    Elpong.setAjax = setAjax;
+    elpong.setAjax = setAjax;
     function enableAutoload() {
         autoload = true;
-        Elpong.load(true);
+        elpong.load(true);
     }
-    Elpong.enableAutoload = enableAutoload;
+    elpong.enableAutoload = enableAutoload;
     function isAutoloadEnabled() {
         return autoload;
     }
-    Elpong.isAutoloadEnabled = isAutoloadEnabled;
+    elpong.isAutoloadEnabled = isAutoloadEnabled;
     function tearDown() {
         autoload = false;
         schemes = {};
     }
-    Elpong.tearDown = tearDown;
-})(Elpong = exports.Elpong || (exports.Elpong = {}));
+    elpong.tearDown = tearDown;
+})(elpong = exports.elpong || (exports.elpong = {}));
 
 
 /***/ }),
@@ -740,11 +742,11 @@ var Elpong;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var elpong_1 = __webpack_require__(7);
 var Collection_1 = __webpack_require__(9);
 var Configuration_1 = __webpack_require__(16);
 var Errors_1 = __webpack_require__(1);
 var Helpers_1 = __webpack_require__(10);
-var Elpong_1 = __webpack_require__(7);
 var Scheme = /** @class */ (function () {
     function Scheme(preSchemeConfiguration) {
         var sc = new Configuration_1.SchemeConfiguration(preSchemeConfiguration);
@@ -757,7 +759,7 @@ var Scheme = /** @class */ (function () {
             var collection = new Collection_1.Collection(this, collection_name);
             this._collections[collection_name] = collection;
         }
-        if (Elpong_1.Elpong.isAutoloadEnabled()) {
+        if (elpong_1.elpong.isAutoloadEnabled()) {
             for (var collection_name in sc.collections) {
                 this._collections[collection_name].load(true);
             }
@@ -824,7 +826,7 @@ var Collection = /** @class */ (function () {
             },
             getOne: function (selector_value, action_options) {
                 if (selector_value === undefined) {
-                    throw new Errors_1.ElpongError(19 /* ELENOS */);
+                    throw new Errors_1.ElpongError(20 /* ELENOS */);
                 }
                 return CollectionActions_1.CollectionActions.executeGetOne(_this, selector_value, action_options);
             }
@@ -984,7 +986,7 @@ var EmbeddedElement;
         var selector_value = embedded_element.selector();
         var reference_field_value = pre_element[reference_field_key];
         if (reference_field_value !== undefined && (reference_field_value != selector_value)) {
-            throw new Errors_1.ElpongError(17 /* ELEAFW */, reference_field_value + " != " + selector_value);
+            throw new Errors_1.ElpongError(18 /* ELEAFW */, reference_field_value + " != " + selector_value);
         }
         element.fields[reference_field_key] = selector_value;
     }
@@ -1112,7 +1114,7 @@ var HasMany;
     function getHasManyRelationArrayInline(element, relation_collection, field_key) {
         var selector_value_arr = element.fields[field_key];
         if (!Array.isArray(selector_value_arr)) {
-            throw new Errors_1.ElpongError(13 /* FLDNSA */, field_key);
+            throw new Errors_1.ElpongError(14 /* FLDNSA */, field_key);
         }
         var element2_arr = [];
         for (var _i = 0, _a = relation_collection.array(); _i < _a.length; _i++) {
@@ -1248,8 +1250,8 @@ exports.SchemeConfiguration = SchemeConfiguration;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Elpong_1 = __webpack_require__(7);
-exports.default = Elpong_1.Elpong;
+var elpong_1 = __webpack_require__(7);
+exports.default = elpong_1.elpong;
 var Scheme_1 = __webpack_require__(8);
 exports.Scheme = Scheme_1.Scheme;
 var Collection_1 = __webpack_require__(9);
@@ -1473,7 +1475,7 @@ var Actions;
                 data = action_options.data;
             }
             else {
-                throw new Errors_1.ElpongError(21 /* AJXGDA */);
+                throw new Errors_1.ElpongError(22 /* AJXGDA */);
             }
         }
         else if (method !== 'GET') {
@@ -1481,12 +1483,12 @@ var Actions;
         }
         if (method === 'POST') {
             if (!element.isNew()) {
-                throw new Error('Element is not new');
+                throw new Errors_1.ElpongError(10 /* ELENNW */);
             }
         }
         else {
             if (element.isNew()) {
-                throw new Error('Element is new');
+                throw new Errors_1.ElpongError(9 /* ELENEW */);
             }
         }
         var url_options = {
@@ -1518,7 +1520,7 @@ var Actions;
                 data = action_options.data;
             }
             else {
-                throw new Errors_1.ElpongError(21 /* AJXGDA */);
+                throw new Errors_1.ElpongError(22 /* AJXGDA */);
             }
         }
         else if (!action_config.no_data) {
@@ -1620,7 +1622,7 @@ var Snapshots;
             if (Util_1.Util.isInteger(id)) {
                 var list = element.snapshots.list;
                 if (id < 0 || id > list.length) {
-                    throw new Errors_1.ElpongError(16 /* ELESTI */, "" + id);
+                    throw new Errors_1.ElpongError(17 /* ELESTI */, "" + id);
                 }
                 else {
                     var snapshot = list[element.snapshots.current_index - id];
@@ -1633,7 +1635,7 @@ var Snapshots;
                     snapshot.revert();
                 }
                 else {
-                    throw new Errors_1.ElpongError(15 /* ELESNF */, "" + id);
+                    throw new Errors_1.ElpongError(16 /* ELESNF */, "" + id);
                 }
             }
             return element;
@@ -1736,7 +1738,7 @@ var CollectionActions;
             action_options = {};
         }
         if (action_options.data) {
-            throw new Errors_1.ElpongError(21 /* AJXGDA */);
+            throw new Errors_1.ElpongError(22 /* AJXGDA */);
         }
         var promise = Ajax_1.Ajax.executeRequest(UrlHelper_1.UrlHelper.createForCollection(collection, { params: action_options.params || {} }), 'GET', undefined, action_options.headers);
         promise.then(function (response) {
@@ -1750,7 +1752,7 @@ var CollectionActions;
     function executeGetOne(collection, selector_value, action_options) {
         if (action_options === void 0) { action_options = {}; }
         if (action_options.data) {
-            throw new Errors_1.ElpongError(21 /* AJXGDA */);
+            throw new Errors_1.ElpongError(22 /* AJXGDA */);
         }
         var url_options = {
             suffix: selector_value,
@@ -1761,7 +1763,7 @@ var CollectionActions;
             if (response.data) {
                 var selector_key = collection.scheme().configuration().selector;
                 if (response.data[selector_key] !== selector_value) {
-                    throw new Errors_1.ElpongError(18 /* ELESNM */, response.data[selector_key] + " != " + selector_value);
+                    throw new Errors_1.ElpongError(19 /* ELESNM */, response.data[selector_key] + " != " + selector_value);
                 }
                 collection.buildOrMerge(response.data);
             }

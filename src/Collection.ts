@@ -1,4 +1,3 @@
-import { Elpong } from './Elpong';
 import { Scheme } from './Scheme';
 import { CollectionHelper } from './Helpers';
 import { Element, SelectorValue } from './Element';

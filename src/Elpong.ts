@@ -1,6 +1,6 @@
 import { Scheme } from './Scheme';
 import { Collection } from './Collection';
-import { SchemeConfiguration, PreSchemeConfiguration } from './Configuration';
+import { PreSchemeConfiguration } from './Configuration';
 import { ElpongError, ElpongErrorType } from './Errors';
 import { Util } from './Util';
 import { Ajax, AjaxExternalFunction, AjaxAdapterType, AjaxAdapterTypeString } from './Ajax';
@@ -18,7 +18,7 @@ interface CollectionMap {
 let schemes: SchemeMap = {};
 let autoload: boolean = false;
 
-export namespace Elpong {
+export namespace elpong {
   export function add(scheme_config: PreSchemeConfiguration): Scheme {
     let scheme = new Scheme(scheme_config);
     return schemes[scheme.name] = scheme;
@@ -43,7 +43,7 @@ export namespace Elpong {
     }
 
     for (let scheme_tag of Util.arrayFromHTML(scheme_tags) as HTMLMetaElement[]) {
-      let scheme = Elpong.add(JSON.parse(scheme_tag.content));
+      let scheme = elpong.add(JSON.parse(scheme_tag.content));
     }
   }
 
@@ -53,7 +53,7 @@ export namespace Elpong {
 
   export function enableAutoload(): void {
     autoload = true
-    Elpong.load(true);
+    elpong.load(true);
   }
 
   export function isAutoloadEnabled(): boolean {

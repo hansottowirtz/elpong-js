@@ -7,6 +7,7 @@ const karma = require('karma').Server;
 const fs = require('fs');
 const ts = require('gulp-typescript');
 const path = require('path');
+const replace = require('replace-in-file');
 
 gulp.task('build:webpack', () => {
   return gulp.src('src/main.ts')
@@ -31,15 +32,16 @@ gulp.task('build:dts', (done) => {
   require('dts-generator').default({
 		name: 'elpong',
 		project: '.',
-		out: './dist/elpong.generated.d.ts',
-    main: 'elpong',
+		out: './dist/elpong.d.ts',
     eol: '\n'
-  }).then(() => {
-    done();
-  });
+  }).then(() => replace({
+    files: ['./dist/elpong.d.ts'],
+    from: "declare module 'elpong/main'",
+    to: "declare module 'elpong'" 
+  })).then(() => done());
 });
 
-gulp.task('build', gulp.series('build:webpack', 'build:uglify', 'build:tsc'));
+gulp.task('build', gulp.series('build:webpack', 'build:uglify', 'build:tsc', 'build:dts'));
 gulp.task('build:ts', gulp.series('build:tsc'));
 
 gulp.task('lint', () => {
@@ -105,7 +107,9 @@ gulp.task('test:examples:node', (done) => {
   done();
 });
 
-gulp.task('test:travis', gulp.parallel('test:frameworks', 'test:saucelabs'));
+gulp.task('test:examples', gulp.parallel('test:examples:node'));
+
+gulp.task('test:travis', gulp.parallel('test:frameworks', 'test:saucelabs', 'test:examples'));
 
 gulp.task('ensure-built', (done) => {
   let dir_files = (dir) => fs.readdirSync(dir).map((f) => path.join(dir, f));

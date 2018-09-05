@@ -34,9 +34,9 @@ export interface AjaxHeaders {
 }
 
 export const enum AjaxAdapterType {
-  Fetch = 0,
-  Angular = 1,
-  AngularJS = 2,
+  AngularJS = 0,
+  Fetch = 1,
+  Angular = 2,
   JQuery = 3
 }
 
@@ -83,9 +83,10 @@ export namespace Ajax {
   // @param {Function} fn The function.
   // @param {string} type The function.
   export function setAjaxFunction(fn: AjaxExternalFunction, adapter_type?: AjaxAdapterType|AjaxAdapterTypeString) {
-    const type = adapter_type ? convertAjaxAdapterTypeStringToType(adapter_type) : undefined;
+    const type = convertAjaxAdapterTypeStringToType(adapter_type);
     switch (type) {
       case AjaxAdapterType.JQuery:
+        if ((window as any).jQuery)
         ajaxFunction = (url: string, instruction: AjaxInstruction) => {
           let deferred = jQuery.Deferred();
           let ajax = (fn as Function)(url, instruction);
@@ -129,7 +130,7 @@ export namespace Ajax {
                 resolve(response)
               } else {
                 const contentType = response.headers.get('content-type');
-                if (!contentType || contentType.indexOf('json') < 0) throw new Error('ajahct');
+                if (!contentType || contentType.indexOf('json') < 0) throw new ElpongError(ElpongErrorType.AJXHCT);
                 const json = response.json();
                 (response as any).data = json;
                 resolve(response);
@@ -145,12 +146,12 @@ export namespace Ajax {
     }
   }
 
-  export function convertAjaxAdapterTypeStringToType(type: AjaxAdapterType|AjaxAdapterTypeString): AjaxAdapterType {
-    if (!Util.isInteger(type)) {
-      const i = ['fetch', 'angular', 'angularjs', 'jquery'].indexOf(type);
-      return i > -1 ? i : 0;
+  export function convertAjaxAdapterTypeStringToType(type?: AjaxAdapterType|AjaxAdapterTypeString): AjaxAdapterType {
+    if (Util.isInteger(type) || !type) {
+      return type || 0;
     } else {
-      return type;
+      const i = ['angularjs', 'fetch', 'angular', 'jquery'].indexOf(type);
+      return i > -1 ? i : 0;
     }
   }
 }

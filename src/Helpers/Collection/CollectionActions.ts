@@ -1,6 +1,6 @@
 import { Collection } from '../../Collection';
 import { Ajax, AjaxResponse, AjaxData, AjaxHeaders, AjaxPromise } from '../../Ajax';
-import { UrlHelper, UrlOptions, UrlHelperOptions } from '../UrlHelper';
+import { UrlHelper, UrlHelperOptions } from '../UrlHelper';
 import { SelectorValue } from '../../Element';
 import { CollectionActionConfiguration } from '../../Configuration';
 import { ElpongError, ElpongErrorType } from '../../Errors';

@@ -4,7 +4,7 @@ import { Element, SelectorValue } from '../../Element';
 import { Util } from '../../Util';
 import { ElpongError, ElpongErrorType } from '../../Errors';
 import { ElementHelper } from '../ElementHelper';
-import { UrlHelper, UrlOptions, UrlHelperElementOptions } from '../UrlHelper';
+import { UrlHelper, UrlHelperElementOptions } from '../UrlHelper';
 
 export interface ActionOptions {
   data?: AjaxData;
@@ -43,9 +43,9 @@ export namespace Actions {
     }
 
     if (method === 'POST') {
-      if (!element.isNew()) { throw new Error('Element is not new'); }
+      if (!element.isNew()) { throw new ElpongError(ElpongErrorType.ELENNW); }
     } else {
-      if (element.isNew()) { throw new Error('Element is new'); }
+      if (element.isNew()) { throw new ElpongError(ElpongErrorType.ELENEW); }
     }
 
     const url_options: UrlHelperElementOptions = {

@@ -1,6 +1,5 @@
 import { Element } from '../../../Element';
 import { EmbeddedCollectionFieldConfiguration } from '../../../Configuration';
-import { ElpongError } from '../../../Errors';
 import { Collection } from '../../../Collection';
 import { Scheme } from '../../../Scheme';
 import { Util } from '../../../Util';
