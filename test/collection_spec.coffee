@@ -20,4 +20,20 @@ describe 'Collection', ->
       expect(@geese.name).toBe('geese')
 
     it 'should have the right default element', ->
-      expect(@geese.default_pre_element).toEqual({name: 'Bob'})
+      expect(@geese._defaultPreElement).toEqual({name: 'Bob'})
+
+  describe 'arrayfication', ->
+    beforeEach ->
+      @scheme = elpong.add(require('./fixtures/stupid-farm/scheme.json5'))
+      @geese = @scheme.select('geese')
+      @geese.build(name: 'Bob')
+      @geese.build(name: 'Jef')
+      @geese.build(id: 3, name: 'Bart')
+
+    it 'should arrayify with new elements', ->
+      expect(@geese.array().length).toBe(3)
+
+    it 'should arrayify without new elements when told to', ->
+      arr = @geese.array(noNew: true)
+      expect(arr.length).toBe(1)
+      expect(arr[0].fields.id).toBe(3)

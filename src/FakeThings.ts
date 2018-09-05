@@ -1,8 +1,8 @@
-import { Util } from './Util';
+import { values } from './Util';
 
 declare const Map: any;
 
-export type FakeMapKey = string|number;
+export type FakeMapKey = string | number;
 
 const supportsMap = typeof Map !== 'undefined' && (new Map()).values;
 
@@ -21,7 +21,7 @@ export class FakeMap {
   }
 
   set(k: FakeMapKey, v: any): this {
-    if (supportsMap) { this.map.set(k, v) } else { this.map[k] = v };
+    if (supportsMap) { this.map.set(k, v); } else { this.map[k] = v; }
     return this;
   }
 
@@ -31,11 +31,11 @@ export class FakeMap {
 
   values(): any[] {
     // if Map is there, Array.from should also be there
-    return supportsMap ? (Array as any as FakeArrayConstructor).from(this.map.values()) : Util.values(this.map);
+    return supportsMap ? (Array as any as FakeArrayConstructor).from(this.map.values()) : values(this.map);
   }
 
   delete(k: FakeMapKey): void {
-    if (supportsMap) { this.map.delete(k) } else { delete this.map[k]; }
+    if (supportsMap) { this.map.delete(k); } else { delete this.map[k]; }
   }
 }
 
@@ -45,5 +45,5 @@ export interface FakeString {
 }
 
 export interface FakeArrayConstructor {
-  from<T>(arrayLike: ArrayLike<T>): Array<T>;
+  from<T>(arrayLike: ArrayLike<T>): T[];
 }

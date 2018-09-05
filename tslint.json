@@ -1,12 +1,22 @@
 {
   "extends": "tslint:latest",
   "rules": {
-    "curly": true,
-    "quotemark": [true, "single", "avoid-escape"]
+    "curly": [true, "ignore-same-line"],
+    "quotemark": [true, "single", "avoid-escape"],
+    "interface-name": false,
+    "trailing-comma": false,
+    "member-access": [true, "no-public"],
+    "variable-name": [true, "allow-leading-underscore"],
+    "forin": false,
+    "max-line-length": [true, 500],
+    "no-empty-interface": false,
+    "no-object-literal-type-assertion": false,
+    "prefer-conditional-expression": false
   },
-  "jsRules": {
-    "curly": true
-  },
-  "rulesDirectory": [
-  ]
+  "cliOptions": {
+    "exclude": [
+      "test",
+      "node_modules"
+    ]
+  }
 }

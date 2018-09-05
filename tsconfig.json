@@ -4,8 +4,11 @@
     "target": "es5",
     "noFallthroughCasesInSwitch": true,
     "module": "commonjs",
+    "noImplicitAny": true,
     "strictNullChecks": true,
-    "noImplicitAny" : true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noImplicitReturns": true,
     "suppressImplicitAnyIndexErrors": true,
     "types": ["isomorphic-fetch", "es6-promise"],
     "declaration": true

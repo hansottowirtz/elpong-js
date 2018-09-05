@@ -1,4 +1,4 @@
-UrlHelper = require('../src/Helpers/UrlHelper').UrlHelper
+UrlHelper = require('../src/Helpers/UrlHelper')
 elpong = require('../src/main').default
 
 describe 'UrlHelper', ->
@@ -12,10 +12,9 @@ describe 'UrlHelper', ->
     pigs = @scheme.select('pigs')
     bob = pigs.build({id: 1, name: 'Bob'})
     expect(UrlHelper.createForElement(bob, {})).toBe('/api/pigs/1')
-    expect(UrlHelper.createForElement(bob, {no_selector: true})).toBe('/api/pigs')
+    expect(UrlHelper.createForElement(bob, {noSelector: true})).toBe('/api/pigs')
     expect(UrlHelper.createForElement(bob, {params: {a: 'x'}})).toBe('/api/pigs/1?a=x')
-    expect(UrlHelper.createForElement(bob, {no_selector: true, params: {a: 'x'}})).toBe('/api/pigs?a=x')
-
+    expect(UrlHelper.createForElement(bob, {noSelector: true, params: {a: 'x'}})).toBe('/api/pigs?a=x')
 
    it 'can create appropriate urls for collections', ->
     @scheme = elpong.add(require('./fixtures/animal-farm/scheme.json5'))

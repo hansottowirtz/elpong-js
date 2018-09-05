@@ -1,7 +1,4 @@
-/// <reference types="elpong"/>
-
-import elpong, { Collection, AjaxAdapterType } from 'elpong';
-console.log(Collection);
+import elpong, { AjaxAdapterType, Collection } from 'elpong';
 
 elpong.enableAutoload();
 elpong.setAjax(window.fetch, AjaxAdapterType.Fetch);

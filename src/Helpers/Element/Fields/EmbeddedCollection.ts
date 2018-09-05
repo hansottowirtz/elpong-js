@@ -1,23 +1,22 @@
-import { Element } from '../../../Element';
-import { EmbeddedCollectionFieldConfiguration } from '../../../Configuration';
 import { Collection } from '../../../Collection';
-import { Scheme } from '../../../Scheme';
-import { Util } from '../../../Util';
-import { CollectionHelper } from '../../CollectionHelper';
+import { EmbeddedCollectionFieldConfiguration } from '../../../Configuration';
+import { Element } from '../../../Element';
 import { PreElement } from '../../../PreElement';
+import { Scheme } from '../../../Scheme';
+import { forEach } from '../../../Util';
+import { addElement } from '../../CollectionHelper';
 
-export namespace EmbeddedCollection {
-  export function handle(element: Element, pre_element: PreElement, field_key: string, field_config: EmbeddedCollectionFieldConfiguration): void {
-    let embedded_pre_collection;
+export function handle(element: Element, preElement: PreElement, fieldKey: string, fieldConfig: EmbeddedCollectionFieldConfiguration): void {
+  const embeddedPreCollection = preElement[fieldKey];
 
-    if (!(embedded_pre_collection = pre_element[field_key])) { return; }
-    let collection: Collection = element.collection();
-    let scheme: Scheme = collection.scheme();
-    let embedded_element_collection = scheme.select(field_config.collection || field_key);
+  if (!embeddedPreCollection) return;
 
-    Util.forEach(embedded_pre_collection, function(embedded_pre_element: PreElement) {
-      let embedded_element = new Element(embedded_element_collection, embedded_pre_element);
-      CollectionHelper.addElement(embedded_element_collection, embedded_element);
-    });
-  }
+  const collection: Collection = element.collection();
+  const scheme: Scheme = collection.scheme();
+  const embeddedElementCollection = scheme.select(fieldConfig.collection || fieldKey);
+
+  forEach(embeddedPreCollection, (embeddedPreElement: PreElement) => {
+    const embeddedElement = new Element(embeddedElementCollection, embeddedPreElement);
+    addElement(embeddedElementCollection, embeddedElement);
+  });
 }

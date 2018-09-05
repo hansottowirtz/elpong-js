@@ -1,24 +1,22 @@
 import { Element } from '../Element';
-import { Util } from '../Util';
+import { copyJSON } from '../Util';
 
-export namespace ElementHelper {
-  export function toData(element: Element, full_duplicate?: boolean) {
-    let collection = element.collection();
-    let scheme = collection.scheme();
-    let o = {};
-    let object = scheme.configuration().collections[collection.name].fields;
-    for (let field_key in object) {
-      let field_settings = object[field_key];
-      if (field_settings.no_send || field_settings.embedded_collection || field_settings.embedded_element) {
-        continue;
-      }
-      let field_value = element.fields[field_key];
-      if (full_duplicate && (typeof field_value === 'object')) {
-        o[field_key] = Util.copyJSON(field_value);
-      } else {
-        o[field_key] = field_value;
-      }
+export function toData(element: Element, fullDuplicate?: boolean) {
+  const collection = element.collection();
+  const scheme = collection.scheme();
+  const o = {};
+  const object = scheme.configuration().collections[collection.name].fields;
+  for (const fieldKey in object) {
+    const fieldSettings = object[fieldKey];
+    if (fieldSettings.no_send || fieldSettings.embedded_collection || fieldSettings.embedded_element) {
+      continue;
     }
-    return o;
+    const fieldValue = element.fields[fieldKey];
+    if (fullDuplicate && (typeof fieldValue === 'object')) {
+      o[fieldKey] = copyJSON(fieldValue);
+    } else {
+      o[fieldKey] = fieldValue;
+    }
   }
+  return o;
 }

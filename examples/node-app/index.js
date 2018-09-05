@@ -1,4 +1,4 @@
-const elpong = require('elpong').default;
+const elpong = require('../../dist/elpong').default;
 const assert = require('assert');
 
 const obj = {"name": "test-app", "selector": "id", "collections": {"pigs": {"fields": {"id": {}, "name": {}}}}};

@@ -1,7 +1,9 @@
 declare var DEBUG: boolean;
+/* tslint:disable */ 
 if (typeof DEBUG === 'undefined') {
   var DEBUG = true;
 }
+/* tslint:enable */
 
 export const enum ElpongErrorType {
   SCHNFO,
@@ -29,8 +31,9 @@ export const enum ElpongErrorType {
   AJXGDA
 }
 
+let errorTextMap: { [key: number]: string };
 if (DEBUG) {
-  var error_text_map = {
+  errorTextMap = {
     [ElpongErrorType.SCHNFO]: 'Scheme not found',
     [ElpongErrorType.COLNFO]: 'Collection not found',
     [ElpongErrorType.COLNFS]: 'Collection not found by singular name',
@@ -54,17 +57,16 @@ if (DEBUG) {
     [ElpongErrorType.ELENOS]: 'No selector value given in getOne action',
     [ElpongErrorType.AJXHCT]: 'Content-Type header not set to application/json',
     [ElpongErrorType.AJXGDA]: 'GET request can\'t have data. Use params'
-  }
+  };
 }
 
 export class ElpongError extends Error {
   constructor(message: ElpongErrorType, argument?: string) {
-    let actual_message = DEBUG ? error_text_map[message] : message;
+    const actualMessage = errorTextMap[message] ? errorTextMap[message] : `Error code ${message}`;
     if (argument) {
-      super(`${actual_message}: ${argument}`);
-    }
-    else {
-      super(actual_message);
+      super(`${actualMessage}: ${argument}`);
+    } else {
+      super(actualMessage);
     }
   }
 }

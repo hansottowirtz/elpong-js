@@ -1,10 +1,10 @@
+import { AjaxData, AjaxHeaders, AjaxPromise, AjaxResponse, executeRequest } from '../../Ajax';
 import { Collection } from '../../Collection';
-import { Ajax, AjaxResponse, AjaxData, AjaxHeaders, AjaxPromise } from '../../Ajax';
-import { UrlHelper, UrlHelperOptions } from '../UrlHelper';
-import { SelectorValue } from '../../Element';
 import { CollectionActionConfiguration } from '../../Configuration';
+import { SelectorValue } from '../../Element';
 import { ElpongError, ElpongErrorType } from '../../Errors';
 import { PreElement } from '../../PreElement';
+import { createForCollection, UrlHelperOptions } from '../UrlHelper';
 
 export interface CollectionActionOptions {
   data?: AjaxData;
@@ -12,66 +12,64 @@ export interface CollectionActionOptions {
   params?: any;
 }
 
-export namespace CollectionActions {
-  export function executeGetAll(collection: Collection, action_options: CollectionActionOptions = {}): AjaxPromise {
-    if (!action_options) { action_options = {}; }
-    if (action_options.data) {
-      throw new ElpongError(ElpongErrorType.AJXGDA);
-    }
-
-    let promise = Ajax.executeRequest(
-      UrlHelper.createForCollection(collection, {params: action_options.params || {}}),
-      'GET',
-      undefined,
-      action_options.headers
-    );
-    promise.then((response: AjaxResponse) => {
-      response.data.map((pre_element: PreElement) => {
-        collection.buildOrMerge(pre_element);
-      });
-    });
-    return promise;
+export function executeGetAll(collection: Collection, actionOptions: CollectionActionOptions = {}): AjaxPromise {
+  if (!actionOptions) actionOptions = {};
+  if (actionOptions.data) {
+    throw new ElpongError(ElpongErrorType.AJXGDA);
   }
 
-  export function executeGetOne(collection: Collection, selector_value: SelectorValue, action_options: CollectionActionOptions = {}) {
-    if (action_options.data) {
-      throw new ElpongError(ElpongErrorType.AJXGDA);
-    }
+  const promise = executeRequest(
+    createForCollection(collection, {params: actionOptions.params || {}}),
+    'GET',
+    undefined,
+    actionOptions.headers
+  );
+  promise.then((response: AjaxResponse) => {
+    response.data.map((preElement: PreElement) => {
+      collection.buildOrMerge(preElement);
+    });
+  });
+  return promise;
+}
 
-    const url_options: UrlHelperOptions = {
-      suffix: selector_value as string,
-      params: action_options.params || {}
-    }
+export function executeGetOne(collection: Collection, selectorValue: SelectorValue, actionOptions: CollectionActionOptions = {}) {
+  if (actionOptions.data) {
+    throw new ElpongError(ElpongErrorType.AJXGDA);
+  }
 
-    let promise = Ajax.executeRequest(
-      UrlHelper.createForCollection(collection, url_options),
-      'GET',
-      undefined,
-      action_options.headers
-    );
-    promise.then((response: AjaxResponse) => {
-      if (response.data) {
-        let selector_key = collection.scheme().configuration().selector;
-        if (response.data[selector_key] !== selector_value) {
-          throw new ElpongError(ElpongErrorType.ELESNM, `${response.data[selector_key]} != ${selector_value}`)
-        }
-        collection.buildOrMerge(response.data);
+  const urlOptions: UrlHelperOptions = {
+    params: actionOptions.params || {},
+    suffix: selectorValue as string
+  };
+
+  const promise = executeRequest(
+    createForCollection(collection, urlOptions),
+    'GET',
+    undefined,
+    actionOptions.headers
+  );
+  promise.then((response: AjaxResponse) => {
+    if (response.data) {
+      const selectorKey = collection.scheme().configuration().selector;
+      if (response.data[selectorKey] !== selectorValue) {
+        throw new ElpongError(ElpongErrorType.ELESNM, `${response.data[selectorKey]} != ${selectorValue}`);
       }
-    });
-    return promise;
-  }
+      collection.buildOrMerge(response.data);
+    }
+  });
+  return promise;
+}
 
-  export function executeCustom(collection: Collection, action_name: string, action_config: CollectionActionConfiguration, action_options?: CollectionActionOptions) {
-    if (!action_options) { action_options = {}; }
-    let data = action_options.data;
+export function executeCustom(collection: Collection, actionName: string, actionConfig: CollectionActionConfiguration, actionOptions?: CollectionActionOptions) {
+  if (!actionOptions) { actionOptions = {}; }
+  const data = actionOptions.data;
 
-    let method = action_config.method.toUpperCase();
+  const method = actionConfig.method.toUpperCase();
 
-    return Ajax.executeRequest(
-      UrlHelper.createForCollection(collection, {suffix: action_config.path || action_name, params: action_options.params}),
-      method,
-      data,
-      action_options.headers
-    );
-  }
+  return executeRequest(
+    createForCollection(collection, {suffix: actionConfig.path || actionName, params: actionOptions.params}),
+    method,
+    data,
+    actionOptions.headers
+  );
 }

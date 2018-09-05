@@ -107,9 +107,9 @@ gulp.task('test:examples:node', (done) => {
   done();
 });
 
-gulp.task('test:examples', gulp.parallel('test:examples:node'));
+gulp.task('test:examples', gulp.series('build', 'test:examples:node'));
 
-gulp.task('test:travis', gulp.parallel('test:frameworks', 'test:saucelabs', 'test:examples'));
+gulp.task('test:travis', gulp.parallel('lint', 'test:frameworks', 'test:saucelabs', 'test:examples'));
 
 gulp.task('ensure-built', (done) => {
   let dir_files = (dir) => fs.readdirSync(dir).map((f) => path.join(dir, f));

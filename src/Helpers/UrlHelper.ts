@@ -1,6 +1,5 @@
-import { ActionConfiguration } from '../Configuration';
-import { Element } from '../Element';
 import { Collection } from '../Collection';
+import { Element } from '../Element';
 import { ElpongError, ElpongErrorType } from '../Errors';
 
 export interface UrlHelperOptions extends UrlOptions {
@@ -9,7 +8,7 @@ export interface UrlHelperOptions extends UrlOptions {
 }
 
 export interface UrlHelperElementOptions extends UrlHelperOptions {
-  no_selector?: boolean;
+  noSelector?: boolean;
 }
 
 export interface UrlHelperCollectionOptions extends UrlHelperOptions {
@@ -19,48 +18,46 @@ export interface UrlOptions {
   params?: any;
 }
 
-export namespace UrlHelper {
-  export function createForElement(element: Element, url_options: UrlHelperElementOptions): string {
-    let path, url;
-    let collection = element.collection();
-    let scheme = collection.scheme();
-    let api_url = scheme.getApiUrl();
-    if (!api_url) { throw new ElpongError(ElpongErrorType.APINUR); }
+export function createForElement(element: Element, urlOptions: UrlHelperElementOptions): string {
+  let url;
+  const collection = element.collection();
+  const scheme = collection.scheme();
+  const apiUrl = scheme.getApiUrl();
+  if (!apiUrl) { throw new ElpongError(ElpongErrorType.APINUR); }
 
-    url = `${api_url}/${collection.name}`;
-    if (!url_options.no_selector) {
-      url = `${url}/${element.selector()}`;
-    }
-
-    if (url_options.suffix) { url = `${url}/${url_options.suffix}`; }
-    if (url_options.params) { url = appendParamsToUrl(url, url_options.params); }
-    return url;
+  url = `${apiUrl}/${collection.name}`;
+  if (!urlOptions.noSelector) {
+    url = `${url}/${element.selector()}`;
   }
 
-  export function createForCollection(collection: Collection, url_options: UrlHelperOptions): string {
-    let api_url = collection.scheme().getApiUrl();
-    if (!api_url) { throw new ElpongError(ElpongErrorType.APINUR); }
+  if (urlOptions.suffix) { url = `${url}/${urlOptions.suffix}`; }
+  if (urlOptions.params) { url = appendParamsToUrl(url, urlOptions.params); }
+  return url;
+}
 
-    let url = `${api_url}/${collection.name}`; //HPP.Helpers.Url.createForCollection(, hpe, user_options) # (action_name, element, user_options = {}, suffix)
-    if (url_options.suffix) { url = `${url}/${url_options.suffix}`; }
-    if (url_options.params) { url = appendParamsToUrl(url, url_options.params); }
-    return url;
-  }
+export function createForCollection(collection: Collection, urlOptions: UrlHelperOptions): string {
+  const apiUrl = collection.scheme().getApiUrl();
+  if (!apiUrl) { throw new ElpongError(ElpongErrorType.APINUR); }
 
-  export function trimSlashes(s: string): string {
-    return s.replace(/^\/|\/$/g, '');
-  }
+  let url = `${apiUrl}/${collection.name}`; // HPP.Helpers.Url.createForCollection(, hpe, userOptions) # (action_name, element, user_options = {}, suffix)
+  if (urlOptions.suffix) { url = `${url}/${urlOptions.suffix}`; }
+  if (urlOptions.params) { url = appendParamsToUrl(url, urlOptions.params); }
+  return url;
+}
 
-  export function isFqdn(s: string): boolean {
-    return /^https?:\/\//.test(s);
-  }
+export function trimSlashes(s: string): string {
+  return s.replace(/^\/|\/$/g, '');
+}
 
-  export function appendParamsToUrl(url: string, params: any): string {
-    url = `${url}?`;
-    for(let k in params) {
-      url = `${url}${k}=${encodeURIComponent(params[k])}&`;
-    }
-    url = url.slice(0, -1);
-    return url;
+export function isFqdn(s: string): boolean {
+  return /^https?:\/\//.test(s);
+}
+
+export function appendParamsToUrl(url: string, params: any): string {
+  url = `${url}?`;
+  for (const k in params) {
+    url = `${url}${k}=${encodeURIComponent(params[k])}&`;
   }
+  url = url.slice(0, -1);
+  return url;
 }

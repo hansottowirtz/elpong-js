@@ -1,9 +1,4 @@
-import { ElpongError, ElpongErrorType } from './Errors'
-
-declare var DEBUG: boolean;
-if (typeof DEBUG === 'undefined') {
-  var DEBUG = true;
-}
+import { ElpongError, ElpongErrorType } from './Errors';
 
 export class SchemeConfiguration implements PreSchemeConfiguration {
   readonly name: string;
@@ -12,33 +7,33 @@ export class SchemeConfiguration implements PreSchemeConfiguration {
 
   constructor(preconf: PreSchemeConfiguration) {
     this.name = preconf.name;
-    if (DEBUG && !this.name) {
+    if (!this.name) {
       throw new ElpongError(ElpongErrorType.CNFNNA);
     }
     this.selector = preconf.selector;
-    if (DEBUG && !this.selector) {
+    if (!this.selector) {
       throw new ElpongError(ElpongErrorType.CNFNSL, preconf.name);
     }
     this.collections = {} as CollectionConfigurationMap;
 
-    for (let collection_name in preconf.collections) {
-      let collection_preconf = preconf.collections[collection_name];
+    for (const collectionName in preconf.collections) {
+      const collectionPreconf = preconf.collections[collectionName];
 
-      let collection_configuration: CollectionConfiguration = this.collections[collection_name] = {
-        singular: collection_preconf.singular || collection_name.slice(0, -1)
+      const collectionConfiguration: CollectionConfiguration = this.collections[collectionName] = {
+        singular: collectionPreconf.singular || collectionName.slice(0, -1)
       } as CollectionConfiguration;
 
-      let props = ['fields', 'relations', 'actions', 'collection_actions'];
-      let relation_types = ['has_many', 'has_one', 'belongs_to'];
+      const props = ['fields', 'relations', 'actions', 'collection_actions'];
+      const relationTypes = ['has_many', 'has_one', 'belongs_to'];
 
-      for (let prop of props) {
-        collection_configuration[prop] = collection_preconf[prop] || {};
+      for (const prop of props) {
+        collectionConfiguration[prop] = collectionPreconf[prop] || {};
       }
-      let relations_conf;
-      if (relations_conf = collection_preconf.relations) {
-        for (let relation_type of relation_types) {
-          relations_conf[relation_type] =
-            (collection_preconf.relations as RelationConfigurationMaps)[relation_type] || {};
+      const relationsConf = collectionPreconf.relations;
+      if (relationsConf) {
+        for (const relationType of relationTypes) {
+          relationsConf[relationType] =
+            (collectionPreconf.relations as RelationConfigurationMaps)[relationType] || {};
         }
       }
     }

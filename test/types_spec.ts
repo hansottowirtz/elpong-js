@@ -1,7 +1,7 @@
 /// <reference types="node"/>
 /// <reference types="jasmine"/>
 
-import elpong, { Scheme, Element, Collection, SchemeConfiguration } from '../src/main';
+import elpong, { Collection, Element, Scheme, SchemeConfiguration } from '../src/main';
 
 describe('importing types from global', () => {
   it('compiles', () => {

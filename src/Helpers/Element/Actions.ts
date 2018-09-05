@@ -1,10 +1,10 @@
-import { Ajax, AjaxResponse, AjaxData, AjaxHeaders, AjaxPromise } from '../../Ajax';
-import { ActionConfigurationMap, ActionConfiguration } from '../../Configuration';
+import { AjaxData, AjaxHeaders, AjaxPromise, AjaxResponse, executeRequest } from '../../Ajax';
+import { ActionConfiguration, ActionConfigurationMap } from '../../Configuration';
 import { Element, SelectorValue } from '../../Element';
-import { Util } from '../../Util';
 import { ElpongError, ElpongErrorType } from '../../Errors';
-import { ElementHelper } from '../ElementHelper';
-import { UrlHelper, UrlHelperElementOptions } from '../UrlHelper';
+import { camelize, forEach, includes, removeFromArray } from '../../Util';
+import { toData } from '../ElementHelper';
+import { createForElement, UrlHelperElementOptions } from '../UrlHelper';
 
 export interface ActionOptions {
   data?: AjaxData;
@@ -12,114 +12,111 @@ export interface ActionOptions {
   params?: any;
 }
 
-export namespace Actions {
-  export function setup(element: Element, actions_config: ActionConfigurationMap) {
-    for (let method of ['get', 'post', 'put', 'delete']) {
-      element.actions[method] = (action_options: ActionOptions) => {
-        return execute(element, method.toUpperCase(), action_options);
-      }
-    }
-
-    Util.forEach(actions_config, (action_config: ActionConfiguration, action_name: string) => {
-      element.actions[Util.camelize(action_name)] = (action_options: ActionOptions) => {
-        if (element.isNew() && !action_config.no_selector) { throw new ElpongError(ElpongErrorType.ELENEW); }
-        return executeCustom(element, action_name, action_config, action_options);
-      }
-    });
+export function setup(element: Element, actionsConfig: ActionConfigurationMap) {
+  for (const method of ['get', 'post', 'put', 'delete']) {
+    element.actions[method] = (actionOptions: ActionOptions) => {
+      return execute(element, method.toUpperCase(), actionOptions);
+    };
   }
 
-  export function execute(element: Element, method: string, action_options: ActionOptions = {}): AjaxPromise {
-    element.snapshots.make(`before_${method.toLowerCase()}`);
+  forEach(actionsConfig, (actionConfig: ActionConfiguration, actionName: string) => {
+    element.actions[camelize(actionName)] = (actionOptions: ActionOptions) => {
+      if (element.isNew() && !actionConfig.no_selector) { throw new ElpongError(ElpongErrorType.ELENEW); }
+      return executeCustom(element, actionName, actionConfig, actionOptions);
+    };
+  });
+}
 
-    let data;
-    if (action_options.data) {
-      if (method !== 'GET') {
-        data = action_options.data;
-      } else {
-        throw new ElpongError(ElpongErrorType.AJXGDA);
-      }
-    } else if (method !== 'GET') {
-      data = ElementHelper.toData(element);
-    }
+export function execute(element: Element, method: string, actionOptions: ActionOptions = {}): AjaxPromise {
+  element.snapshots.make(`before_${method.toLowerCase()}`);
 
-    if (method === 'POST') {
-      if (!element.isNew()) { throw new ElpongError(ElpongErrorType.ELENNW); }
+  let data;
+  if (actionOptions.data) {
+    if (method !== 'GET') {
+      data = actionOptions.data;
     } else {
-      if (element.isNew()) { throw new ElpongError(ElpongErrorType.ELENEW); }
+      throw new ElpongError(ElpongErrorType.AJXGDA);
     }
+  } else if (method !== 'GET') {
+    data = toData(element);
+  }
 
-    const url_options: UrlHelperElementOptions = {
-      no_selector: method === 'POST',
-      params: action_options.params || {}
+  if (method === 'POST') {
+    if (!element.isNew()) { throw new ElpongError(ElpongErrorType.ELENNW); }
+  } else {
+    if (element.isNew()) { throw new ElpongError(ElpongErrorType.ELENEW); }
+  }
+
+  const urlOptions: UrlHelperElementOptions = {
+    noSelector: method === 'POST',
+    params: actionOptions.params || {}
+  };
+
+  const promise = executeRequest(
+    createForElement(element, urlOptions),
+    method,
+    data,
+    actionOptions.headers
+  );
+  promise.then((response: AjaxResponse): void => {
+    if (response.data) {
+      element.merge(response.data);
     }
+    element.snapshots.make(`after_${method.toLowerCase()}`);
 
-    let promise = Ajax.executeRequest(
-      UrlHelper.createForElement(element, url_options),
-      method,
-      data,
-      action_options.headers
-    );
-    promise.then((response: AjaxResponse): void => {
+    const collection = element.collection();
+
+    if (includes(collection.newElements, element)) {
+      removeFromArray(collection.newElements, element);
+      collection.elements.set(element.selector() as SelectorValue, element);
+    }
+  });
+
+  return promise;
+}
+
+export function executeCustom(element: Element, actionName: string, actionConfig: ActionConfiguration, actionOptions: ActionOptions = {}): AjaxPromise {
+  const method = actionConfig.method.toUpperCase();
+  element.snapshots.make(`before_${actionName}`);
+
+  let data;
+  if (actionOptions.data) {
+    if (method !== 'GET') {
+      data = actionOptions.data;
+    } else {
+      throw new ElpongError(ElpongErrorType.AJXGDA);
+    }
+  } else if (!actionConfig.no_data) {
+    data = toData(element);
+  }
+
+  const urlOptions: UrlHelperElementOptions = {
+    params: actionOptions.params || {},
+    suffix: actionConfig.path || actionName
+  };
+  urlOptions.noSelector = actionConfig.no_selector;
+
+  const promise = executeRequest(
+    createForElement(element, urlOptions),
+    method,
+    data,
+    actionOptions.headers
+  );
+  promise.then((response: AjaxResponse) => {
+    if (!actionConfig.returns_other) {
       if (response.data) {
         element.merge(response.data);
       }
       element.snapshots.make(`after_${method.toLowerCase()}`);
-
-      let collection = element.collection();
-
-      if (Util.includes(collection.new_elements, element)) {
-        Util.removeFromArray(collection.new_elements, element);
-        collection.elements.set(element.selector() as SelectorValue, element);
-      }
-    });
-
-    return promise;
-  }
-
-  export function executeCustom(element: Element, action_name: string, action_config: ActionConfiguration, action_options: ActionOptions = {}): AjaxPromise {
-    const method = action_config.method.toUpperCase();
-    element.snapshots.make(`before_${action_name}`);
-
-    let data;
-    if (action_options.data) {
-      if (method !== 'GET') {
-        data = action_options.data;
-      } else {
-        throw new ElpongError(ElpongErrorType.AJXGDA);
-      }
-    } else if (!action_config.no_data) {
-      data = ElementHelper.toData(element);
     }
 
-    const url_options: UrlHelperElementOptions = {
-      suffix: action_config.path || action_name,
-      params: action_options.params || {}
-    };
-    url_options.no_selector = action_config.no_selector;
+    const collection = element.collection();
+    const selectorValue = element.selector();
+    if (selectorValue && includes(collection.newElements, element)) {
+      removeFromArray(collection.newElements, element);
+      collection.elements.set(selectorValue, element);
+    }
+  });
 
-    const promise = Ajax.executeRequest(
-      UrlHelper.createForElement(element, url_options),
-      method,
-      data,
-      action_options.headers
-    );
-    promise.then((response: AjaxResponse) => {
-      let selector_value;
-      if (!action_config.returns_other) {
-        if (response.data) {
-          element.merge(response.data);
-        }
-        element.snapshots.make(`after_${method.toLowerCase()}`);
-      }
-
-      const collection = element.collection();
-
-      if ((selector_value = element.selector()) && Util.includes(collection.new_elements, element)) {
-        Util.removeFromArray(collection.new_elements, element);
-        return collection.elements.set(selector_value, element);
-      }
-    });
-
-    return promise;
-  }
+  return promise;
 }

@@ -22,7 +22,6 @@ export {
 export { PreElement } from './PreElement';
 export { ElpongError } from './Errors';
 export { Snapshot } from './Snapshot';
-export { Util } from './Util';
 export {
   SchemeConfiguration,
   PreSchemeConfiguration,
@@ -53,4 +52,4 @@ export {
 } from './Configuration';
 export {
   AjaxAdapterType
-} from './Ajax'
+} from './Ajax';

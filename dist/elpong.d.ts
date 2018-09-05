@@ -46,38 +46,36 @@ declare module 'elpong/FakeThings' {
 	    endsWith(searchString: string, endPosition?: number): boolean;
 	}
 	export interface FakeArrayConstructor {
-	    from<T>(arrayLike: ArrayLike<T>): Array<T>;
+	    from<T>(arrayLike: ArrayLike<T>): T[];
 	}
 
 }
 declare module 'elpong/Util' {
-	export const Util: {
-	    capitalize: (string: string) => string;
-	    camelize: (string: string) => string;
-	    removeFromArray: (array: any[], element: any) => boolean;
-	    isInteger: (value: any) => value is number;
-	    isNumber: (value: any) => value is number;
-	    isString: (value: any) => value is string;
-	    isRegExp: (value: any) => value is RegExp;
-	    forEach: (o: Object, fn: (v: any, k: string) => void) => void;
-	    endsWith: (string: string, search: string) => boolean;
-	    startsWith: (string: string, search: string) => boolean;
-	    arrayFromHTML: (node_list: NodeListOf<HTMLElement>) => HTMLElement[];
-	    values: (obj: Object) => any[];
-	    includes: (a: any[], b: any) => boolean;
-	    equalsJSON: (a: any, b: any) => boolean;
-	    copyJSON: (o: any) => any;
-	};
+	export function capitalize(string: string): string;
+	export function camelize(string: string): string;
+	export function removeFromArray(array: any[], element: any): boolean;
+	export function isInteger(value: any): value is number;
+	export function isNumber(value: any): value is number;
+	export function isString(value: any): value is string;
+	export function isRegExp(value: any): value is RegExp;
+	export function forEach(o: object, fn: (v: any, k: string) => void): void;
+	export function endsWith(string: string, search: string): boolean;
+	export function startsWith(string: string, search: string): boolean;
+	export function arrayFromHTML(nodeList: NodeListOf<HTMLElement>): HTMLElement[];
+	export function values(obj: object): any[];
+	export function includes(a: any[], b: any): boolean;
+	export function equalsJSON(a: any, b: any): boolean;
+	export function copyJSON(o: any): any;
 
 }
 declare module 'elpong/Ajax' {
 	export type AjaxPromiseThenOnResolveFunction = (response: AjaxResponse) => void;
-	export type AjaxPromiseThenFunction = (resolve_fn: AjaxPromiseThenOnResolveFunction) => any;
+	export type AjaxPromiseThenFunction = (resolveFn: AjaxPromiseThenOnResolveFunction) => any;
 	export type AjaxPromise = Promise<AjaxResponse>;
 	export interface AjaxResponse extends Response {
 	    data?: any;
 	}
-	export type AjaxExternalFunction = Function | any;
+	export type AjaxExternalFunction = () => any | object;
 	export type AjaxFunction = (url: string, instruction: AjaxInstruction) => AjaxPromise;
 	export interface AjaxObject {
 	    data: {};
@@ -92,6 +90,16 @@ declare module 'elpong/Ajax' {
 	export interface AjaxHeaders {
 	    [name: string]: string;
 	}
+	export interface AjaxFunctionOptions {
+	    method: string;
+	    type: string;
+	    url: string;
+	    data: string;
+	    body: string;
+	    headers: AjaxHeaders;
+	    dataType: 'json';
+	    responseType: 'json';
+	}
 	export const enum AjaxAdapterType {
 	    AngularJS = 0,
 	    Fetch = 1,
@@ -99,11 +107,9 @@ declare module 'elpong/Ajax' {
 	    JQuery = 3
 	}
 	export type AjaxAdapterTypeString = 'fetch' | 'angular' | 'angularjs' | 'jquery';
-	export namespace Ajax {
-	    function executeRequest(url: string, method: string, data?: AjaxData, headers?: AjaxHeaders): Promise<AjaxResponse>;
-	    function setAjaxFunction(fn: AjaxExternalFunction, adapter_type?: AjaxAdapterType | AjaxAdapterTypeString): void;
-	    function convertAjaxAdapterTypeStringToType(type?: AjaxAdapterType | AjaxAdapterTypeString): AjaxAdapterType;
-	}
+	export function executeRequest(url: string, method: string, data?: AjaxData, headers?: AjaxHeaders): Promise<AjaxResponse>;
+	export function setAjaxFunction(fn: AjaxExternalFunction, adapterType?: AjaxAdapterType | AjaxAdapterTypeString): void;
+	export function convertAjaxAdapterTypeStringToType(type?: AjaxAdapterType | AjaxAdapterTypeString): AjaxAdapterType;
 
 }
 declare module 'elpong/Configuration' {
@@ -230,40 +236,45 @@ declare module 'elpong/Configuration' {
 	}
 
 }
-declare module 'elpong/elpong' {
-	import { Scheme } from 'elpong/Scheme';
-	import { PreSchemeConfiguration } from 'elpong/Configuration';
-	import { AjaxExternalFunction, AjaxAdapterType, AjaxAdapterTypeString } from 'elpong/Ajax';
-	export namespace elpong {
-	    function add(scheme_config: PreSchemeConfiguration): Scheme;
-	    function get(name: string): Scheme;
-	    function load(ignore_empty: boolean): void;
-	    function setAjax(fn: AjaxExternalFunction, type?: AjaxAdapterType | AjaxAdapterTypeString): void;
-	    function enableAutoload(): void;
-	    function isAutoloadEnabled(): boolean;
-	    function tearDown(): void;
-	}
-
-}
 declare module 'elpong/Helpers/ElementHelper' {
 	import { Element } from 'elpong/Element';
-	export namespace ElementHelper {
-	    function toData(element: Element, full_duplicate?: boolean): {};
-	}
+	export function toData(element: Element, fullDuplicate?: boolean): {};
 
 }
-declare module 'elpong/Snapshot' {
+declare module 'elpong/Helpers/UrlHelper' {
+	import { Collection } from 'elpong/Collection';
 	import { Element } from 'elpong/Element';
-	export class Snapshot {
-	    tag?: string;
-	    time: number;
-	    data: Object;
-	    element: Element;
-	    undone: boolean;
-	    index: number;
-	    constructor(element: Element, tag?: string);
-	    revert(): void;
+	export interface UrlHelperOptions extends UrlOptions {
+	    suffix?: string;
+	    params?: any;
 	}
+	export interface UrlHelperElementOptions extends UrlHelperOptions {
+	    noSelector?: boolean;
+	}
+	export interface UrlHelperCollectionOptions extends UrlHelperOptions {
+	}
+	export interface UrlOptions {
+	    params?: any;
+	}
+	export function createForElement(element: Element, urlOptions: UrlHelperElementOptions): string;
+	export function createForCollection(collection: Collection, urlOptions: UrlHelperOptions): string;
+	export function trimSlashes(s: string): string;
+	export function isFqdn(s: string): boolean;
+	export function appendParamsToUrl(url: string, params: any): string;
+
+}
+declare module 'elpong/Helpers/Element/Actions' {
+	import { AjaxData, AjaxHeaders, AjaxPromise } from 'elpong/Ajax';
+	import { ActionConfiguration, ActionConfigurationMap } from 'elpong/Configuration';
+	import { Element } from 'elpong/Element';
+	export interface ActionOptions {
+	    data?: AjaxData;
+	    headers?: AjaxHeaders;
+	    params?: any;
+	}
+	export function setup(element: Element, actionsConfig: ActionConfigurationMap): void;
+	export function execute(element: Element, method: string, actionOptions?: ActionOptions): AjaxPromise;
+	export function executeCustom(element: Element, actionName: string, actionConfig: ActionConfiguration, actionOptions?: ActionOptions): AjaxPromise;
 
 }
 declare module 'elpong/PreElement' {
@@ -272,137 +283,149 @@ declare module 'elpong/PreElement' {
 	}
 
 }
+declare module 'elpong/elpong' {
+	import { AjaxAdapterType, AjaxExternalFunction } from 'elpong/Ajax';
+	import { PreSchemeConfiguration } from 'elpong/Configuration';
+	import { Scheme } from 'elpong/Scheme';
+	export const elpong: {
+	    add: (schemeConfig: PreSchemeConfiguration) => Scheme;
+	    enableAutoload: () => void;
+	    get: (name: string) => Scheme;
+	    isAutoloadEnabled: () => boolean;
+	    load: (ignoreEmpty: boolean) => void;
+	    setAjax: (fn: AjaxExternalFunction, type?: AjaxAdapterType | "fetch" | "angular" | "angularjs" | "jquery" | undefined) => void;
+	    tearDown: () => void;
+	};
+
+}
+declare module 'elpong/Scheme' {
+	import { Collection } from 'elpong/Collection';
+	import { PreSchemeConfiguration, SchemeConfiguration } from 'elpong/Configuration';
+	export interface CollectionMap {
+	    [name: string]: Collection;
+	}
+	export class Scheme {
+	    name: string;
+	    private _configuration;
+	    private _collections;
+	    private apiUrl;
+	    constructor(preSchemeConfiguration: PreSchemeConfiguration);
+	    configuration(): SchemeConfiguration;
+	    select(name: string): Collection;
+	    setApiUrl(url: string): string;
+	    getApiUrl(): string;
+	    getCollections(): CollectionMap;
+	}
+
+}
 declare module 'elpong/Helpers/CollectionHelper' {
-	import { Element } from 'elpong/Element';
 	import { Collection } from 'elpong/Collection';
 	import { CollectionConfiguration } from 'elpong/Configuration';
-	export namespace CollectionHelper {
-	    function getConfiguration(collection: Collection): CollectionConfiguration;
-	    function getSingularName(collection: Collection): string;
-	    function addElement(collection: Collection, element: Element): void;
-	}
+	import { Element } from 'elpong/Element';
+	export function getConfiguration(collection: Collection): CollectionConfiguration;
+	export function getSingularName(collection: Collection): string;
+	export function addElement(collection: Collection, element: Element): void;
+
+}
+declare module 'elpong/Helpers/Element/Fields/EmbeddedCollection' {
+	import { EmbeddedCollectionFieldConfiguration } from 'elpong/Configuration';
+	import { Element } from 'elpong/Element';
+	import { PreElement } from 'elpong/PreElement';
+	export function handle(element: Element, preElement: PreElement, fieldKey: string, fieldConfig: EmbeddedCollectionFieldConfiguration): void;
 
 }
 declare module 'elpong/Helpers/SchemeHelper' {
 	import { Scheme } from 'elpong/Scheme';
-	import { Collection } from 'elpong/Collection';
-	export namespace SchemeHelper {
-	    function getCollectionBySingularName(scheme: Scheme, singular_name: string): Collection;
-	}
+	export function getCollectionBySingularName(scheme: Scheme, singularName: string): import("../Collection").Collection;
 
 }
 declare module 'elpong/Helpers/Element/Fields/EmbeddedElement' {
-	import { Element } from 'elpong/Element';
 	import { EmbeddedElementFieldConfiguration } from 'elpong/Configuration';
-	import { PreElement } from 'elpong/PreElement';
-	export namespace EmbeddedElement {
-	    function handle(element: Element, pre_element: PreElement, field_key: string, field_config: EmbeddedElementFieldConfiguration): void;
-	}
-
-}
-declare module 'elpong/Helpers/Element/Fields/EmbeddedCollection' {
 	import { Element } from 'elpong/Element';
-	import { EmbeddedCollectionFieldConfiguration } from 'elpong/Configuration';
 	import { PreElement } from 'elpong/PreElement';
-	export namespace EmbeddedCollection {
-	    function handle(element: Element, pre_element: PreElement, field_key: string, field_config: EmbeddedCollectionFieldConfiguration): void;
-	}
+	export function handle(element: Element, preElement: PreElement, fieldKey: string, fieldConfig: EmbeddedElementFieldConfiguration): void;
 
 }
 declare module 'elpong/Helpers/Element/Fields' {
-	import { Element } from 'elpong/Element';
 	import { FieldConfigurationMap } from 'elpong/Configuration';
+	import { Element } from 'elpong/Element';
 	import { PreElement } from 'elpong/PreElement';
-	export namespace Fields {
-	    function setup(element: Element, fields_config_map: FieldConfigurationMap, pre_element: PreElement): void;
-	}
-
-}
-declare module 'elpong/Helpers/Element/Relations/HasMany' {
-	import { Element } from 'elpong/Element';
-	import { Collection } from 'elpong/Collection';
-	import { HasManyRelationConfiguration, HasOneRelationConfiguration } from 'elpong/Configuration';
-	export type HasManyRelationFunction = () => Element[];
-	export namespace HasMany {
-	    function setup(element: Element, relation_collection_name: string, relation_settings: HasManyRelationConfiguration): () => Element[];
-	    function getHasManyRelationFunction(element: Element, collection: Collection, relation_config: HasManyRelationConfiguration | HasOneRelationConfiguration, relation_collection: Collection, limit_to_one?: boolean): HasManyRelationFunction;
-	}
-
-}
-declare module 'elpong/Helpers/Element/Relations/HasOne' {
-	import { Element } from 'elpong/Element';
-	import { HasOneRelationConfiguration } from 'elpong/Configuration';
-	export namespace HasOne {
-	    function setup(element: Element, relation_collection_singular_name: string, relation_config: HasOneRelationConfiguration): () => Element;
-	}
+	export function setup(element: Element, fieldsConfigMap: FieldConfigurationMap, preElement: PreElement): void;
 
 }
 declare module 'elpong/Helpers/Element/Relations/BelongsTo' {
-	import { Element } from 'elpong/Element';
 	import { BelongsToRelationConfiguration } from 'elpong/Configuration';
-	export namespace BelongsTo {
-	    function setup(element: Element, relation_collection_singular_name: string, relation_config: BelongsToRelationConfiguration): void;
-	}
+	import { Element } from 'elpong/Element';
+	export function setup(element: Element, relationCollectionSingularName: string, relationConfig: BelongsToRelationConfiguration): void;
+
+}
+declare module 'elpong/Helpers/Element/Relations/HasMany' {
+	import { Collection } from 'elpong/Collection';
+	import { HasManyRelationConfiguration, HasOneRelationConfiguration } from 'elpong/Configuration';
+	import { Element } from 'elpong/Element';
+	export type HasManyRelationFunction = () => Element[];
+	export function setup(element: Element, relationCollectionName: string, relationSettings: HasManyRelationConfiguration): () => Element[];
+	export function getHasManyRelationFunction(element: Element, collection: Collection, relationConfig: HasManyRelationConfiguration | HasOneRelationConfiguration, relationCollection: Collection, limitToOne?: boolean): HasManyRelationFunction;
+
+}
+declare module 'elpong/Helpers/Element/Relations/HasOne' {
+	import { HasOneRelationConfiguration } from 'elpong/Configuration';
+	import { Element } from 'elpong/Element';
+	export function setup(element: Element, relationCollectionSingularName: string, relationConfig: HasOneRelationConfiguration): () => Element;
 
 }
 declare module 'elpong/Helpers/Element/Relations' {
-	import { Element } from 'elpong/Element';
 	import { RelationConfigurationMaps } from 'elpong/Configuration';
-	export namespace Relations {
-	    function setup(element: Element, relations_config_maps: RelationConfigurationMaps): void;
-	}
+	import { Element } from 'elpong/Element';
+	export function setup(element: Element, relationsConfigMaps: RelationConfigurationMaps): void;
 
 }
-declare module 'elpong/Helpers/Element/Actions' {
-	import { AjaxData, AjaxHeaders, AjaxPromise } from 'elpong/Ajax';
-	import { ActionConfigurationMap, ActionConfiguration } from 'elpong/Configuration';
+declare module 'elpong/Snapshot' {
 	import { Element } from 'elpong/Element';
-	export interface ActionOptions {
-	    data?: AjaxData;
-	    headers?: AjaxHeaders;
-	    params?: any;
-	}
-	export namespace Actions {
-	    function setup(element: Element, actions_config: ActionConfigurationMap): void;
-	    function execute(element: Element, method: string, action_options?: ActionOptions): AjaxPromise;
-	    function executeCustom(element: Element, action_name: string, action_config: ActionConfiguration, action_options?: ActionOptions): AjaxPromise;
+	export class Snapshot {
+	    tag?: string;
+	    time: number;
+	    data: object;
+	    element: Element;
+	    undone: boolean;
+	    index: number;
+	    constructor(element: Element, tag?: string);
+	    revert(): void;
 	}
 
 }
 declare module 'elpong/Helpers/Element/Snapshots' {
 	import { Element } from 'elpong/Element';
-	export namespace Snapshots {
-	    function setup(element: Element): void;
-	}
+	export function setup(element: Element): void;
 
 }
 declare module 'elpong/Element' {
-	import { Collection } from 'elpong/Collection';
 	import { AjaxPromise } from 'elpong/Ajax';
-	import { Snapshot } from 'elpong/Snapshot';
-	import { PreElement } from 'elpong/PreElement';
+	import { Collection } from 'elpong/Collection';
 	import { ActionOptions } from 'elpong/Helpers/Element/Actions';
+	import { PreElement } from 'elpong/PreElement';
+	import { Snapshot } from 'elpong/Snapshot';
 	export type SelectorValue = string | number;
 	export function isSelectorValue(v: any): v is SelectorValue;
 	export interface Fields {
-	    [field_key: string]: any;
+	    [fieldKey: string]: any;
 	}
 	export type RelationFunction = () => Element | Element[] | null | undefined;
 	export interface Relations {
-	    [relation_function_name: string]: RelationFunction;
+	    [relationFunctionName: string]: RelationFunction;
 	}
-	export type ActionFunction = (action_options?: ActionOptions) => AjaxPromise;
+	export type ActionFunction = (actionOptions?: ActionOptions) => AjaxPromise;
 	export interface Actions {
 	    get: ActionFunction;
 	    post: ActionFunction;
 	    put: ActionFunction;
 	    delete: ActionFunction;
-	    [action_name: string]: ActionFunction;
+	    [actionName: string]: ActionFunction;
 	}
 	export interface Snapshots {
-	    make: Function;
+	    make: (tag?: string) => void;
 	    list: Snapshot[];
-	    current_index: number;
+	    currentIndex: number;
 	    undo: (identifier: number | string | RegExp) => Element;
 	    lastPersisted: () => Snapshot | undefined;
 	    lastWithTag: (tag: string | RegExp) => Snapshot | undefined;
@@ -415,99 +438,48 @@ declare module 'elpong/Element' {
 	    readonly relations: Relations;
 	    readonly actions: Actions;
 	    readonly snapshots: Snapshots;
-	    constructor(collection: Collection, pre_element: PreElement);
+	    constructor(collection: Collection, preElement: PreElement);
 	    collection(): Collection;
 	    selector(): SelectorValue | undefined;
-	    remove(): Promise<void> | {
-	        then: (fn: Function) => any;
-	        catch: () => void;
+	    remove(): {
+	        then(fn: () => any): any;
+	        catch(): void;
 	    };
 	    save(): AjaxPromise;
 	    isNew(): boolean;
-	    merge(pre_element: PreElement): this;
-	}
-
-}
-declare module 'elpong/Helpers/UrlHelper' {
-	import { Element } from 'elpong/Element';
-	import { Collection } from 'elpong/Collection';
-	export interface UrlHelperOptions extends UrlOptions {
-	    suffix?: string;
-	    params?: any;
-	}
-	export interface UrlHelperElementOptions extends UrlHelperOptions {
-	    no_selector?: boolean;
-	}
-	export interface UrlHelperCollectionOptions extends UrlHelperOptions {
-	}
-	export interface UrlOptions {
-	    params?: any;
-	}
-	export namespace UrlHelper {
-	    function createForElement(element: Element, url_options: UrlHelperElementOptions): string;
-	    function createForCollection(collection: Collection, url_options: UrlHelperOptions): string;
-	    function trimSlashes(s: string): string;
-	    function isFqdn(s: string): boolean;
-	    function appendParamsToUrl(url: string, params: any): string;
-	}
-
-}
-declare module 'elpong/Helpers' {
-	export { UrlHelper } from 'elpong/Helpers/UrlHelper';
-	export { CollectionHelper } from 'elpong/Helpers/CollectionHelper';
-
-}
-declare module 'elpong/Scheme' {
-	import { Collection } from 'elpong/Collection';
-	import { SchemeConfiguration, PreSchemeConfiguration } from 'elpong/Configuration';
-	export interface CollectionMap {
-	    [name: string]: Collection;
-	}
-	export class Scheme {
-	    name: string;
-	    private _configuration;
-	    private _collections;
-	    private api_url;
-	    constructor(preSchemeConfiguration: PreSchemeConfiguration);
-	    configuration(): SchemeConfiguration;
-	    select(name: string): Collection;
-	    setApiUrl(url: string): string;
-	    getApiUrl(): string;
-	    getCollections(): CollectionMap;
+	    merge(preElement: PreElement): this;
 	}
 
 }
 declare module 'elpong/Helpers/Collection/CollectionActions' {
+	import { AjaxData, AjaxHeaders, AjaxPromise, AjaxResponse } from 'elpong/Ajax';
 	import { Collection } from 'elpong/Collection';
-	import { AjaxResponse, AjaxData, AjaxHeaders, AjaxPromise } from 'elpong/Ajax';
-	import { SelectorValue } from 'elpong/Element';
 	import { CollectionActionConfiguration } from 'elpong/Configuration';
+	import { SelectorValue } from 'elpong/Element';
 	export interface CollectionActionOptions {
 	    data?: AjaxData;
 	    headers?: AjaxHeaders;
 	    params?: any;
 	}
-	export namespace CollectionActions {
-	    function executeGetAll(collection: Collection, action_options?: CollectionActionOptions): AjaxPromise;
-	    function executeGetOne(collection: Collection, selector_value: SelectorValue, action_options?: CollectionActionOptions): Promise<AjaxResponse>;
-	    function executeCustom(collection: Collection, action_name: string, action_config: CollectionActionConfiguration, action_options?: CollectionActionOptions): Promise<AjaxResponse>;
-	}
+	export function executeGetAll(collection: Collection, actionOptions?: CollectionActionOptions): AjaxPromise;
+	export function executeGetOne(collection: Collection, selectorValue: SelectorValue, actionOptions?: CollectionActionOptions): Promise<AjaxResponse>;
+	export function executeCustom(collection: Collection, actionName: string, actionConfig: CollectionActionConfiguration, actionOptions?: CollectionActionOptions): Promise<AjaxResponse>;
 
 }
 declare module 'elpong/Collection' {
-	import { Scheme } from 'elpong/Scheme';
-	import { Element, SelectorValue } from 'elpong/Element';
-	import { CollectionConfiguration } from 'elpong/Configuration';
-	import { CollectionActionOptions } from 'elpong/Helpers/Collection/CollectionActions';
 	import { AjaxPromise } from 'elpong/Ajax';
+	import { CollectionConfiguration } from 'elpong/Configuration';
+	import { Element, SelectorValue } from 'elpong/Element';
 	import { FakeMap } from 'elpong/FakeThings';
+	import { CollectionActionOptions } from 'elpong/Helpers/Collection/CollectionActions';
 	import { PreElement } from 'elpong/PreElement';
+	import { Scheme } from 'elpong/Scheme';
 	export type ElementMap = FakeMap;
-	export type GetAllCollectionActionFunction = (action_options?: CollectionActionOptions) => AjaxPromise;
-	export type GetOneCollectionActionFunction = (selector_value?: SelectorValue, action_options?: CollectionActionOptions) => AjaxPromise;
-	export type CustomCollectionActionFunction = (action_options?: CollectionActionOptions | SelectorValue) => AjaxPromise;
+	export type GetAllCollectionActionFunction = (actionOptions?: CollectionActionOptions) => AjaxPromise;
+	export type GetOneCollectionActionFunction = (selectorValue?: SelectorValue, actionOptions?: CollectionActionOptions) => AjaxPromise;
+	export type CustomCollectionActionFunction = (actionOptions?: CollectionActionOptions | SelectorValue) => AjaxPromise;
 	export interface CollectionActions {
-	    [action_name: string]: CustomCollectionActionFunction;
+	    [actionName: string]: CustomCollectionActionFunction;
 	    getAll: GetAllCollectionActionFunction;
 	    getOne: GetOneCollectionActionFunction;
 	}
@@ -521,21 +493,21 @@ declare module 'elpong/Collection' {
 	    [key: string]: any;
 	}
 	export class Collection {
-	    private readonly _scheme;
 	    readonly name: string;
-	    private readonly default_pre_element;
 	    readonly elements: FakeMap;
-	    readonly new_elements: Element[];
+	    readonly newElements: Element[];
 	    readonly actions: CollectionActions;
+	    private readonly _scheme;
+	    private readonly _defaultPreElement;
 	    constructor(scheme: Scheme, name: string);
 	    scheme(): Scheme;
-	    load(ignore_empty: boolean): void;
+	    load(ignoreEmpty: boolean): void;
 	    configuration(): CollectionConfiguration;
 	    array(options?: CollectionArrayOptions): Element[];
-	    find(selector_value: SelectorValue): Element | null;
-	    findBy(fields_key_value_map: FieldsKeyValueMap, find_options: CollectionFindByOptions): Element | Element[] | null;
-	    build(pre_element: PreElement): Element;
-	    buildOrMerge(pre_element: PreElement): Element;
+	    find(selectorValue: SelectorValue): Element | null;
+	    findBy(fieldsKeyValueMap: FieldsKeyValueMap, findOptions: CollectionFindByOptions): Element | Element[] | null;
+	    build(preElement: PreElement): Element;
+	    buildOrMerge(preElement: PreElement): Element;
 	}
 
 }
@@ -547,7 +519,6 @@ declare module 'elpong' {
 	export { PreElement } from 'elpong/PreElement';
 	export { ElpongError } from 'elpong/Errors';
 	export { Snapshot } from 'elpong/Snapshot';
-	export { Util } from 'elpong/Util';
 	export { SchemeConfiguration, PreSchemeConfiguration, CollectionConfiguration, CollectionConfigurationMap, CollectionActionConfiguration, CollectionActionConfigurationMap, CollectionConfigurationWithOptionals, CollectionConfigurationMapWithOptionals, FieldConfiguration, FieldConfigurationMap, RelationConfiguration, RelationConfigurationMaps, HasOneRelationConfiguration, HasManyRelationConfiguration, BelongsToRelationConfiguration, HasOneRelationConfigurationMap, HasManyRelationConfigurationMap, BelongsToRelationConfigurationMap, EmbeddedElementFieldConfiguration, BelongsToRelationConfigurationBase, EmbeddedCollectionFieldConfiguration, RelationConfigurationMapsWithOptionals, ActionConfiguration, ActionConfigurationMap, PolymorphicBelongsToRelationConfiguration, NonPolymorphicBelongsToRelationConfiguration } from 'elpong/Configuration';
 	export { AjaxAdapterType } from 'elpong/Ajax';
 

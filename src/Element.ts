@@ -1,54 +1,51 @@
-import { Collection } from './Collection';
-import { Util } from './Util';
 import { AjaxPromise } from './Ajax';
-import { Snapshot } from './Snapshot';
-import { PreElement } from './PreElement';
-
-import { Fields } from './Helpers/Element/Fields';
-import { Relations } from './Helpers/Element/Relations';
-import { Actions, ActionOptions } from './Helpers/Element/Actions';
-import { Snapshots } from './Helpers/Element/Snapshots';
-
-import { EmbeddedElement } from './Helpers/Element/Fields/EmbeddedElement';
-import { EmbeddedCollection } from './Helpers/Element/Fields/EmbeddedCollection';
-
+import { Collection } from './Collection';
+import { EmbeddedCollectionFieldConfiguration, EmbeddedElementFieldConfiguration, FieldConfiguration } from './Configuration';
 import { ElpongError, ElpongErrorType } from './Errors';
-import { FieldConfiguration, EmbeddedElementFieldConfiguration, EmbeddedCollectionFieldConfiguration } from './Configuration';
+import { ActionOptions, setup as actionsSetup } from './Helpers/Element/Actions';
+import { setup as fieldsSetup } from './Helpers/Element/Fields';
+import { handle as embeddedCollectionHandle } from './Helpers/Element/Fields/EmbeddedCollection';
+import { handle as embeddedElementHandle } from './Helpers/Element/Fields/EmbeddedElement';
+import { setup as relationsSetup } from './Helpers/Element/Relations';
+import { setup as snapshotsSetup } from './Helpers/Element/Snapshots';
+import { PreElement } from './PreElement';
+import { Snapshot } from './Snapshot';
+import { forEach, includes, removeFromArray } from './Util';
 
-export type SelectorValue = string|number;
+export type SelectorValue = string | number;
 
 export function isSelectorValue(v: any): v is SelectorValue {
   return (!!v || v === 0 || v === '') && (typeof v === 'string' || typeof v === 'number');
 }
 
 export interface Fields {
-  [field_key: string]: any;
+  [fieldKey: string]: any;
 }
 
-export type RelationFunction = () => Element|Element[]|null|undefined;
+export type RelationFunction = () => Element | Element[] | null | undefined;
 
 export interface Relations {
-  [relation_function_name: string]: RelationFunction;
+  [relationFunctionName: string]: RelationFunction;
 }
 
-export type ActionFunction = (action_options?: ActionOptions) => AjaxPromise;
+export type ActionFunction = (actionOptions?: ActionOptions) => AjaxPromise;
 
 export interface Actions {
   get: ActionFunction;
   post: ActionFunction;
   put: ActionFunction;
   delete: ActionFunction;
-  [action_name: string]: ActionFunction;
+  [actionName: string]: ActionFunction;
 }
 
 export interface Snapshots {
-  make: Function;
+  make: (tag?: string) => void;
   list: Snapshot[];
-  current_index: number;
-  undo: (identifier: number|string|RegExp) => Element;
-  lastPersisted: () => Snapshot|undefined;
-  lastWithTag: (tag: string|RegExp) => Snapshot|undefined;
-  last: () => Snapshot|undefined;
+  currentIndex: number;
+  undo: (identifier: number | string | RegExp) => Element;
+  lastPersisted: () => Snapshot | undefined;
+  lastWithTag: (tag: string | RegExp) => Snapshot | undefined;
+  last: () => Snapshot | undefined;
   isPersisted: () => boolean;
 }
 
@@ -59,15 +56,15 @@ export class Element {
   readonly actions: Actions = {} as Actions;
   readonly snapshots: Snapshots = {} as Snapshots;
 
-  constructor(collection: Collection, pre_element: PreElement) {
+  constructor(collection: Collection, preElement: PreElement) {
     this._collection = collection;
 
-    let collection_config = collection.configuration();
+    const collectionConfig = collection.configuration();
 
-    Fields.setup(this, collection_config.fields, pre_element);
-    Relations.setup(this, collection_config.relations);
-    Actions.setup(this, collection_config.actions);
-    Snapshots.setup(this);
+    fieldsSetup(this, collectionConfig.fields, preElement);
+    relationsSetup(this, collectionConfig.relations);
+    actionsSetup(this, collectionConfig.actions);
+    snapshotsSetup(this);
 
     this.snapshots.make('creation');
   }
@@ -76,22 +73,22 @@ export class Element {
     return this._collection;
   }
 
-  selector(): SelectorValue|undefined {
+  selector(): SelectorValue | undefined {
     return this.fields[this.collection().scheme().configuration().selector];
   }
 
   remove() {
-    const selector_value: SelectorValue|undefined = this.selector();
-    if (selector_value !== undefined) {
+    const selectorValue: SelectorValue | undefined = this.selector();
+    if (selectorValue !== undefined) {
       return this.actions.delete().then(() => {
-        let elements = this.collection().elements;
-        elements.delete(selector_value);
+        const elements = this.collection().elements;
+        elements.delete(selectorValue);
       });
     } else {
-      Util.removeFromArray(this.collection().new_elements, this);
+      removeFromArray(this.collection().newElements, this);
       return {
-        then: function(fn: Function) { return fn(); },
-        catch: function() {}
+        then(fn: () => any) { return fn(); },
+        catch() { return; }
       };
     }
   }
@@ -105,7 +102,7 @@ export class Element {
   }
 
   isNew(): boolean {
-    if (Util.includes(this.collection().new_elements, this)) {
+    if (includes(this.collection().newElements, this)) {
       if (this.selector()) {
         throw new ElpongError(ElpongErrorType.ELESNA);
       } else {
@@ -120,24 +117,24 @@ export class Element {
     }
   }
 
-  merge(pre_element: PreElement): this {
-    let collection_config = this.collection().configuration();
-    let selector_key = this.collection().scheme().configuration().selector;
-    Util.forEach(collection_config.fields, (field_config: FieldConfiguration, field_key: string) => {
-      let field_value;
-      if (field_value = pre_element[field_key]) {
-        if (field_config.embedded_element) {
-          EmbeddedElement.handle(this, pre_element, field_key, field_config as EmbeddedElementFieldConfiguration);
-        } else if (field_config.embedded_collection) {
-          EmbeddedCollection.handle(this, pre_element, field_key, field_config as EmbeddedCollectionFieldConfiguration);
-        } else if (field_key === selector_key) {
-          let selector_value = this.fields[field_key];
-          if ((selector_value !== field_value) && isSelectorValue(selector_value) && isSelectorValue(field_value)) {
-            throw new ElpongError(ElpongErrorType.ELESCH, `${selector_value} -> ${field_value}`);
+  merge(preElement: PreElement): this {
+    const collectionConfig = this.collection().configuration();
+    const selectorKey = this.collection().scheme().configuration().selector;
+    forEach(collectionConfig.fields, (fieldConfig: FieldConfiguration, fieldKey: string) => {
+      const fieldValue = preElement[fieldKey] ;
+      if (fieldValue) {
+        if (fieldConfig.embedded_element) {
+          embeddedElementHandle(this, preElement, fieldKey, fieldConfig as EmbeddedElementFieldConfiguration);
+        } else if (fieldConfig.embedded_collection) {
+          embeddedCollectionHandle(this, preElement, fieldKey, fieldConfig as EmbeddedCollectionFieldConfiguration);
+        } else if (fieldKey === selectorKey) {
+          const selectorValue = this.fields[fieldKey];
+          if ((selectorValue !== fieldValue) && isSelectorValue(selectorValue) && isSelectorValue(fieldValue)) {
+            throw new ElpongError(ElpongErrorType.ELESCH, `${selectorValue} -> ${fieldValue}`);
           }
-          this.fields[field_key] = field_value;
+          this.fields[fieldKey] = fieldValue;
         } else {
-          this.fields[field_key] = field_value;
+          this.fields[fieldKey] = fieldValue;
         }
       }
     });

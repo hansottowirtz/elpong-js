@@ -1,8 +1,8 @@
-import { elpong } from './elpong';
 import { Collection } from './Collection';
-import { SchemeConfiguration, PreSchemeConfiguration } from './Configuration';
+import { PreSchemeConfiguration, SchemeConfiguration } from './Configuration';
+import { elpong } from './elpong';
 import { ElpongError, ElpongErrorType } from './Errors';
-import { UrlHelper } from './Helpers';
+import { isFqdn, trimSlashes } from './Helpers/UrlHelper';
 
 export interface CollectionMap {
   [name: string]: Collection;
@@ -12,7 +12,7 @@ export class Scheme {
   name: string;
   private _configuration: SchemeConfiguration;
   private _collections: CollectionMap;
-  private api_url: string;
+  private apiUrl: string;
 
   constructor(preSchemeConfiguration: PreSchemeConfiguration) {
     const sc = new SchemeConfiguration(preSchemeConfiguration);
@@ -21,15 +21,15 @@ export class Scheme {
     this._collections = {};
 
     // Create collections
-    for (let collection_name in sc.collections) {
-      let collection_settings = sc.collections[collection_name];
-      let collection = new Collection(this, collection_name);
-      this._collections[collection_name] = collection;
+    for (const collectionName in sc.collections) {
+      const collectionSettings = sc.collections[collectionName];
+      const collection = new Collection(this, collectionName);
+      this._collections[collectionName] = collection;
     }
 
     if (elpong.isAutoloadEnabled()) {
-      for (let collection_name in sc.collections) {
-        this._collections[collection_name].load(true);
+      for (const collectionName in sc.collections) {
+        this._collections[collectionName].load(true);
       }
     }
   }
@@ -39,8 +39,8 @@ export class Scheme {
   }
 
   select(name: string): Collection {
-    let collection;
-    if (collection = this._collections[name]) {
+    const collection = this._collections[name];
+    if (collection) {
       return collection;
     } else {
       throw new ElpongError(ElpongErrorType.COLNFO, name);
@@ -48,12 +48,12 @@ export class Scheme {
   }
 
   setApiUrl(url: string): string {
-    const trimmed_url = UrlHelper.trimSlashes(url);
-    return this.api_url = UrlHelper.isFqdn(trimmed_url) ? trimmed_url : `/${trimmed_url}`;
+    const trimmedUrl = trimSlashes(url);
+    return this.apiUrl = isFqdn(trimmedUrl) ? trimmedUrl : `/${trimmedUrl}`;
   }
 
   getApiUrl(): string {
-    return this.api_url;
+    return this.apiUrl;
   }
 
   getCollections(): CollectionMap {

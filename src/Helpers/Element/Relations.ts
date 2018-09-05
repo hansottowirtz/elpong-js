@@ -1,22 +1,20 @@
-import { Util } from '../../Util';
-import { HasMany } from './Relations/HasMany';
-import { HasOne } from './Relations/HasOne';
+import { BelongsToRelationConfiguration, HasManyRelationConfiguration, HasOneRelationConfiguration, RelationConfigurationMaps } from '../../Configuration';
 import { Element } from '../../Element';
-import { RelationConfigurationMaps, HasManyRelationConfiguration, HasOneRelationConfiguration, BelongsToRelationConfiguration } from '../../Configuration';
-import { BelongsTo } from './Relations/BelongsTo';
+import { forEach } from '../../Util';
+import { setup as belongsToSetup } from './Relations/BelongsTo';
+import { setup as hasManySetup } from './Relations/HasMany';
+import { setup as hasOneSetup } from './Relations/HasOne';
 
-export namespace Relations {
-  export function setup(element: Element, relations_config_maps: RelationConfigurationMaps) {
-    Util.forEach(relations_config_maps.has_many, (relation_config: HasManyRelationConfiguration, relation_collection_name: string) => {
-      HasMany.setup(element, relation_collection_name, relation_config);
-    });
+export function setup(element: Element, relationsConfigMaps: RelationConfigurationMaps) {
+  forEach(relationsConfigMaps.has_many, (relationConfig: HasManyRelationConfiguration, relationCollectionName: string) => {
+    hasManySetup(element, relationCollectionName, relationConfig);
+  });
 
-    Util.forEach(relations_config_maps.has_one, (relation_config: HasOneRelationConfiguration, relation_collection_singular_name: string) => {
-      HasOne.setup(element, relation_collection_singular_name, relation_config);
-    });
+  forEach(relationsConfigMaps.has_one, (relationConfig: HasOneRelationConfiguration, relationCollectionSingularName: string) => {
+    hasOneSetup(element, relationCollectionSingularName, relationConfig);
+  });
 
-    Util.forEach(relations_config_maps.belongs_to, (relation_config: BelongsToRelationConfiguration, relation_collection_singular_name: string) => {
-      BelongsTo.setup(element, relation_collection_singular_name, relation_config);
-    });
-  }
+  forEach(relationsConfigMaps.belongs_to, (relationConfig: BelongsToRelationConfiguration, relationCollectionSingularName: string) => {
+    belongsToSetup(element, relationCollectionSingularName, relationConfig);
+  });
 }

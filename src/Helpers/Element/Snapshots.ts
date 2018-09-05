@@ -1,94 +1,92 @@
-import { Util } from '../../Util';
-import { Snapshot } from '../../Snapshot';
 import { Element } from '../../Element';
-import { ElementHelper } from '../ElementHelper';
 import { ElpongError, ElpongErrorType } from '../../Errors';
+import { Snapshot } from '../../Snapshot';
+import { equalsJSON, includes, isInteger, isRegExp } from '../../Util';
 
-export namespace Snapshots {
-  export function setup(element: Element) {
-    let snapshots = element.snapshots;
+export function setup(element: Element) {
+  const snapshots = element.snapshots;
 
-    snapshots.list = [];
+  snapshots.list = [];
 
-    snapshots.make = (tag?: string): Snapshot => {
-      return new Snapshot(element, tag);
-    }
+  snapshots.make = (tag?: string): Snapshot => {
+    return new Snapshot(element, tag);
+  };
 
-    snapshots.lastPersisted = (): Snapshot|undefined => {
-      if (element.isNew()) { return; }
+  snapshots.lastPersisted = (): Snapshot | undefined => {
+    if (element.isNew()) return;
 
-      for (let i = snapshots.list.length - 1; i >= 0 ; i--) {
-        let snapshot = snapshots.list[i];
-        if (Util.includes(['after_post', 'after_put', 'after_get', 'creation'], snapshot.tag)) {
-          return snapshot;
-        }
+    for (let i = snapshots.list.length - 1; i >= 0 ; i--) {
+      const snapshot = snapshots.list[i];
+      if (includes(['after_post', 'after_put', 'after_get', 'creation'], snapshot.tag)) {
+        return snapshot;
       }
-
-      // Util.reverseForEach(element.snapshots.list, function(k: string, v: Snapshot) {
-      //   if ((v.tag === 'after_post') || (v.tag === 'after_put') || (v.tag === 'after_get') || (v.tag === 'creation')) {
-      //     last_persisted_snapshot = v;
-      //     return Util.BREAK;
-      //   }
-      // });
-
-      // return last_persisted_snapshot;
     }
 
-    snapshots.lastWithTag = (tag: string|RegExp): Snapshot|undefined => {
-      let last_snapshot_with_tag: Snapshot|undefined;
-      let list = element.snapshots.list;
-      if (Util.isRegExp(tag)) {
-        for (let i = list.length - 1; i >= 0 ; i--) {
-          let snapshot = list[i];
-          if (snapshot.tag) {
-            if (tag.test(snapshot.tag)) {
-              return snapshot;
-            }
-          }
-        }
-      } else {
-        for (let i = list.length - 1; i >= 0 ; i--) {
-          let snapshot = list[i];
-          if (tag === snapshot.tag) {
+    return;
+
+    // Util.reverseForEach(element.snapshots.list, function(k: string, v: Snapshot) {
+    //   if ((v.tag === 'after_post') || (v.tag === 'after_put') || (v.tag === 'after_get') || (v.tag === 'creation')) {
+    //     last_persisted_snapshot = v;
+    //     return Util.BREAK;
+    //   }
+    // });
+
+    // return last_persisted_snapshot;
+  };
+
+  snapshots.lastWithTag = (tag: string | RegExp): Snapshot | undefined => {
+    const list = element.snapshots.list;
+    if (isRegExp(tag)) {
+      for (let i = list.length - 1; i >= 0 ; i--) {
+        const snapshot = list[i];
+        if (snapshot.tag) {
+          if (tag.test(snapshot.tag)) {
             return snapshot;
           }
         }
       }
-      return last_snapshot_with_tag;
-    }
-
-    snapshots.last = (): Snapshot => {
-      let list = element.snapshots.list;
-      return list[list.length - 1];
-    }
-
-    snapshots.undo = (id?: number|string|RegExp): Element => {
-      if (id == null) { id = 0; }
-      if (Util.isInteger(id)) {
-        let list = element.snapshots.list;
-        if (id < 0 || id > list.length) {
-          throw new ElpongError(ElpongErrorType.ELESTI, `${id}`);
-        } else {
-          let snapshot = list[element.snapshots.current_index - id];
-          snapshot.revert();
-        }
-      } else {
-        let snapshot;
-        if (snapshot = snapshots.lastWithTag(id)) {
-          snapshot.revert();
-        } else {
-          throw new ElpongError(ElpongErrorType.ELESNF, `${id}`);
+    } else {
+      for (let i = list.length - 1; i >= 0 ; i--) {
+        const snapshot = list[i];
+        if (tag === snapshot.tag) {
+          return snapshot;
         }
       }
-      return element;
     }
+    return;
+  };
 
-    snapshots.isPersisted = () => {
-      let snapshot = snapshots.lastPersisted();
-      if (!snapshot) { return false; }
-      return Util.equalsJSON(element.fields, snapshot.data);
+  snapshots.last = (): Snapshot => {
+    const list = element.snapshots.list;
+    return list[list.length - 1];
+  };
+
+  snapshots.undo = (id?: number | string | RegExp): Element => {
+    if (id == null) { id = 0; }
+    if (isInteger(id)) {
+      const list = element.snapshots.list;
+      if (id < 0 || id > list.length) {
+        throw new ElpongError(ElpongErrorType.ELESTI, `${id}`);
+      } else {
+        const snapshot = list[element.snapshots.currentIndex - id];
+        snapshot.revert();
+      }
+    } else {
+      const snapshot = snapshots.lastWithTag(id);
+      if (snapshot) {
+        snapshot.revert();
+      } else {
+        throw new ElpongError(ElpongErrorType.ELESNF, `${id}`);
+      }
     }
-  }
+    return element;
+  };
+
+  snapshots.isPersisted = () => {
+    const snapshot = snapshots.lastPersisted();
+    if (!snapshot) { return false; }
+    return equalsJSON(element.fields, snapshot.data);
+  };
 }
 
 // import Element from '../../Element';

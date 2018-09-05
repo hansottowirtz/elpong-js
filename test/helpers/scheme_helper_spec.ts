@@ -1,13 +1,11 @@
-import { SchemeHelper } from '../../src/Helpers/SchemeHelper';
 import elpong from '../../src/main';
+import { getCollectionBySingularName } from '../../src/Helpers/SchemeHelper';
 
-declare const require: Function;
+declare const require: (path: string) => any;
 
 describe('SchemeHelper', () => {
-  beforeEach(() => {
-    this.scheme = elpong.add(require('../fixtures/stupid-farm/scheme.json5'));
-  });
   it('finds schemes by their singular names', () => {
-    expect(SchemeHelper.getCollectionBySingularName(this.scheme, 'boss').name).toBe('bosses');
+    const scheme = elpong.add(require('../fixtures/stupid-farm/scheme.json5'));
+    expect(getCollectionBySingularName(scheme, 'boss').name).toBe('bosses');
   });
 });
