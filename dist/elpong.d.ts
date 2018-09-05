@@ -286,8 +286,7 @@ declare module 'elpong/PreElement' {
 declare module 'elpong/elpong' {
 	import { AjaxAdapterType, AjaxExternalFunction } from 'elpong/Ajax';
 	import { PreSchemeConfiguration } from 'elpong/Configuration';
-	import { Scheme } from 'elpong/Scheme';
-	export const elpong: {
+	import { Scheme } from 'elpong/Scheme'; const elpong: {
 	    add: (schemeConfig: PreSchemeConfiguration) => Scheme;
 	    enableAutoload: () => void;
 	    get: (name: string) => Scheme;
@@ -296,6 +295,7 @@ declare module 'elpong/elpong' {
 	    setAjax: (fn: AjaxExternalFunction, type?: AjaxAdapterType | "fetch" | "angular" | "angularjs" | "jquery" | undefined) => void;
 	    tearDown: () => void;
 	};
+	export { elpong };
 
 }
 declare module 'elpong/Scheme' {
@@ -335,8 +335,9 @@ declare module 'elpong/Helpers/Element/Fields/EmbeddedCollection' {
 
 }
 declare module 'elpong/Helpers/SchemeHelper' {
+	import { Collection } from 'elpong/Collection';
 	import { Scheme } from 'elpong/Scheme';
-	export function getCollectionBySingularName(scheme: Scheme, singularName: string): import("../Collection").Collection;
+	export function getCollectionBySingularName(scheme: Scheme, singularName: string): Collection;
 
 }
 declare module 'elpong/Helpers/Element/Fields/EmbeddedElement' {
@@ -484,7 +485,7 @@ declare module 'elpong/Collection' {
 	    getOne: GetOneCollectionActionFunction;
 	}
 	export interface CollectionArrayOptions {
-	    no_new?: boolean;
+	    noNew?: boolean;
 	}
 	export interface CollectionFindByOptions extends CollectionArrayOptions {
 	    multiple?: boolean;

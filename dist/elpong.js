@@ -693,14 +693,14 @@ var Scheme_1 = __webpack_require__(8);
 var Util_1 = __webpack_require__(1);
 var schemes = {};
 var autoload = false;
-exports.elpong = {
+var elpong = {
     add: function (schemeConfig) {
         var scheme = new Scheme_1.Scheme(schemeConfig);
         return schemes[scheme.name] = scheme;
     },
     enableAutoload: function () {
         autoload = true;
-        exports.elpong.load(true);
+        elpong.load(true);
     },
     get: function (name) {
         var scheme = schemes[name];
@@ -720,7 +720,7 @@ exports.elpong = {
         }
         for (var _i = 0, _a = Util_1.arrayFromHTML(schemeTags); _i < _a.length; _i++) {
             var schemeTag = _a[_i];
-            var scheme = exports.elpong.add(JSON.parse(schemeTag.content));
+            var scheme = elpong.add(JSON.parse(schemeTag.content));
         }
     },
     setAjax: function (fn, type) {
@@ -731,6 +731,7 @@ exports.elpong = {
         schemes = {};
     }
 };
+exports.elpong = elpong;
 
 
 /***/ }),
@@ -868,9 +869,9 @@ var Collection = /** @class */ (function () {
     // @return {Element[]} Array of elements
     Collection.prototype.array = function (options) {
         if (!options) {
-            options = { no_new: false };
+            options = { noNew: false };
         }
-        var arr = options.no_new ? [] : this.newElements;
+        var arr = options.noNew ? [] : this.newElements;
         return arr.concat(this.elements.values());
     };
     Collection.prototype.find = function (selectorValue) {
